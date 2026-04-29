@@ -10,10 +10,10 @@
   html,body{width:100%;height:100%;background:transparent!important;display:flex;align-items:center;justify-content:center;overflow:hidden;font-family:'Roboto Condensed',sans-serif}
   .container{position:relative;width:100%;height:100%;display:flex;align-items:center;justify-content:center;overflow:hidden;background:var(--bg-color,transparent);transition:background 0.3s}
   .wrapper{position:relative;display:flex;flex-direction:column;align-items:center;gap:8px;padding:20px 30px;transform-origin:center;transition:transform 0.3s}
-  .gear{position:absolute;top:0;right:0;width:28px;height:28px;background:none;border:none;cursor:pointer;display:flex;align-items:center;justify-content:center;z-index:100;opacity:0;transform:scale(0.7);transition:opacity 0.2s,transform 0.2s;pointer-events:none;border-radius:6px}
-  .wrapper:hover .gear,.gear.pin{opacity:0.5;transform:scale(1);pointer-events:auto}
-  .gear:hover{opacity:1!important;background:rgba(128,128,128,0.12)}
-  .gear svg{width:16px;height:16px;fill:var(--date-color,#888)}
+  .gear{position:absolute;top:4px;left:4px;width:22px;height:22px;background:none;border:none;cursor:pointer;display:flex;align-items:center;justify-content:center;z-index:10;opacity:0;transform:scale(0.7);transition:opacity 0.2s,transform 0.2s;pointer-events:none;border-radius:4px}
+  #tH:hover .gear,.wrapper:hover .gear,.gear.pin{opacity:0.6;transform:scale(1);pointer-events:auto}
+  .gear:hover{opacity:1!important;background:rgba(128,128,128,0.2)}
+  .gear svg{width:13px;height:13px;fill:var(--time-text,#fff);transition:fill 0.3s}
 
   .clock{display:flex;align-items:center;gap:0px}
   .colon{font-size:60px;font-weight:700;color:var(--date-color,#2a2a2a);padding-bottom:6px;user-select:none;transition:color 0.3s;padding:0 3px;text-shadow:2px 3px 5px rgba(0,0,0,0.3)}
@@ -103,9 +103,8 @@
 <body>
 <div class="container" id="cont">
   <div class="wrapper" id="wrapper">
-    <button class="gear" id="gearBtn" title="Settings"><svg viewBox="0 0 24 24"><path d="M19.14 12.94c.04-.31.06-.63.06-.94 0-.31-.02-.63-.06-.94l2.03-1.58a.49.49 0 00.12-.61l-1.92-3.32a.49.49 0 00-.59-.22l-2.39.96a7.04 7.04 0 00-1.62-.94l-.36-2.54a.48.48 0 00-.48-.41h-3.84a.48.48 0 00-.48.41l-.36 2.54c-.59.24-1.13.57-1.62.94l-2.39-.96a.49.49 0 00-.59.22L2.74 8.87a.49.49 0 00.12.61l2.03 1.58c-.04.31-.06.63-.06.94 0 .31.02.63.06.94l-2.03 1.58a.49.49 0 00-.12.61l1.92 3.32c.12.22.37.29.59.22l2.39-.96c.5.38 1.03.7 1.62.94l.36 2.54c.05.24.26.41.48.41h3.84c.24 0 .44-.17.48-.41l.36-2.54c.59-.24 1.13-.57 1.62-.94l2.39.96c.22.08.47 0 .59-.22l1.92-3.32a.49.49 0 00-.12-.61l-2.03-1.58zM12 15.6A3.6 3.6 0 1112 8.4a3.6 3.6 0 010 7.2z"/></svg></button>
     <div class="clock">
-      <div class="tile" id="tH"><div class="half top"><div class="num">00</div></div><div class="half bot"><div class="num">00</div></div></div>
+      <div class="tile" id="tH"><button class="gear" id="gearBtn" title="Settings"><svg viewBox="0 0 24 24"><path d="M19.14 12.94c.04-.31.06-.63.06-.94 0-.31-.02-.63-.06-.94l2.03-1.58a.49.49 0 00.12-.61l-1.92-3.32a.49.49 0 00-.59-.22l-2.39.96a7.04 7.04 0 00-1.62-.94l-.36-2.54a.48.48 0 00-.48-.41h-3.84a.48.48 0 00-.48.41l-.36 2.54c-.59.24-1.13.57-1.62.94l-2.39-.96a.49.49 0 00-.59.22L2.74 8.87a.49.49 0 00.12.61l2.03 1.58c-.04.31-.06.63-.06.94 0 .31.02.63.06.94l-2.03 1.58a.49.49 0 00-.12.61l1.92 3.32c.12.22.37.29.59.22l2.39-.96c.5.38 1.03.7 1.62.94l.36 2.54c.05.24.26.41.48.41h3.84c.24 0 .44-.17.48-.41l.36-2.54c.59-.24 1.13-.57 1.62-.94l2.39.96c.22.08.47 0 .59-.22l1.92-3.32a.49.49 0 00-.12-.61l-2.03-1.58zM12 15.6A3.6 3.6 0 1112 8.4a3.6 3.6 0 010 7.2z"/></svg></button><div class="half top"><div class="num">00</div></div><div class="half bot"><div class="num">00</div></div></div>
       <div class="colon">:</div>
       <div class="tile" id="tM"><div class="half top"><div class="num">00</div></div><div class="half bot"><div class="num">00</div></div></div>
       <div class="ampm" id="ampm">AM</div>
