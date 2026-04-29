@@ -15,8 +15,8 @@
   .gear:hover{opacity:1!important;background:rgba(128,128,128,0.12)}
   .gear svg{width:16px;height:16px;fill:var(--date-color,#888)}
   .clock{display:flex;align-items:center;gap:6px}
-  .colon{font-size:60px;font-weight:700;color:var(--date-color,#2a2a2a);padding-bottom:6px;user-select:none;transition:color 0.3s;padding:0 2px;text-shadow:2px 3px 5px rgba(0,0,0,0.3)}
-  .tile{position:relative;width:70px;height:110px;perspective:500px}
+  .colon{font-size:60px;font-weight:700;color:var(--date-color,#2a2a2a);padding-bottom:6px;margin:0 -3px;user-select:none;transition:color 0.3s;text-shadow:2px 3px 5px rgba(0,0,0,0.3)}
+  .tile{position:relative;width:60px;height:110px;perspective:500px}
   .half{position:absolute;left:0;right:0;height:50%;overflow:hidden;background:var(--tile-bg,#2a2a2a);transition:background 0.3s}
   .half.top{top:0;border-radius:10px 10px 0 0;border-bottom:1px solid rgba(128,128,128,0.15)}
   .half.bot{bottom:0;border-radius:0 0 10px 10px;filter:brightness(0.9)}
@@ -138,7 +138,6 @@
 
   <div class="lbl">Background Colour</div>
   <div class="sr" data-group="bg">
-    <div class="sw dk sw-tp" data-c="transparent"></div>
     <div class="sw lt sw-wh" data-c="#ffffff" style="background:#fff"></div>
     <div class="sw dk" data-c="#787774" style="background:#787774"></div>
     <div class="sw dk" data-c="#2a2a2a" style="background:#2a2a2a"></div>
@@ -205,7 +204,7 @@
 <script>
 const DAYS=['Sunday','Monday','Tuesday','Wednesday','Thursday','Friday','Saturday'];
 const MONTHS=['January','February','March','April','May','June','July','August','September','October','November','December'];
-const DEF={theme:'light',tile:'#2a2a2a',bg:'transparent',timeText:'#ffffff',dateText:'#2a2a2a',format:'24',display:'both',zoom:100};
+const DEF={theme:'light',tile:'#2a2a2a',bg:'#ffffff',timeText:'#ffffff',dateText:'#2a2a2a',format:'24',display:'both',zoom:100};
 let S={...DEF};
 function load(){try{const d=localStorage.getItem('fc6');if(d)S={...DEF,...JSON.parse(d)};}catch(e){}}
 function save(){try{localStorage.setItem('fc6',JSON.stringify(S));}catch(e){}}
@@ -342,7 +341,7 @@ pickerKeys.forEach(key=>{
 // TOGGLES
 function setupTg(id,key,cb){document.getElementById(id).addEventListener('click',e=>{const b=e.target.closest('.tb');if(!b)return;document.querySelectorAll(`#${id} .tb`).forEach(x=>x.classList.remove('on'));b.classList.add('on');S[key]=b.dataset.v;save();if(cb)cb();});}
 function syncTg(id,val){document.querySelectorAll(`#${id} .tb`).forEach(b=>b.classList.toggle('on',b.dataset.v===val));}
-setupTg('gTheme','theme',()=>{if(S.theme==='dark'){S.tile='#ffffff';S.timeText='#111111';S.dateText='#ffffff';S.bg='transparent';}else{S.tile='#2a2a2a';S.timeText='#ffffff';S.dateText='#2a2a2a';S.bg='transparent';}save();applyAll();hlAll();});
+setupTg('gTheme','theme',()=>{if(S.theme==='dark'){S.tile='#ffffff';S.timeText='#111111';S.dateText='#ffffff';S.bg='#191919';}else{S.tile='#2a2a2a';S.timeText='#ffffff';S.dateText='#2a2a2a';S.bg='#ffffff';}save();applyAll();hlAll();});
 setupTg('gFmt','format',()=>tick(false));
 setupTg('gDisp','display',()=>tick(false));
 const zSlider=document.getElementById('zSlider'),zLabel=document.getElementById('zLabel');

@@ -16,20 +16,20 @@
   .gear svg{width:16px;height:16px;fill:var(--date-color,#888)}
 
   .clock{display:flex;align-items:center;gap:0px}
-  .colon{font-size:60px;font-weight:700;color:var(--date-color,#2a2a2a);padding-bottom:6px;user-select:none;transition:color 0.3s;padding:0 2px;text-shadow:2px 3px 5px rgba(0,0,0,0.3)}
+  .colon{font-size:60px;font-weight:700;color:var(--date-color,#2a2a2a);padding-bottom:6px;user-select:none;transition:color 0.3s;padding:0 3px;text-shadow:2px 3px 5px rgba(0,0,0,0.3)}
 
   /* Wider tile that holds both digits together */
-  .tile{position:relative;width:100px;height:115px;perspective:600px}
+  .tile{position:relative;width:100px;height:110px;perspective:600px}
   .half{position:absolute;left:0;right:0;height:50%;overflow:hidden;background:var(--tile-bg,#2a2a2a);transition:background 0.3s}
   .half.top{top:0;border-radius:10px 10px 0 0;border-bottom:1px solid rgba(128,128,128,0.15)}
   .half.bot{bottom:0;border-radius:0 0 10px 10px;filter:brightness(0.9)}
-  .half .num{position:absolute;left:0;width:100%;height:115px;line-height:115px;text-align:center;font-size:78px;font-weight:400;color:var(--time-text,#fff);pointer-events:none;transition:color 0.3s;letter-spacing:0.02em;font-family:'Anton','Roboto Condensed',sans-serif;text-shadow:2px 4px 6px rgba(0,0,0,0.35)}
-  .half.top .num{top:0}.half.bot .num{top:-57.5px}
+  .half .num{position:absolute;left:0;width:100%;height:110px;line-height:110px;text-align:center;font-size:82px;font-weight:400;color:var(--time-text,#fff);pointer-events:none;transition:color 0.3s;letter-spacing:0.02em;font-family:'Anton','Roboto Condensed',sans-serif;text-shadow:2px 4px 6px rgba(0,0,0,0.35)}
+  .half.top .num{top:0}.half.bot .num{top:-55px}
 
   .flap{position:absolute;left:0;right:0;height:50%;overflow:hidden;z-index:5}
-  .flap .num{position:absolute;left:0;width:100%;height:115px;line-height:115px;text-align:center;font-size:78px;font-weight:400;color:var(--time-text,#fff);pointer-events:none;letter-spacing:0.02em;font-family:'Anton','Roboto Condensed',sans-serif;text-shadow:2px 4px 6px rgba(0,0,0,0.35)}
+  .flap .num{position:absolute;left:0;width:100%;height:110px;line-height:110px;text-align:center;font-size:82px;font-weight:400;color:var(--time-text,#fff);pointer-events:none;letter-spacing:0.02em;font-family:'Anton','Roboto Condensed',sans-serif;text-shadow:2px 4px 6px rgba(0,0,0,0.35)}
   .flap-top{top:0;background:var(--tile-bg,#2a2a2a);border-radius:10px 10px 0 0;border-bottom:1px solid rgba(128,128,128,0.15);transform-origin:bottom center;animation:fd .3s ease-in forwards}.flap-top .num{top:0}
-  .flap-bot{bottom:0;background:var(--tile-bg,#2a2a2a);filter:brightness(0.9);border-radius:0 0 10px 10px;transform-origin:top center;transform:rotateX(90deg);animation:fu .3s ease-out .3s forwards}.flap-bot .num{top:-57.5px}
+  .flap-bot{bottom:0;background:var(--tile-bg,#2a2a2a);filter:brightness(0.9);border-radius:0 0 10px 10px;transform-origin:top center;transform:rotateX(90deg);animation:fu .3s ease-out .3s forwards}.flap-bot .num{top:-55px}
   @keyframes fd{0%{transform:rotateX(0)}100%{transform:rotateX(-90deg)}}
   @keyframes fu{0%{transform:rotateX(90deg)}100%{transform:rotateX(0)}}
 
@@ -141,7 +141,6 @@
 
   <div class="lbl">Background Colour</div>
   <div class="sr" data-group="bg">
-    <div class="sw dk sw-tp" data-c="transparent"></div>
     <div class="sw lt sw-wh" data-c="#ffffff" style="background:#fff"></div>
     <div class="sw dk" data-c="#787774" style="background:#787774"></div>
     <div class="sw dk" data-c="#2a2a2a" style="background:#2a2a2a"></div>
@@ -208,7 +207,7 @@
 <script>
 const DAYS=['Sunday','Monday','Tuesday','Wednesday','Thursday','Friday','Saturday'];
 const MONTHS=['January','February','March','April','May','June','July','August','September','October','November','December'];
-const DEF={theme:'light',tile:'#2a2a2a',bg:'transparent',timeText:'#ffffff',dateText:'#2a2a2a',format:'24',display:'both',zoom:100};
+const DEF={theme:'light',tile:'#2a2a2a',bg:'#ffffff',timeText:'#ffffff',dateText:'#2a2a2a',format:'24',display:'both',zoom:100};
 let S={...DEF};
 function load(){try{const d=localStorage.getItem('cfc1');if(d)S={...DEF,...JSON.parse(d)};}catch(e){}}
 function save(){try{localStorage.setItem('cfc1',JSON.stringify(S));}catch(e){}}
@@ -319,7 +318,7 @@ pickerKeys.forEach(key=>{
 
 function setupTg(id,key,cb){document.getElementById(id).addEventListener('click',e=>{const b=e.target.closest('.tb');if(!b)return;document.querySelectorAll(`#${id} .tb`).forEach(x=>x.classList.remove('on'));b.classList.add('on');S[key]=b.dataset.v;save();if(cb)cb();});}
 function syncTg(id,val){document.querySelectorAll(`#${id} .tb`).forEach(b=>b.classList.toggle('on',b.dataset.v===val));}
-setupTg('gTheme','theme',()=>{if(S.theme==='dark'){S.tile='#ffffff';S.timeText='#111111';S.dateText='#ffffff';S.bg='transparent';}else{S.tile='#2a2a2a';S.timeText='#ffffff';S.dateText='#2a2a2a';S.bg='transparent';}save();applyAll();hlAll();});
+setupTg('gTheme','theme',()=>{if(S.theme==='dark'){S.tile='#ffffff';S.timeText='#111111';S.dateText='#ffffff';S.bg='#191919';}else{S.tile='#2a2a2a';S.timeText='#ffffff';S.dateText='#2a2a2a';S.bg='#ffffff';}save();applyAll();hlAll();});
 setupTg('gFmt','format',()=>tick(false));
 setupTg('gDisp','display',()=>tick(false));
 const zSlider=document.getElementById('zSlider'),zLabel=document.getElementById('zLabel');
