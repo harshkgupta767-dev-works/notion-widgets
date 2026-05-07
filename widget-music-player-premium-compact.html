@@ -66,86 +66,7 @@
   #yt-player.full iframe{height:400px;margin-top:0}
   #yt-player.compact{height:80px}
   #yt-player.compact iframe{height:400px;margin-top:-160px}
-
-  
-  .yt-compact-overlay{
-    position:absolute;
-    inset:0;
-    display:none;
-    align-items:center;
-    gap:12px;
-    padding:12px;
-    background:linear-gradient(90deg,rgba(0,0,0,0.75),rgba(0,0,0,0.45));
-    backdrop-filter:blur(10px);
-    z-index:5;
-  }
-
-  #yt-player.compact .yt-compact-overlay{
-    display:flex;
-  }
-
-  .yt-compact-thumb{
-    width:56px;
-    height:56px;
-    border-radius:10px;
-    background-size:cover;
-    background-position:center;
-    flex-shrink:0;
-    box-shadow:0 4px 12px rgba(0,0,0,0.35);
-  }
-
-  .yt-compact-info{
-    flex:1;
-    min-width:0;
-  }
-
-  .yt-compact-title{
-    color:#fff;
-    font-size:12px;
-    font-weight:600;
-    white-space:nowrap;
-    overflow:hidden;
-    text-overflow:ellipsis;
-    margin-bottom:6px;
-  }
-
-  .yt-compact-eq{
-    display:flex;
-    align-items:flex-end;
-    gap:3px;
-    height:14px;
-  }
-
-  .yt-compact-eq span{
-    width:4px;
-    background:#ff0000;
-    border-radius:2px;
-    animation:eq 0.9s infinite ease-in-out;
-  }
-
-  .yt-compact-eq span:nth-child(1){height:8px;}
-  .yt-compact-eq span:nth-child(2){height:14px;animation-delay:0.15s;}
-  .yt-compact-eq span:nth-child(3){height:10px;animation-delay:0.3s;}
-
-  @keyframes eq{
-    0%,100%{transform:scaleY(0.6);opacity:0.7;}
-    50%{transform:scaleY(1.2);opacity:1;}
-  }
-
-  .yt-expand-btn{
-    border:none;
-    background:#ff0000;
-    color:#fff;
-    padding:8px 12px;
-    border-radius:999px;
-    font-size:11px;
-    font-weight:600;
-    cursor:pointer;
-    flex-shrink:0;
-  }
-
-
-  /* ─── POPUP ─── */
+/* ─── POPUP ─── */
   .ov{position:fixed;inset:0;background:rgba(0,0,0,.2);z-index:200;opacity:0;pointer-events:none;transition:opacity .2s}.ov.open{opacity:1;pointer-events:auto}
   .pop{position:fixed;top:50%;left:50%;transform:translate(-50%,-50%) scale(.93);width:310px;max-height:88vh;overflow-y:auto;border-radius:14px;z-index:210;padding:20px;opacity:0;pointer-events:none;transition:opacity .2s,transform .2s;font-family:'Inter',sans-serif}
   .pop.open{opacity:1;pointer-events:auto;transform:translate(-50%,-50%) scale(1)}
@@ -310,14 +231,7 @@
     <!-- YOUTUBE PLAYER (native embed with built-in playlist UI) -->
     <div class="player-pane" id="yt-player">
       <iframe id="ytFrame" src="" allow="autoplay; clipboard-write; encrypted-media; fullscreen; picture-in-picture" loading="lazy"></iframe>
-    <div class="yt-compact-overlay" id="ytCompactOverlay">
-      <div class="yt-compact-thumb" id="ytCompactThumb"></div>
-      <div class="yt-compact-info">
-        <div class="yt-compact-title">YouTube Music</div>
-        <div class="yt-compact-eq">
-          <span></span><span></span><span></span>
-        </div>
-      </div>
+    </div>
       <button class="yt-expand-btn" id="ytExpandBtn">Expand</button>
     </div>
 
@@ -632,7 +546,6 @@ document.getElementById('toggleBtn').addEventListener('click',()=>{
   if(S.service==='youtube'){
     S.ytView=S.ytView==='full'?'compact':'full';
     applyYTView();
-  updateYTCompactUI();
   }
 
   save();
@@ -653,7 +566,6 @@ function loadYTPlayer(){
   const frame=document.getElementById('ytFrame');
   if(frame.dataset.src!==src){frame.src=src;frame.dataset.src=src;}
   applyYTView();
-  updateYTCompactUI();
 }
 
 // ─── SETTINGS POPUP ────────────────────────────────────────────────────────────
@@ -815,28 +727,6 @@ document.getElementById('rstYes').addEventListener('click',()=>{
   hlAll();PICKER_KEYS.forEach(k=>pickers[k].cpk.classList.remove('open'));
   applyAll();
   route();
-});
-
-
-function updateYTCompactUI(){
-  const parsed=parseYTUrl(S.ytUrl);
-  if(!parsed)return;
-
-  const thumb=document.getElementById('ytCompactThumb');
-
-  if(parsed.videoId){
-    thumb.style.backgroundImage=`url(https://img.youtube.com/vi/${parsed.videoId}/hqdefault.jpg)`;
-  }else{
-    thumb.style.background='linear-gradient(135deg,#ff0000,#1a1a1a)';
-  }
-}
-
-document.getElementById('ytExpandBtn').addEventListener('click',()=>{
-  S.ytView='full';
-  save();
-  applyYTView();
-  updateYTCompactUI();
-  updateToggleIcon();
 });
 
 
