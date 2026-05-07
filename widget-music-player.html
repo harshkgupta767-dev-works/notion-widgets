@@ -60,7 +60,12 @@
   #spotify-player.compact iframe{height:80px}
 
   /* ─── YOUTUBE PLAYER (native embed) ─── */
-  #yt-player iframe{width:100%;border:none;display:block;height:400px}
+  #yt-player{position:relative;width:100%;overflow:hidden;transition:height 0.35s ease}
+  #yt-player iframe{width:100%;border:none;display:block;transition:all 0.35s ease}
+  #yt-player.full{height:400px}
+  #yt-player.full iframe{height:400px;margin-top:0}
+  #yt-player.compact{height:80px}
+  #yt-player.compact iframe{height:400px;margin-top:-160px}
 
   /* ─── POPUP ─── */
   .ov{position:fixed;inset:0;background:rgba(0,0,0,.2);z-index:200;opacity:0;pointer-events:none;transition:opacity .2s}.ov.open{opacity:1;pointer-events:auto}
@@ -311,7 +316,7 @@
 </div>
 
 <script>
-const DEF={theme:'dark',bg:'transparent',zoom:100,service:'',spotifyUrl:'',ytUrl:'',spotifyView:'full'};
+const DEF={theme:'dark',bg:'transparent',zoom:100,service:'',spotifyUrl:'',ytUrl:'',spotifyView:'full',ytView:'full'};
 let S={...DEF};
 
 function load(){try{const d=localStorage.getItem('spw1');if(d)S={...DEF,...JSON.parse(d)};}catch(e){}}
@@ -411,7 +416,7 @@ function updateHeader(){
     updateToggleIcon();
   }else{
     icon.innerHTML=YT_ICON;title.textContent='Now Playing';
-    backBtn.style.display='none';toggleBtn.style.display='none';gearBtn.style.display='';
+    backBtn.style.display='none';toggleBtn.style.display='';gearBtn.style.display='';
   }
 }
 
@@ -490,6 +495,12 @@ function applySpotifyView(){
   player.classList.remove('full','compact');
   player.classList.add(S.spotifyView);
 }
+
+function applyYTView(){
+  const player=document.getElementById('yt-player');
+  player.classList.remove('full','compact');
+  player.classList.add(S.ytView);
+}
 function loadSpotifyPlayer(){
   const parsed=parseSpotifyUrl(S.spotifyUrl);if(!parsed)return;
   const frame=document.getElementById('spotifyFrame');
@@ -501,17 +512,41 @@ function loadSpotifyPlayer(){
 function updateToggleIcon(){
   const icon=document.getElementById('toggleIcon');
   const btn=document.getElementById('toggleBtn');
-  if(S.spotifyView==='full'){
-    icon.innerHTML='<path d="M3 11h18v2H3z"/>';btn.title='Show now playing only';
+
+  let mode='full';
+
+  if(S.service==='spotify'){
+    mode=S.spotifyView;
+  }
+
+  if(S.service==='youtube'){
+    mode=S.ytView;
+  }
+
+  if(mode==='full'){
+    icon.innerHTML='<path d="M3 11h18v2H3z"/>';
+    btn.title='Compact mode';
   }else{
-    icon.innerHTML='<path d="M3 6h18v2H3zm0 5h18v2H3zm0 5h18v2H3z"/>';btn.title='Show full playlist';
+    icon.innerHTML='<path d="M3 6h18v2H3zm0 5h18v2H3zm0 5h18v2H3z"/>';
+    btn.title='Full mode';
   }
 }
 
 document.getElementById('toggleBtn').addEventListener('click',()=>{
-  S.spotifyView=S.spotifyView==='full'?'compact':'full';save();
-  applySpotifyView();
-  updateToggleIcon();syncTg('gView',S.spotifyView);
+
+  if(S.service==='spotify'){
+    S.spotifyView=S.spotifyView==='full'?'compact':'full';
+    applySpotifyView();
+    syncTg('gView',S.spotifyView);
+  }
+
+  if(S.service==='youtube'){
+    S.ytView=S.ytView==='full'?'compact':'full';
+    applyYTView();
+  }
+
+  save();
+  updateToggleIcon();
 });
 
 // ─── YOUTUBE PLAYER (native embed) ─────────────────────────────────────────────
@@ -527,6 +562,7 @@ function loadYTPlayer(){
   const src=buildYTEmbedUrl(parsed);if(!src)return;
   const frame=document.getElementById('ytFrame');
   if(frame.dataset.src!==src){frame.src=src;frame.dataset.src=src;}
+  applyYTView();
 }
 
 // ─── SETTINGS POPUP ────────────────────────────────────────────────────────────
