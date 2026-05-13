@@ -340,8 +340,16 @@ function renderDots(){
 
 /* ── HISTORY ── */
 const HIST_KEY='pomo-hist-v1';
-function loadHist(){try{return JSON.parse(localStorage.getItem(HIST_KEY)||'{}');}catch(e){return{};}}
-function saveHist(h){try{localStorage.setItem(HIST_KEY,JSON.stringify(h));}catch(e){}}
+function loadHist(){
+  try{return JSON.parse(localStorage.getItem(HIST_KEY)||'{}');}
+  catch(e){console.error('[History] Load failed:',e);return{};}
+}
+function saveHist(h){
+  try{
+    localStorage.setItem(HIST_KEY,JSON.stringify(h));
+    console.log('[History] Saved:',h);
+  }catch(e){console.error('[History] Save failed:',e);}
+}
 
 function todayKey(){
   const d=new Date();
@@ -349,6 +357,7 @@ function todayKey(){
 }
 
 function recordSession(){
+  console.log('[History] Recording session — overtime:',overtimeCount,'focus mins:',S.focus);
   const h=loadHist(),k=todayKey();
   const secs=S.focus*60+overtimeCount;
   if(!h[k])h[k]={s:0,t:0};
@@ -770,6 +779,7 @@ document.getElementById('gearBtn').addEventListener('click',openPanel);
 document.getElementById('closeBtn').addEventListener('click',closePanel);
 document.getElementById('playBtn').addEventListener('click',()=>{
   if(isOvertime&&isRun){
+    console.log('[Stop] pressed — mode:',mode,'isOvertime:',isOvertime,'isRun:',isRun);
     playClick('pause');
     if(mode==='focus'){
       recordSession();
