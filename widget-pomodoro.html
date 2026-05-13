@@ -498,57 +498,6 @@ function switchMode(m,auto=false){
   if(auto)setTimeout(start,100);
 }
 
-/* ── HISTORY ── */
-let hist=[];
-function loadHist(){try{const d=localStorage.getItem('pomo-hist');if(d)hist=JSON.parse(d);}catch(e){}}
-function saveHist(){try{localStorage.setItem('pomo-hist',JSON.stringify(hist));}catch(e){}}
-function recordSession(){
-  const date=new Date().toISOString().split('T')[0];
-  const secs=S.focus*60+overtimeCount;
-  hist.push({date,secs});
-  saveHist();
-}
-
-function fmtDate(dateStr){
-  const today=new Date().toISOString().split('T')[0];
-  const yest=new Date(Date.now()-86400000).toISOString().split('T')[0];
-  if(dateStr===today)return'Today';
-  if(dateStr===yest)return'Yesterday';
-  const d=new Date(dateStr+'T00:00:00');
-  return d.toLocaleDateString('en-US',{month:'short',day:'numeric'});
-}
-
-function fmtDur(secs){
-  const h=Math.floor(secs/3600),m=Math.floor((secs%3600)/60);
-  if(h>0)return`${h}h ${m}m`;
-  return`${m}m`;
-}
-
-function openHist(){
-  const body=document.getElementById('histBody');
-  if(!hist.length){body.innerHTML='<div class="hist-empty">No sessions recorded yet.</div>';}
-  else{
-    const byDate={};
-    hist.forEach(({date,secs})=>{
-      if(!byDate[date])byDate[date]={sessions:0,secs:0};
-      byDate[date].sessions++;byDate[date].secs+=secs;
-    });
-    const days=Object.keys(byDate).sort((a,b)=>b.localeCompare(a));
-    body.innerHTML=days.map(d=>`
-      <div class="hist-day">
-        <div>
-          <div class="hist-date">${fmtDate(d)}</div>
-          <div class="hist-sub">${d}</div>
-        </div>
-        <div class="hist-right">
-          <div class="hist-sessions">${byDate[d].sessions} ${byDate[d].sessions===1?'session':'sessions'}</div>
-          <div class="hist-time">${fmtDur(byDate[d].secs)} focus time</div>
-        </div>
-      </div>`).join('');
-  }
-  document.getElementById('histPanel').classList.add('open');
-}
-function closeHist(){document.getElementById('histPanel').classList.remove('open');}
 function mkCtx(){return new(window.AudioContext||window.webkitAudioContext)();}
 
 function tone(ctx,freq,type,vol,start,dur,freqEnd){
