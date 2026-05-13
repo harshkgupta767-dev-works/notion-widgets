@@ -378,13 +378,15 @@ function buildHist(){
   const keys=Object.keys(h).sort((a,b)=>b.localeCompare(a));
   const el=document.getElementById('hBody');
 
-  if(!keys.length){
-    el.innerHTML=`<div class="h-empty">
-      <div class="h-empty-title">No sessions yet</div>
-      <div class="h-empty-sub">Complete a focus session<br>to start tracking your history.</div>
-    </div>`;
-    return;
-  }
+  /* ── DEBUG: test storage ── */
+  let storageOk=false;
+  try{localStorage.setItem('_pomo_test','1');localStorage.removeItem('_pomo_test');storageOk=true;}catch(e){}
+  const debugBar=`<div style="font-size:10px;padding:6px 10px;border-radius:8px;margin-bottom:10px;background:${storageOk?'rgba(16,185,129,.15)':'rgba(239,68,68,.15)'};color:${storageOk?'#10b981':'#ef4444'}">
+    Storage: ${storageOk?'✓ available':'✗ blocked'} &nbsp;|&nbsp; Sessions saved: ${keys.length} day(s)
+    ${storageOk?`<button onclick="(function(){const h=window._loadHist();const k=window._todayKey();if(!h[k])h[k]={s:0,t:0};h[k].s++;h[k].t+=1500;window._saveHist(h);window._buildHist();})()" style="margin-left:8px;background:rgba(255,255,255,.1);border:none;border-radius:4px;padding:2px 6px;font-size:10px;cursor:pointer;color:inherit">+ Add test session</button>`:''}
+  </div>`;
+  el.innerHTML=debugBar+(keys.length?'':'<div class="h-empty"><div class="h-empty-title">No sessions yet</div><div class="h-empty-sub">Complete a focus session<br>to start tracking your history.</div></div>');
+  if(!keys.length)return;
 
   /* Group by YYYY-MM */
   const byMonth={};
@@ -803,7 +805,8 @@ document.getElementById('dots').addEventListener('click',openHist);
 document.getElementById('histCloseBtn').addEventListener('click',closeHist);
 
 /* ── BOOT ── */
-load();loadHist();applyAll();timeLeft=S[mode]*60;buildRing();updateUI();syncModes();
+load();applyAll();timeLeft=S[mode]*60;buildRing();updateUI();syncModes();
+window._loadHist=loadHist;window._saveHist=saveHist;window._todayKey=todayKey;window._buildHist=buildHist;
 </script>
 </body>
 </html>
