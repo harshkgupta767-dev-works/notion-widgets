@@ -332,16 +332,8 @@ function renderDots(){
 
 /* ── HISTORY ── */
 const HIST_KEY='pomo-hist-v1';
-function loadHist(){
-  try{return JSON.parse(localStorage.getItem(HIST_KEY)||'{}');}
-  catch(e){console.error('[History] Load failed:',e);return{};}
-}
-function saveHist(h){
-  try{
-    localStorage.setItem(HIST_KEY,JSON.stringify(h));
-    console.log('[History] Saved:',h);
-  }catch(e){console.error('[History] Save failed:',e);}
-}
+function loadHist(){try{return JSON.parse(localStorage.getItem(HIST_KEY)||'{}');}catch(e){return{};}}
+function saveHist(h){try{localStorage.setItem(HIST_KEY,JSON.stringify(h));}catch(e){}}
 
 function todayKey(){
   const d=new Date();
@@ -349,7 +341,6 @@ function todayKey(){
 }
 
 function recordSession(){
-  console.log('[History] Recording session — overtime:',overtimeCount,'focus mins:',S.focus);
   const h=loadHist(),k=todayKey();
   const secs=S.focus*60+overtimeCount;
   if(!h[k])h[k]={s:0,t:0};
@@ -370,15 +361,10 @@ function buildHist(){
   const keys=Object.keys(h).sort((a,b)=>b.localeCompare(a));
   const el=document.getElementById('hBody');
 
-  /* ── DEBUG: test storage ── */
-  let storageOk=false;
-  try{localStorage.setItem('_pomo_test','1');localStorage.removeItem('_pomo_test');storageOk=true;}catch(e){}
-  const debugBar=`<div style="font-size:10px;padding:6px 10px;border-radius:8px;margin-bottom:10px;background:${storageOk?'rgba(16,185,129,.15)':'rgba(239,68,68,.15)'};color:${storageOk?'#10b981':'#ef4444'}">
-    Storage: ${storageOk?'✓ available':'✗ blocked'} &nbsp;|&nbsp; Sessions saved: ${keys.length} day(s)
-    ${storageOk?`<button onclick="(function(){const h=window._loadHist();const k=window._todayKey();if(!h[k])h[k]={s:0,t:0};h[k].s++;h[k].t+=1500;window._saveHist(h);window._buildHist();})()" style="margin-left:8px;background:rgba(255,255,255,.1);border:none;border-radius:4px;padding:2px 6px;font-size:10px;cursor:pointer;color:inherit">+ Add test session</button>`:''}
-  </div>`;
-  el.innerHTML=debugBar+(keys.length?'':'<div class="h-empty"><div class="h-empty-title">No sessions yet</div><div class="h-empty-sub">Complete a focus session<br>to start tracking your history.</div></div>');
-  if(!keys.length)return;
+  if(!keys.length){
+    el.innerHTML=`<div class="h-empty"><div class="h-empty-title">No sessions yet</div><div class="h-empty-sub">Complete a focus session<br>to start tracking your history.</div></div>`;
+    return;
+  }
 
   /* Group by YYYY-MM */
   const byMonth={};
@@ -409,10 +395,9 @@ function buildHist(){
     });
   });
 
-  /* Delete oldest 3 months button — only if >3 months of data */
-  if(months.length>3){
-    html+=`<button class="h-del" id="hDelBtn">Delete oldest 3 months</button>`;
-  }
+  /* Delete button — always visible */
+  const delLabel=months.length>3?'Delete oldest 3 months':'Clear all history';
+  html+=`<button class="h-del" id="hDelBtn">${delLabel}</button>`;
 
   el.innerHTML=html;
 
@@ -722,7 +707,6 @@ document.getElementById('gearBtn').addEventListener('click',openPanel);
 document.getElementById('closeBtn').addEventListener('click',closePanel);
 document.getElementById('playBtn').addEventListener('click',()=>{
   if(isOvertime&&isRun){
-    console.log('[Stop] pressed — mode:',mode,'isOvertime:',isOvertime,'isRun:',isRun);
     playClick('pause');
     if(mode==='focus'){
       recordSession();
@@ -747,7 +731,6 @@ document.getElementById('histCloseBtn').addEventListener('click',closeHist);
 
 /* ── BOOT ── */
 load();applyAll();timeLeft=S[mode]*60;buildRing();updateUI();syncModes();
-window._loadHist=loadHist;window._saveHist=saveHist;window._todayKey=todayKey;window._buildHist=buildHist;
 </script>
 </body>
 </html>
