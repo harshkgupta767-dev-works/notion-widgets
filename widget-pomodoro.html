@@ -48,9 +48,9 @@ html,body{width:100%;height:100%;overflow:hidden;background:transparent!importan
 .ic-btn:active{transform:scale(.93)}
 
 /* ── SESSION DOTS ── */
-.dots-btn{display:flex;gap:7px;align-items:center;background:none;border:none;cursor:pointer;padding:6px;border-radius:10px;transition:background .2s}
-.dots-btn:hover{background:var(--surf)}
-.dot{width:7px;height:7px;border-radius:50%;background:var(--trk);transition:background .3s;pointer-events:none}
+.dots-btn{width:40px;height:40px;border-radius:50%;background:var(--surf);border:1px solid var(--bdr);cursor:pointer;display:flex;flex-wrap:wrap;gap:4px;align-items:center;justify-content:center;padding:8px;transition:background .2s}
+.dots-btn:hover{background:var(--surf-hi)}
+.dot{width:6px;height:6px;border-radius:50%;background:var(--trk);transition:background .3s;pointer-events:none;flex-shrink:0}
 .dot.on{background:var(--acc,#ff5a1f)}
 
 /* ── HISTORY ROWS ── */
@@ -103,24 +103,56 @@ html,body{width:100%;height:100%;overflow:hidden;background:transparent!importan
 
 /* ── HISTORY PANEL ── */
 .hist-panel{z-index:55}
-.h-body{overflow-y:auto;flex:1;display:flex;flex-direction:column;padding-right:2px;gap:0}
+.h-body{overflow-y:auto;flex:1;display:flex;flex-direction:column;padding-right:2px;gap:2px}
 .h-body::-webkit-scrollbar{width:3px}
 .h-body::-webkit-scrollbar-track{background:transparent}
 .h-body::-webkit-scrollbar-thumb{border-radius:3px;background:var(--surf-hi)}
-.h-month{font-size:9.5px;font-weight:700;text-transform:uppercase;letter-spacing:.15em;color:var(--lbl);padding:14px 0 6px}
-.h-month:first-child{padding-top:2px}
-.h-day{display:flex;align-items:center;justify-content:space-between;padding:8px 12px;background:var(--surf);border-radius:10px;margin-bottom:4px}
-.h-day-date{font-size:12.5px;font-weight:500;color:var(--text)}
-.h-day-right{display:flex;align-items:center;gap:10px}
-.h-day-sess{font-size:11.5px;font-weight:600;color:var(--acc,#ff5a1f)}
-.h-day-time{font-size:11px;color:var(--text-faint)}
+
+/* Month group */
+.h-grp{margin-bottom:6px}
+.h-grp-hd{display:flex;align-items:center;border-radius:8px;padding:2px;transition:background .15s}
+.h-grp-hd:hover{background:var(--surf)}
+.h-month-tog{display:flex;align-items:center;gap:7px;flex:1;padding:5px 4px;cursor:pointer;user-select:none}
+.h-chev{color:var(--text-faint);transition:transform .18s;flex-shrink:0;font-size:8px;line-height:1}
+.h-grp-hd.open .h-month-tog .h-chev{transform:rotate(90deg)}
+.h-day-hd.open .h-day-tog .h-chev{transform:rotate(90deg)}
+.h-grp-label{font-size:11.5px;font-weight:700;color:var(--text);letter-spacing:.01em}
+.h-grp-meta-right{margin-left:auto;padding-right:4px}
+.h-grp-count{font-size:10px;color:var(--text-faint)}
+.h-grp-body{display:none;flex-direction:column;padding-left:18px;margin-top:2px;gap:1px}
+.h-grp-body.open{display:flex}
+
+/* Day group */
+.h-day-grp{margin-bottom:1px}
+.h-day-hd{display:flex;align-items:center;border-radius:6px;padding:2px;transition:background .15s}
+.h-day-hd:hover{background:var(--surf)}
+.h-day-tog{display:flex;align-items:center;gap:7px;flex:1;padding:4px 4px;cursor:pointer;user-select:none}
+.h-day-label{font-size:12px;font-weight:600;color:var(--text-sub)}
+.h-day-meta{margin-left:auto;padding-right:4px}
+.h-day-count{font-size:10px;color:var(--text-faint)}
+.h-day-body{display:none;flex-direction:column;padding-left:18px;margin-top:2px;gap:1px}
+.h-day-body.open{display:flex}
+
+/* Session row */
+.h-sess{display:flex;align-items:center;gap:8px;padding:5px 6px;border-radius:6px;transition:background .15s}
+.h-sess:hover{background:var(--surf)}
+.h-sess-time{font-size:11.5px;font-weight:600;color:var(--acc,#ff5a1f);width:36px;flex-shrink:0}
+.h-sess-dur{font-size:11px;color:var(--text-faint);flex:1}
+
+/* Trash button */
+.h-trash{padding:3px 5px;background:none;border:none;color:transparent;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:color .15s,background .15s;flex-shrink:0;border-radius:4px}
+.h-grp-hd:hover .h-trash,.h-day-hd:hover .h-trash,.h-sess:hover .h-trash{color:var(--text-faint)}
+.h-trash:hover{color:#ef4444 !important;background:rgba(239,68,68,.1)}
+
 .h-empty{display:flex;flex-direction:column;align-items:center;justify-content:center;flex:1;gap:6px;text-align:center;padding:20px}
 .h-empty-title{font-size:13px;font-weight:600;color:var(--text-sub)}
 .h-empty-sub{font-size:11.5px;color:var(--text-faint);line-height:1.5}
-.h-del{margin-top:12px;flex-shrink:0;padding:9px;border-radius:12px;background:none;border:1px solid var(--bdr);font-family:'Inter',sans-serif;font-size:11.5px;font-weight:600;color:var(--text-faint);cursor:pointer;width:100%;transition:all .18s}
+.h-empty-title{font-size:13px;font-weight:600;color:var(--text-sub)}
+.h-empty-sub{font-size:11.5px;color:var(--text-faint);line-height:1.5}
+.h-del{margin-bottom:10px;flex-shrink:0;padding:9px;border-radius:12px;background:none;border:1px solid var(--bdr);font-family:'Inter',sans-serif;font-size:11.5px;font-weight:600;color:var(--text-faint);cursor:pointer;width:100%;transition:all .18s}
 .h-del:hover{background:var(--surf);color:var(--text-sub)}
-.dots-btn{background:none;border:none;cursor:pointer;display:flex;gap:7px;align-items:center;padding:4px;border-radius:8px;transition:opacity .2s}
-.dots-btn:hover{opacity:.7}
+.dots-btn{background:var(--surf);border:1px solid var(--bdr);cursor:pointer;display:flex;gap:6px;align-items:center;justify-content:center;padding:0 12px;height:40px;border-radius:20px;transition:background .2s}
+.dots-btn:hover{background:var(--surf-hi)}
 
 /* ── SETTINGS COMPONENTS ── */
 .s-lbl{font-size:9.5px;font-weight:700;text-transform:uppercase;letter-spacing:.15em;color:var(--lbl);margin-bottom:7px}
@@ -331,7 +363,7 @@ function renderDots(){
 }
 
 /* ── HISTORY ── */
-const HIST_KEY='pomo-hist-v1';
+const HIST_KEY='pomo-hist-v2';
 function loadHist(){try{return JSON.parse(localStorage.getItem(HIST_KEY)||'{}');}catch(e){return{};}}
 function saveHist(h){try{localStorage.setItem(HIST_KEY,JSON.stringify(h));}catch(e){}}
 
@@ -339,13 +371,21 @@ function todayKey(){
   const d=new Date();
   return`${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;
 }
+function nowTime(){
+  const d=new Date();
+  return`${String(d.getHours()).padStart(2,'0')}:${String(d.getMinutes()).padStart(2,'0')}`;
+}
+
+function addSessionRecord(secs){
+  if(secs<60)return;
+  const h=loadHist(),k=todayKey();
+  if(!h[k])h[k]=[];
+  h[k].push({time:nowTime(),secs});
+  saveHist(h);
+}
 
 function recordSession(){
-  const h=loadHist(),k=todayKey();
-  const secs=S.focus*60+overtimeCount;
-  if(!h[k])h[k]={s:0,t:0};
-  h[k].s++;h[k].t+=secs;
-  saveHist(h);
+  addSessionRecord(S.focus*60+overtimeCount);
 }
 
 function fmtTime(secs){
@@ -357,60 +397,61 @@ function openHist(){buildHist();document.getElementById('histPanel').classList.a
 function closeHist(){document.getElementById('histPanel').classList.remove('open');}
 
 function buildHist(){
-  const h=loadHist();
-  const keys=Object.keys(h).sort((a,b)=>b.localeCompare(a));
-  const el=document.getElementById('hBody');
-
-  if(!keys.length){
+  const h=loadHist(),el=document.getElementById('hBody');
+  const allDates=Object.keys(h).sort((a,b)=>b.localeCompare(a));
+  if(!allDates.length){
     el.innerHTML=`<div class="h-empty"><div class="h-empty-title">No sessions yet</div><div class="h-empty-sub">Complete a focus session<br>to start tracking your history.</div></div>`;
     return;
   }
-
-  /* Group by YYYY-MM */
   const byMonth={};
-  keys.forEach(k=>{
-    const ym=k.slice(0,7);
-    if(!byMonth[ym])byMonth[ym]=[];
-    byMonth[ym].push(k);
-  });
-
+  allDates.forEach(k=>{const ym=k.slice(0,7);if(!byMonth[ym])byMonth[ym]=[];byMonth[ym].push(k);});
   const months=Object.keys(byMonth).sort((a,b)=>b.localeCompare(a));
-  const MNAMES=['January','February','March','April','May','June','July','August','September','October','November','December'];
-
+  const MN=['January','February','March','April','May','June','July','August','September','October','November','December'];
+  const CHEV=`▶`;
+  const TRASH=`<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 01-2 2H7a2 2 0 01-2-2V6m3 0V4a1 1 0 011-1h4a1 1 0 011 1v2"/></svg>`;
   let html='';
-  months.forEach(ym=>{
+  months.forEach((ym,mi)=>{
     const [y,m]=ym.split('-');
-    html+=`<div class="h-month">${MNAMES[+m-1]} ${y}</div>`;
-    byMonth[ym].forEach(k=>{
-      const d=new Date(k+'T00:00:00');
-      const label=d.toLocaleDateString('en-GB',{day:'numeric',month:'short'});
-      const {s,t}=h[k];
-      html+=`<div class="h-day">
-        <span class="h-day-date">${label}</span>
-        <div class="h-day-right">
-          <span class="h-day-sess">${s} ${s===1?'session':'sessions'}</span>
-          <span class="h-day-time">${fmtTime(t)}</span>
-        </div>
-      </div>`;
+    const mDates=byMonth[ym];
+    const mSess=mDates.reduce((a,k)=>a+h[k].length,0);
+    const mSecs=mDates.reduce((a,k)=>a+h[k].reduce((b,s)=>b+s.secs,0),0);
+    const mOpen=mi===0?'open':'';
+  html+=`<div class="h-grp"><div class="h-grp-hd ${mOpen}"><div class="h-month-tog"><span class="h-chev">${CHEV}</span><span class="h-grp-label">${MN[+m-1]} ${y}</span><span class="h-grp-meta-right"><span class="h-grp-count">${mSess} session${mSess===1?'':'s'} · ${fmtTime(mSecs)}</span></span></div><button class="h-trash" data-del-month="${ym}">${TRASH}</button></div><div class="h-grp-body ${mOpen}">`;
+    mDates.forEach((dk,di)=>{
+      const sessions=h[dk];
+      const d=new Date(dk+'T00:00:00');
+      const dayLabel=d.toLocaleDateString('en-GB',{day:'numeric',month:'short'});
+      const dSess=sessions.length;
+      const dSecs=sessions.reduce((a,s)=>a+s.secs,0);
+      const dOpen=(mi===0&&di===0)?'open':'';
+      html+=`<div class="h-day-grp"><div class="h-day-hd ${dOpen}"><div class="h-day-tog"><span class="h-chev">${CHEV}</span><span class="h-day-label">${dayLabel}</span><span class="h-day-meta"><span class="h-day-count">${dSess} session${dSess===1?'':'s'} · ${fmtTime(dSecs)}</span></span></div><button class="h-trash" data-del-day="${dk}">${TRASH}</button></div><div class="h-day-body ${dOpen}">`;
+      sessions.forEach((sess,si)=>{
+        html+=`<div class="h-sess"><span class="h-sess-time">${sess.time}</span><span class="h-sess-dur">${fmtTime(sess.secs)}</span><button class="h-trash" data-del-sess="${dk}|${si}">${TRASH}</button></div>`;
+      });
+      html+=`</div></div>`;
     });
+    html+=`</div></div>`;
   });
-
-  /* Delete button — always visible */
-  const delLabel=months.length>3?'Delete oldest 3 months':'Clear all history';
-  html+=`<button class="h-del" id="hDelBtn">${delLabel}</button>`;
-
   el.innerHTML=html;
-
-  const delBtn=document.getElementById('hDelBtn');
-  if(delBtn)delBtn.addEventListener('click',()=>{
-    const h2=loadHist();
-    const oldest=months.slice(-3);
-    oldest.forEach(ym=>{
-      Object.keys(h2).forEach(k=>{if(k.startsWith(ym))delete h2[k];});
-    });
-    saveHist(h2);buildHist();
-  });
+  el.querySelectorAll('.h-month-tog').forEach(tog=>tog.addEventListener('click',()=>{
+    const hd=tog.closest('.h-grp-hd');hd.classList.toggle('open');hd.nextElementSibling.classList.toggle('open');
+  }));
+  el.querySelectorAll('.h-day-tog').forEach(tog=>tog.addEventListener('click',()=>{
+    const hd=tog.closest('.h-day-hd');hd.classList.toggle('open');hd.nextElementSibling.classList.toggle('open');
+  }));
+  el.querySelectorAll('[data-del-month]').forEach(btn=>btn.addEventListener('click',e=>{
+    e.stopPropagation();const ym=btn.dataset.delMonth,h2=loadHist();
+    Object.keys(h2).forEach(k=>{if(k.startsWith(ym))delete h2[k];});saveHist(h2);buildHist();
+  }));
+  el.querySelectorAll('[data-del-day]').forEach(btn=>btn.addEventListener('click',e=>{
+    e.stopPropagation();const h2=loadHist();delete h2[btn.dataset.delDay];saveHist(h2);buildHist();
+  }));
+  el.querySelectorAll('[data-del-sess]').forEach(btn=>btn.addEventListener('click',e=>{
+    e.stopPropagation();const[dk,si]=btn.dataset.delSess.split('|'),h2=loadHist();
+    if(h2[dk]){h2[dk].splice(+si,1);if(!h2[dk].length)delete h2[dk];}saveHist(h2);buildHist();
+  }));
 }
+
 
 /* ── DISPLAY ── */
 function updateUI(){
@@ -472,10 +513,18 @@ function pause(){
   if(rafId){cancelAnimationFrame(rafId);rafId=null;}
 }
 function reset(){
+  if(mode==='focus'&&!isOvertime){
+    const elapsed=S.focus*60-timeLeft;
+    addSessionRecord(elapsed);
+  }
   pause();isOvertime=false;overtimeCount=0;
   timeLeft=dur();updateUI();
 }
 function switchMode(m,auto=false){
+  if(mode==='focus'&&!isOvertime&&timeLeft<S.focus*60){
+    const elapsed=S.focus*60-timeLeft;
+    addSessionRecord(elapsed);
+  }
   mode=m;timeLeft=dur();isRun=false;isOvertime=false;overtimeCount=0;
   clearInterval(iv);iv=null;
   if(rafId){cancelAnimationFrame(rafId);rafId=null;}
