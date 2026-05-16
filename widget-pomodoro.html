@@ -144,6 +144,20 @@ html,body{width:100%;height:100%;overflow:hidden;display:flex;align-items:center
 .h-sess-time{font-size:11.5px;font-weight:600;color:var(--acc,#ff5a1f);width:36px;flex-shrink:0}
 .h-sess-dur{font-size:11px;color:var(--text-faint);flex:1}
 
+/* Edit button */
+.h-edit{padding:3px 5px;background:none;border:none;color:transparent;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:color .15s,background .15s;flex-shrink:0;border-radius:4px}
+.h-sess:hover .h-edit{color:var(--text-faint)}
+.h-edit:hover{color:var(--acc,#ff5a1f)!important;background:rgba(255,90,31,.1)}
+
+/* Inline edit */
+.h-edit-in{width:38px;background:var(--surf);border:1px solid var(--bdr);border-radius:4px;padding:2px 4px;font-family:'Inter',sans-serif;font-size:11px;font-weight:600;color:var(--text);outline:none;text-align:right;-moz-appearance:textfield}
+.h-edit-in::-webkit-outer-spin-button,.h-edit-in::-webkit-inner-spin-button{-webkit-appearance:none}
+.h-edit-unit{font-size:11px;color:var(--text-faint);flex-shrink:0}
+.h-save-btn{padding:2px 6px;background:none;border:none;cursor:pointer;font-size:13px;border-radius:4px;color:var(--acc,#ff5a1f);transition:background .15s;flex-shrink:0}
+.h-save-btn:hover{background:rgba(255,90,31,.1)}
+.h-cancel-btn{padding:2px 5px;background:none;border:none;cursor:pointer;font-size:13px;border-radius:4px;color:var(--text-faint);transition:background .15s;flex-shrink:0}
+.h-cancel-btn:hover{background:var(--surf)}
+
 /* Trash button */
 .h-trash{padding:3px 5px;background:none;border:none;color:transparent;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:color .15s,background .15s;flex-shrink:0;border-radius:4px}
 .h-grp-hd:hover .h-trash,.h-day-hd:hover .h-trash,.h-sess:hover .h-trash{color:var(--text-faint)}
@@ -431,7 +445,7 @@ function buildHist(){
   allDates.forEach(k=>{const ym=k.slice(0,7);if(!byMonth[ym])byMonth[ym]=[];byMonth[ym].push(k);});
   const months=Object.keys(byMonth).sort((a,b)=>b.localeCompare(a));
   const MN=['January','February','March','April','May','June','July','August','September','October','November','December'];
-  const CHEV=`▶`;
+  const PENCIL=`<svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 20h9"/><path d="M16.5 3.5a2.121 2.121 0 013 3L7 19l-4 1 1-4L16.5 3.5z"/></svg>`;
   const TRASH=`<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 01-2 2H7a2 2 0 01-2-2V6m3 0V4a1 1 0 011-1h4a1 1 0 011 1v2"/></svg>`;
   let html='';
   months.forEach((ym,mi)=>{
@@ -450,7 +464,7 @@ function buildHist(){
       const dOpen=(firstOpen&&mi===0&&di===0)||openDays.has(dk)?'open':'';
       html+=`<div class="h-day-grp"><div class="h-day-hd ${dOpen}" data-dk="${dk}"><div class="h-day-tog"><span class="h-chev">${CHEV}</span><span class="h-day-label">${dayLabel}</span><span class="h-day-meta"><span class="h-day-count">${dSess} session${dSess===1?'':'s'} · ${fmtTime(dSecs)}</span></span></div><button class="h-trash" data-del-day="${dk}">${TRASH}</button></div><div class="h-day-body ${dOpen}">`;
       sessions.forEach((sess,si)=>{
-        html+=`<div class="h-sess"><span class="h-sess-time">${sess.time}</span><span class="h-sess-dur">${fmtTime(sess.secs)}</span><button class="h-trash" data-del-sess="${dk}|${si}">${TRASH}</button></div>`;
+        html+=`<div class="h-sess"><span class="h-sess-time">${sess.time}</span><span class="h-sess-dur">${fmtTime(sess.secs)}</span><button class="h-edit" data-edit-sess="${dk}|${si}" data-secs="${sess.secs}" data-time="${sess.time}">${PENCIL}</button><button class="h-trash" data-del-sess="${dk}|${si}">${TRASH}</button></div>`;
       });
       html+=`</div></div>`;
     });
@@ -473,6 +487,31 @@ function buildHist(){
   el.querySelectorAll('[data-del-sess]').forEach(btn=>btn.addEventListener('click',e=>{
     e.stopPropagation();const[dk,si]=btn.dataset.delSess.split('|'),h2=loadHist();
     if(h2[dk]){h2[dk].splice(+si,1);if(!h2[dk].length)delete h2[dk];}saveHist(h2);buildHist();
+  }));
+
+  /* Edit session */
+  el.querySelectorAll('[data-edit-sess]').forEach(btn=>btn.addEventListener('click',e=>{
+    e.stopPropagation();
+    const[dk,si]=btn.dataset.editSess.split('|');
+    const secs=+btn.dataset.secs,timeStr=btn.dataset.time;
+    const row=btn.closest('.h-sess');
+    row.innerHTML=`
+      <span class="h-sess-time">${timeStr}</span>
+      <input type="number" class="h-edit-in" value="${Math.round(secs/60)}" min="1" max="480">
+      <span class="h-edit-unit">min</span>
+      <button class="h-save-btn">✓</button>
+      <button class="h-cancel-btn">✕</button>`;
+    const inp=row.querySelector('.h-edit-in');
+    inp.focus();inp.select();
+    const save=()=>{
+      const v=Math.max(1,parseInt(inp.value)||1);
+      const h2=loadHist();
+      if(h2[dk]&&h2[dk][+si])h2[dk][+si].secs=v*60;
+      saveHist(h2);buildHist();
+    };
+    row.querySelector('.h-save-btn').addEventListener('click',save);
+    row.querySelector('.h-cancel-btn').addEventListener('click',()=>buildHist());
+    inp.addEventListener('keydown',e=>{if(e.key==='Enter')save();if(e.key==='Escape')buildHist();});
   }));
 }
 
@@ -803,8 +842,63 @@ document.querySelectorAll('.mode').forEach(b=>b.addEventListener('click',()=>{if
 document.getElementById('dots').addEventListener('click',openHist);
 document.getElementById('histCloseBtn').addEventListener('click',closeHist);
 
+/* ── TIMER STATE PERSISTENCE ── */
+const TIMER_KEY='pomo-timer-v1';
+
+function saveState(){
+  try{
+    localStorage.setItem(TIMER_KEY,JSON.stringify({
+      mode,timeLeft,isRun,isOvertime,overtimeCount,sessions,ts:Date.now()
+    }));
+  }catch(e){}
+}
+
+function restoreState(){
+  try{
+    const raw=localStorage.getItem(TIMER_KEY);
+    if(!raw)return false;
+    localStorage.removeItem(TIMER_KEY);
+    const st=JSON.parse(raw);
+    const elapsed=Math.floor((Date.now()-st.ts)/1000);
+    mode=st.mode;
+    sessions=st.sessions;
+    if(st.isRun){
+      if(st.isOvertime){
+        isOvertime=true;
+        overtimeCount=st.overtimeCount+elapsed;
+        timeLeft=0;
+      }else{
+        const rem=st.timeLeft-elapsed;
+        if(rem<=0){
+          isOvertime=true;
+          overtimeCount=Math.abs(rem);
+          timeLeft=0;
+        }else{
+          timeLeft=rem;
+          isOvertime=false;
+          overtimeCount=0;
+        }
+      }
+      return true; /* was running — auto-resume */
+    }else{
+      timeLeft=st.timeLeft;
+      isOvertime=st.isOvertime;
+      overtimeCount=st.overtimeCount;
+      return false;
+    }
+  }catch(e){return false;}
+}
+
+document.addEventListener('visibilitychange',()=>{if(document.hidden)saveState();});
+window.addEventListener('pagehide',saveState);
+
 /* ── BOOT ── */
-load();applyAll();timeLeft=S[mode]*60;buildRing();updateUI();syncModes();
+load();
+applyAll();
+timeLeft=S[mode]*60;
+const _resume=restoreState();
+buildRing();updateUI();syncModes();syncIcon();
+if(_resume)start();
 </script>
 </body>
 </html>
