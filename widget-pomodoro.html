@@ -415,6 +415,13 @@ function closeHist(){document.getElementById('histPanel').classList.remove('open
 
 function buildHist(){
   const h=loadHist(),el=document.getElementById('hBody');
+
+  /* Save which months/days are currently open */
+  const openMonths=new Set(),openDays=new Set();
+  el.querySelectorAll('.h-grp-hd.open[data-ym]').forEach(hd=>openMonths.add(hd.dataset.ym));
+  el.querySelectorAll('.h-day-hd.open[data-dk]').forEach(hd=>openDays.add(hd.dataset.dk));
+  const firstOpen=!openMonths.size&&!openDays.size; /* true on first build */
+
   const allDates=Object.keys(h).sort((a,b)=>b.localeCompare(a));
   if(!allDates.length){
     el.innerHTML=`<div class="h-empty"><div class="h-empty-title">No sessions yet</div><div class="h-empty-sub">Complete a focus session<br>to start tracking your history.</div></div>`;
@@ -432,16 +439,16 @@ function buildHist(){
     const mDates=byMonth[ym];
     const mSess=mDates.reduce((a,k)=>a+h[k].length,0);
     const mSecs=mDates.reduce((a,k)=>a+h[k].reduce((b,s)=>b+s.secs,0),0);
-    const mOpen=mi===0?'open':'';
-  html+=`<div class="h-grp"><div class="h-grp-hd ${mOpen}"><div class="h-month-tog"><span class="h-chev">${CHEV}</span><span class="h-grp-label">${MN[+m-1]} ${y}</span><span class="h-grp-meta-right"><span class="h-grp-count">${mSess} session${mSess===1?'':'s'} · ${fmtTime(mSecs)}</span></span></div><button class="h-trash" data-del-month="${ym}">${TRASH}</button></div><div class="h-grp-body ${mOpen}">`;
+    const mOpen=(firstOpen&&mi===0)||openMonths.has(ym)?'open':'';
+  html+=`<div class="h-grp"><div class="h-grp-hd ${mOpen}" data-ym="${ym}"><div class="h-month-tog"><span class="h-chev">${CHEV}</span><span class="h-grp-label">${MN[+m-1]} ${y}</span><span class="h-grp-meta-right"><span class="h-grp-count">${mSess} session${mSess===1?'':'s'} · ${fmtTime(mSecs)}</span></span></div><button class="h-trash" data-del-month="${ym}">${TRASH}</button></div><div class="h-grp-body ${mOpen}">`;
     mDates.forEach((dk,di)=>{
       const sessions=h[dk];
       const d=new Date(dk+'T00:00:00');
       const dayLabel=d.toLocaleDateString('en-GB',{day:'numeric',month:'short'});
       const dSess=sessions.length;
       const dSecs=sessions.reduce((a,s)=>a+s.secs,0);
-      const dOpen=(mi===0&&di===0)?'open':'';
-      html+=`<div class="h-day-grp"><div class="h-day-hd ${dOpen}"><div class="h-day-tog"><span class="h-chev">${CHEV}</span><span class="h-day-label">${dayLabel}</span><span class="h-day-meta"><span class="h-day-count">${dSess} session${dSess===1?'':'s'} · ${fmtTime(dSecs)}</span></span></div><button class="h-trash" data-del-day="${dk}">${TRASH}</button></div><div class="h-day-body ${dOpen}">`;
+      const dOpen=(firstOpen&&mi===0&&di===0)||openDays.has(dk)?'open':'';
+      html+=`<div class="h-day-grp"><div class="h-day-hd ${dOpen}" data-dk="${dk}"><div class="h-day-tog"><span class="h-chev">${CHEV}</span><span class="h-day-label">${dayLabel}</span><span class="h-day-meta"><span class="h-day-count">${dSess} session${dSess===1?'':'s'} · ${fmtTime(dSecs)}</span></span></div><button class="h-trash" data-del-day="${dk}">${TRASH}</button></div><div class="h-day-body ${dOpen}">`;
       sessions.forEach((sess,si)=>{
         html+=`<div class="h-sess"><span class="h-sess-time">${sess.time}</span><span class="h-sess-dur">${fmtTime(sess.secs)}</span><button class="h-trash" data-del-sess="${dk}|${si}">${TRASH}</button></div>`;
       });
