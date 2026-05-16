@@ -7,7 +7,7 @@
 <link href="https://fonts.googleapis.com/css2?family=Anton&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
 <style>
 *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
-html,body{width:100%;height:100%;overflow:hidden;background:transparent!important;display:flex;align-items:center;justify-content:center}
+html,body{width:100%;height:100%;overflow:hidden;display:flex;align-items:center;justify-content:center}
 
 /* ── THEME VARIABLES ── Theme controls ALL styling. Widget color only sets --wbg. ── */
 [data-theme="dark"]{
@@ -48,10 +48,10 @@ html,body{width:100%;height:100%;overflow:hidden;background:transparent!importan
 .ic-btn:active{transform:scale(.93)}
 
 /* ── SESSION DOTS ── */
-.dots-btn{width:40px;height:40px;border-radius:50%;background:var(--surf);border:1px solid var(--bdr);cursor:pointer;display:flex;flex-wrap:wrap;gap:4px;align-items:center;justify-content:center;padding:8px;transition:background .2s}
+.dots-btn{min-width:40px;height:40px;border-radius:20px;background:var(--surf);border:1px solid var(--bdr);cursor:pointer;display:flex;flex-wrap:nowrap;gap:4px;align-items:center;justify-content:center;padding:0 11px;transition:background .2s}
 .dots-btn:hover{background:var(--surf-hi)}
 .dot{width:6px;height:6px;border-radius:50%;background:var(--trk);transition:background .3s;pointer-events:none;flex-shrink:0}
-.dot.on{background:var(--acc,#ff5a1f)}
+.dot.on{background:var(--text)}
 
 /* ── HISTORY ROWS ── */
 .hist-empty{font-size:12px;color:var(--text-faint);text-align:center;padding:24px 0}
@@ -91,9 +91,14 @@ html,body{width:100%;height:100%;overflow:hidden;background:transparent!importan
 .panel{
   position:absolute;inset:0;z-index:50;background:var(--pop);border-radius:38px;
   display:flex;flex-direction:column;padding:20px 18px 14px;
-  opacity:0;pointer-events:none;transform:translateY(6px);transition:opacity .2s,transform .2s;
+  opacity:0;pointer-events:none;
+  transform:translateY(18px) scale(0.97);
+  transition:opacity .28s cubic-bezier(0.32,0.72,0,1),transform .28s cubic-bezier(0.32,0.72,0,1);
 }
-.panel.open{opacity:1;pointer-events:auto;transform:translateY(0)}
+.panel.open{
+  opacity:1;pointer-events:auto;
+  transform:translateY(0) scale(1);
+}
 .p-hd{display:flex;justify-content:space-between;align-items:center;margin-bottom:12px;flex-shrink:0}
 .p-hd-t{font-size:14px;font-weight:700;color:var(--text)}
 .p-body{overflow-y:auto;flex:1;display:flex;flex-direction:column;gap:13px;padding-right:2px}
@@ -309,6 +314,7 @@ function applyAll(){
   c.setAttribute('data-theme',S.theme);
   c.style.setProperty('--wbg',S.wbg);
   c.style.setProperty('--acc',S.acc);
+  document.documentElement.style.background=S.theme==='dark'?'#191919':'#ffffff';
   document.getElementById('swWrap').style.transform=`scale(${S.zoom/100})`;
 }
 
@@ -357,8 +363,19 @@ function updateRing(tl){
 
 /* ── DOTS ── */
 function renderDots(){
+  /* Dots light up every S.focus minutes regardless of stop being pressed */
+  let runComplete=0;
+  if(isOvertime&&mode==='focus'){
+    runComplete=1+Math.floor(overtimeCount/(S.focus*60));
+  }
+  const total=sessions+runComplete;
+  const cyclePos=total%S.sess;
+  const active=(cyclePos===0&&total>0)?S.sess:cyclePos;
   let h='';
-  for(let i=0;i<S.sess;i++)h+=`<div class="dot${i<sessions%S.sess?' on':''}"></div>`;
+  for(let i=0;i<S.sess;i++){
+    const on=active>0&&i>=S.sess-active;
+    h+=`<div class="dot${on?' on':''}"></div>`;
+  }
   document.getElementById('dots').innerHTML=h;
 }
 
@@ -758,8 +775,9 @@ document.getElementById('playBtn').addEventListener('click',()=>{
   if(isOvertime&&isRun){
     playClick('pause');
     if(mode==='focus'){
+      const earned=1+Math.floor(overtimeCount/(S.focus*60));
       recordSession();
-      sessions++;
+      sessions+=earned;
       const nextMode=sessions%S.sess===0?'longBreak':'shortBreak';
       switchMode(nextMode,false);
     }else{
