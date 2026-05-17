@@ -8,7 +8,7 @@
 <style>
   *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
   html,body{width:100%;height:100%;background:transparent!important;display:flex;align-items:center;justify-content:center;overflow:hidden;font-family:'Roboto Condensed',sans-serif}
-  .container{position:relative;width:100%;height:100%;display:flex;align-items:center;justify-content:center;overflow:hidden;background:var(--bg-color,transparent);transition:background 0.3s}
+  .container{position:relative;width:100%;height:100%;display:flex;align-items:center;justify-content:center;overflow:hidden;background:transparent;transition:background 0.3s}
   .wrapper{position:relative;display:flex;flex-direction:column;align-items:center;gap:8px;padding:20px 30px;transform-origin:center;transition:transform 0.3s}
   .gear{position:absolute;top:4px;left:4px;width:22px;height:22px;background:none;border:none;cursor:pointer;display:flex;align-items:center;justify-content:center;z-index:10;opacity:0;transform:scale(0.7);transition:opacity 0.2s,transform 0.2s;pointer-events:none;border-radius:4px}
   #tH:hover .gear,.wrapper:hover .gear,.gear.pin{opacity:0.6;transform:scale(1);pointer-events:auto}
@@ -67,7 +67,6 @@
   .sw.on{border-color:rgba(128,128,128,.7)}
   .sw.on::after{content:'✓';position:absolute;inset:0;display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:700}
   .sw.dk.on::after{color:#fff}.sw.lt.on::after{color:#333}
-  .sw-tp{background:repeating-conic-gradient(#ccc 0% 25%,#fff 0% 50%) 50%/10px 10px}
   .sw-wh{box-shadow:inset 0 0 0 1px rgba(0,0,0,.12)}
 
   .sw-cu{overflow:hidden;background:conic-gradient(hsl(0,80%,60%),hsl(30,80%,55%),hsl(60,80%,52%),hsl(120,65%,45%),hsl(180,75%,45%),hsl(210,80%,52%),hsl(240,65%,58%),hsl(300,65%,55%),hsl(330,75%,55%),hsl(360,80%,60%))!important;border:none!important;box-shadow:inset 0 0 4px rgba(0,0,0,.15),0 .5px 2px rgba(0,0,0,.2)!important}
@@ -125,35 +124,12 @@
     <div class="sw lt sw-wh" data-c="#ffffff" style="background:#fff"></div>
     <div class="sw dk" data-c="#787774" style="background:#787774"></div>
     <div class="sw dk" data-c="#2a2a2a" style="background:#2a2a2a"></div>
-    <div class="sw dk" data-c="#191919" style="background:#191919"></div>
-    <div class="sw dk" data-c="#9f6b53" style="background:#9f6b53"></div>
     <div class="sw dk" data-c="#d9730d" style="background:#d9730d"></div>
-    <div class="sw dk" data-c="#cb912f" style="background:#cb912f"></div>
     <div class="sw dk" data-c="#448361" style="background:#448361"></div>
     <div class="sw dk" data-c="#337ea9" style="background:#337ea9"></div>
-    <div class="sw dk" data-c="#9065b0" style="background:#9065b0"></div>
-    <div class="sw dk" data-c="#d44c47" style="background:#d44c47"></div>
     <div class="sw sw-cu" data-target="tile"></div>
   </div>
   <div class="cpk" id="cpk-tile"><div class="cpk-box"><div class="cpk-box-hue"></div><div class="cpk-box-white"></div><div class="cpk-box-black"></div><div class="cpk-dot"></div></div><div class="cpk-hue"><div class="cpk-hue-thumb"></div></div><div class="cpk-bottom"><div class="cpk-preview"></div><input class="cpk-hex-input" maxlength="7" value="#2a2a2a" spellcheck="false"></div></div>
-  <div class="sep"></div>
-
-  <div class="lbl">Background Colour</div>
-  <div class="sr" data-group="bg">
-    <div class="sw lt sw-wh" data-c="#ffffff" style="background:#fff"></div>
-    <div class="sw dk" data-c="#787774" style="background:#787774"></div>
-    <div class="sw dk" data-c="#2a2a2a" style="background:#2a2a2a"></div>
-    <div class="sw dk" data-c="#191919" style="background:#191919"></div>
-    <div class="sw dk" data-c="#9f6b53" style="background:#9f6b53"></div>
-    <div class="sw dk" data-c="#d9730d" style="background:#d9730d"></div>
-    <div class="sw dk" data-c="#cb912f" style="background:#cb912f"></div>
-    <div class="sw dk" data-c="#448361" style="background:#448361"></div>
-    <div class="sw dk" data-c="#337ea9" style="background:#337ea9"></div>
-    <div class="sw dk" data-c="#9065b0" style="background:#9065b0"></div>
-    <div class="sw dk" data-c="#d44c47" style="background:#d44c47"></div>
-    <div class="sw sw-cu" data-target="bg"></div>
-  </div>
-  <div class="cpk" id="cpk-bg"><div class="cpk-box"><div class="cpk-box-hue"></div><div class="cpk-box-white"></div><div class="cpk-box-black"></div><div class="cpk-dot"></div></div><div class="cpk-hue"><div class="cpk-hue-thumb"></div></div><div class="cpk-bottom"><div class="cpk-preview"></div><input class="cpk-hex-input" maxlength="7" value="#ffffff" spellcheck="false"></div></div>
   <div class="sep"></div>
 
   <div class="lbl">Number Colour</div>
@@ -161,14 +137,9 @@
     <div class="sw lt sw-wh" data-c="#ffffff" style="background:#fff"></div>
     <div class="sw dk" data-c="#787774" style="background:#787774"></div>
     <div class="sw dk" data-c="#2a2a2a" style="background:#2a2a2a"></div>
-    <div class="sw dk" data-c="#191919" style="background:#191919"></div>
-    <div class="sw dk" data-c="#9f6b53" style="background:#9f6b53"></div>
     <div class="sw dk" data-c="#d9730d" style="background:#d9730d"></div>
-    <div class="sw dk" data-c="#cb912f" style="background:#cb912f"></div>
     <div class="sw dk" data-c="#448361" style="background:#448361"></div>
     <div class="sw dk" data-c="#337ea9" style="background:#337ea9"></div>
-    <div class="sw dk" data-c="#9065b0" style="background:#9065b0"></div>
-    <div class="sw dk" data-c="#d44c47" style="background:#d44c47"></div>
     <div class="sw sw-cu" data-target="timeText"></div>
   </div>
   <div class="cpk" id="cpk-timeText"><div class="cpk-box"><div class="cpk-box-hue"></div><div class="cpk-box-white"></div><div class="cpk-box-black"></div><div class="cpk-dot"></div></div><div class="cpk-hue"><div class="cpk-hue-thumb"></div></div><div class="cpk-bottom"><div class="cpk-preview"></div><input class="cpk-hex-input" maxlength="7" value="#ffffff" spellcheck="false"></div></div>
@@ -179,14 +150,9 @@
     <div class="sw lt sw-wh" data-c="#ffffff" style="background:#fff"></div>
     <div class="sw dk" data-c="#787774" style="background:#787774"></div>
     <div class="sw dk" data-c="#2a2a2a" style="background:#2a2a2a"></div>
-    <div class="sw dk" data-c="#191919" style="background:#191919"></div>
-    <div class="sw dk" data-c="#9f6b53" style="background:#9f6b53"></div>
     <div class="sw dk" data-c="#d9730d" style="background:#d9730d"></div>
-    <div class="sw dk" data-c="#cb912f" style="background:#cb912f"></div>
     <div class="sw dk" data-c="#448361" style="background:#448361"></div>
     <div class="sw dk" data-c="#337ea9" style="background:#337ea9"></div>
-    <div class="sw dk" data-c="#9065b0" style="background:#9065b0"></div>
-    <div class="sw dk" data-c="#d44c47" style="background:#d44c47"></div>
     <div class="sw sw-cu" data-target="dateText"></div>
   </div>
   <div class="cpk" id="cpk-dateText"><div class="cpk-box"><div class="cpk-box-hue"></div><div class="cpk-box-white"></div><div class="cpk-box-black"></div><div class="cpk-dot"></div></div><div class="cpk-hue"><div class="cpk-hue-thumb"></div></div><div class="cpk-bottom"><div class="cpk-preview"></div><input class="cpk-hex-input" maxlength="7" value="#2a2a2a" spellcheck="false"></div></div>
@@ -206,7 +172,7 @@
 <script>
 const DAYS=['Sunday','Monday','Tuesday','Wednesday','Thursday','Friday','Saturday'];
 const MONTHS=['January','February','March','April','May','June','July','August','September','October','November','December'];
-const DEF={theme:'light',tile:'#2a2a2a',bg:'#ffffff',timeText:'#ffffff',dateText:'#2a2a2a',format:'24',display:'both',zoom:100};
+const DEF={theme:'light',tile:'#2a2a2a',timeText:'#ffffff',dateText:'#2a2a2a',format:'24',display:'both',zoom:100};
 let S={...DEF};
 function load(){try{const d=localStorage.getItem('cfc1');if(d)S={...DEF,...JSON.parse(d)};}catch(e){}}
 function save(){try{localStorage.setItem('cfc1',JSON.stringify(S));}catch(e){}}
@@ -242,7 +208,7 @@ function tick(a=true){
   updateDate(now);
 }
 
-function applyAll(){const r=document.documentElement.style;r.setProperty('--tile-bg',S.tile);r.setProperty('--time-text',S.timeText);r.setProperty('--date-color',S.dateText);r.setProperty('--bg-color',S.bg);document.getElementById('wrapper').style.transform=`scale(${S.zoom/100})`;const p=document.getElementById('pop');p.classList.remove('pop-light','pop-dark');p.classList.add(S.theme==='dark'?'pop-dark':'pop-light');}
+function applyAll(){const r=document.documentElement.style;r.setProperty('--tile-bg',S.tile);r.setProperty('--time-text',S.timeText);r.setProperty('--date-color',S.dateText);document.getElementById('cont').style.background=S.theme==='dark'?'#191919':'#ffffff';document.getElementById('wrapper').style.transform=`scale(${S.zoom/100})`;const p=document.getElementById('pop');p.classList.remove('pop-light','pop-dark');p.classList.add(S.theme==='dark'?'pop-dark':'pop-light');}
 
 // POPUP
 const gearBtn=document.getElementById('gearBtn'),pop=document.getElementById('pop'),ov=document.getElementById('ov');
@@ -257,7 +223,7 @@ function hsvToHex(h,s,v){h*=6;const i=Math.floor(h),f=h-i,p=v*(1-s),q=v*(1-s*f),
 function isValidHex(h){return/^#[0-9a-fA-F]{6}$/.test(h);}
 
 // COLOUR PICKERS
-const pickerKeys=['tile','bg','timeText','dateText'];
+const pickerKeys=['tile','timeText','dateText'];
 const pickers={};
 
 pickerKeys.forEach(key=>{
@@ -301,7 +267,7 @@ document.querySelectorAll('.sw-cu').forEach(sw=>{
   sw.addEventListener('click',()=>{
     const key=sw.dataset.target;const cpk=pickers[key].cpk;const wasOpen=cpk.classList.contains('open');
     pickerKeys.forEach(k=>pickers[k].cpk.classList.remove('open'));
-    if(!wasOpen){cpk.classList.add('open');const cur=S[key];if(isValidHex(cur))pickers[key].setFromHex(cur);else pickers[key].setFromHex('#888888');pickers[key].updateUI();}
+    if(!wasOpen){cpk.classList.add('open');const hex=S[key];if(isValidHex(hex))pickers[key].setFromHex(hex);else pickers[key].setFromHex('#888888');pickers[key].updateUI();}
   });
 });
 
@@ -317,7 +283,7 @@ pickerKeys.forEach(key=>{
 
 function setupTg(id,key,cb){document.getElementById(id).addEventListener('click',e=>{const b=e.target.closest('.tb');if(!b)return;document.querySelectorAll(`#${id} .tb`).forEach(x=>x.classList.remove('on'));b.classList.add('on');S[key]=b.dataset.v;save();if(cb)cb();});}
 function syncTg(id,val){document.querySelectorAll(`#${id} .tb`).forEach(b=>b.classList.toggle('on',b.dataset.v===val));}
-setupTg('gTheme','theme',()=>{if(S.theme==='dark'){S.tile='#ffffff';S.timeText='#111111';S.dateText='#ffffff';S.bg='#191919';}else{S.tile='#2a2a2a';S.timeText='#ffffff';S.dateText='#2a2a2a';S.bg='#ffffff';}save();applyAll();hlAll();});
+setupTg('gTheme','theme',()=>{if(S.theme==='dark'){S.tile='#ffffff';S.timeText='#111111';S.dateText='#ffffff';}else{S.tile='#2a2a2a';S.timeText='#ffffff';S.dateText='#2a2a2a';}save();applyAll();hlAll();});
 setupTg('gFmt','format',()=>tick(false));
 setupTg('gDisp','display',()=>tick(false));
 const zSlider=document.getElementById('zSlider'),zLabel=document.getElementById('zLabel');
