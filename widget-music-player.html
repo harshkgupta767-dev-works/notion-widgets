@@ -40,35 +40,28 @@ box-shadow:
 0 0 40px rgba(255,255,255,0.05);
 }
 
+@keyframes glowPulse{
+  0%,100%{box-shadow:0 4px 18px rgba(0,0,0,0.18),0 0 0px rgba(255,255,255,0)}
+  50%{box-shadow:0 8px 32px rgba(0,0,0,0.28),0 0 18px rgba(255,255,255,0.06)}
+}
+.wrapper.glow-active{animation:glowPulse 4s ease-in-out infinite}
+
   /* ─── HEADER ─── */
   .header{display:flex;align-items:center;justify-content:space-between;padding:10px 14px;border-bottom:1px solid var(--border-color,rgba(255,255,255,0.08));transition:border-color 0.3s;flex-shrink:0}
   .header-left{display:flex;align-items:center;gap:8px;min-width:0;flex:1}
   .header-icon{width:18px;height:18px;display:flex;align-items:center;justify-content:center;flex-shrink:0}
   .header-icon svg{width:18px;height:18px}
   .header-title{font-size:13px;font-weight:600;color:var(--text-color,#fff);transition:color 0.3s;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;letter-spacing:.02em}
-  .header-actions{display:flex;align-items:center;gap:2px;flex-shrink:0}
-  .icon-btn{width:28px;height:28px;background:none;border:none;cursor:pointer;display:flex;align-items:center;justify-content:center;border-radius:6px;color:var(--text-muted,rgba(255,255,255,0.6));transition:all 0.28s cubic-bezier(.22,1,.36,1);padding:0}
+  .header-actions{display:flex;align-items:center;gap:4px;flex-shrink:0}
+  .icon-btn{width:32px;height:32px;background:none;border:none;cursor:pointer;display:flex;align-items:center;justify-content:center;border-radius:6px;color:var(--text-muted,rgba(255,255,255,0.6));transition:all 0.28s cubic-bezier(.22,1,.36,1);padding:0}
   .icon-btn:hover{background:var(--hover-bg,rgba(255,255,255,0.1));color:var(--text-color,#fff)}
-  .icon-btn svg{width:15px;height:15px;fill:currentColor}
+  .icon-btn svg{width:16px;height:16px;fill:currentColor}
 
   /* ─── SCREENS ─── */
   .screen{display:none}
   .screen.active{display:flex;flex-direction:column;align-items:center}
   .player-pane{display:none}
   .player-pane.active{display:flex;flex-direction:column}
-
-  /* ─── SERVICE SELECTION ─── */
-  .svc-wrap{padding:24px 18px 26px;display:flex;flex-direction:column;align-items:center;gap:16px}
-  .svc-title{font-size:13px;font-weight:600;color:var(--text-color,#fff);transition:color 0.3s;letter-spacing:.02em}
-  .svc-cards{display:flex;gap:10px;width:100%}
-  .svc-card{flex:1;padding:18px 10px 14px;border-radius:12px;border:1.5px solid var(--border-color,rgba(255,255,255,0.1));background:var(--input-bg,rgba(255,255,255,0.04));cursor:pointer;display:flex;flex-direction:column;align-items:center;gap:8px;transition:all 0.28s cubic-bezier(.22,1,.36,1);user-select:none}
-  .svc-card:hover{transform:translateY(-4px) scale(1.02)}
-  #card-spotify:hover{border-color:#1DB954;background:rgba(29,185,84,0.08)}
-  #card-yt:hover{border-color:#FF0000;background:rgba(255,0,0,0.06)}
-  .svc-card .svc-icon{width:36px;height:36px;display:flex;align-items:center;justify-content:center}
-  .svc-card .svc-icon svg{width:36px;height:36px}
-  .svc-card-name{font-size:12px;font-weight:600;color:var(--text-color,#fff);transition:color 0.3s}
-  .svc-card-desc{font-size:10px;color:var(--text-muted,rgba(255,255,255,0.5));transition:color 0.3s;text-align:center;line-height:1.35}
 
   /* ─── URL INPUT ─── */
   .url-wrap{padding:26px 22px 28px;display:flex;flex-direction:column;align-items:center;gap:11px}
@@ -78,7 +71,7 @@ box-shadow:
   .url-input{width:100%;max-width:300px;height:36px;border-radius:8px;border:1px solid var(--input-border,rgba(255,255,255,0.15));background:var(--input-bg,rgba(255,255,255,0.06));padding:0 12px;font-family:'Inter',sans-serif;font-size:12px;color:var(--text-color,#fff);outline:none;transition:all 0.28s cubic-bezier(.22,1,.36,1)}
   .url-input:focus{border-color:var(--svc-accent,#1DB954)}
   .url-input::placeholder{color:var(--text-muted,rgba(255,255,255,0.4))}
-  .url-btn{padding:9px 26px;border-radius:20px;border:none;background:var(--svc-accent,#1DB954);color:#fff;font-family:'Inter',sans-serif;font-size:12px;font-weight:600;cursor:pointer;transition:all 0.15s;letter-spacing:.02em}
+  .url-btn{padding:12px 30px;border-radius:20px;border:none;background:var(--text-color,#fff);color:var(--card-bg,#191919);font-family:'Inter',sans-serif;font-size:12px;font-weight:600;cursor:pointer;transition:all 0.15s;letter-spacing:.02em}
   .url-btn:hover{filter:brightness(1.1);transform:scale(1.04)}
   .url-error{font-size:11px;color:#ff6b6b;min-height:14px;margin-top:-2px;font-weight:500;text-align:center}
 
@@ -88,12 +81,8 @@ box-shadow:
   #spotify-player.compact iframe{height:80px}
 
   /* ─── YOUTUBE PLAYER (native embed) ─── */
-  #yt-player{position:relative;width:100%;overflow:hidden;transition:height 0.35s ease}
-  #yt-player iframe{width:100%;border:none;display:block;transition:all 0.35s ease}
-  #yt-player.full{height:400px}
-  #yt-player.full iframe{height:400px;margin-top:0}
-  #yt-player.compact{height:80px}
-  #yt-player.compact iframe{height:400px;margin-top:-160px}
+  #yt-player{width:100%}
+  #yt-player iframe{width:100%;height:400px;border:none;display:block}
 
   /* ─── POPUP ─── */
   .ov{position:fixed;inset:0;background:rgba(0,0,0,.2);z-index:200;opacity:0;pointer-events:none;transition:opacity .2s}.ov.open{opacity:1;pointer-events:auto}
@@ -124,8 +113,9 @@ box-shadow:
   .lbl{font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.12em;margin:14px 0 8px}.lbl:first-of-type{margin-top:0}
   .sep{height:1px;margin:14px 0}
   .tg{display:flex;border-radius:8px;overflow:hidden}
-  .tb{flex:1;padding:8px 6px;font-family:'Inter',sans-serif;font-size:11px;font-weight:600;text-align:center;border:none;cursor:pointer;transition:all .15s;white-space:nowrap}
+  .tb{flex:1;padding:10px 8px;font-family:'Inter',sans-serif;font-size:11px;font-weight:600;text-align:center;border:none;cursor:pointer;transition:all .15s;white-space:nowrap}
   .tb+.tb{border-left:1px solid}
+  #gTheme .tb{font-size:10px;padding:8px 3px}
   .pop-input{width:100%;height:34px;border:1px solid;border-radius:6px;padding:0 10px;font-family:'Inter',sans-serif;font-size:11px;font-weight:500;outline:none;transition:border-color 0.2s}
   .pop-input:focus{border-color:var(--svc-accent,#1DB954)}
   .pop-input-row{display:flex;gap:6px;align-items:center}
@@ -160,6 +150,54 @@ box-shadow:
   .zl{font-size:11px;font-weight:600;min-width:34px;text-align:center}
   .pop-light .zs{background:#ddd}.pop-light .zs::-webkit-slider-thumb{background:#222;border-color:#fff}.pop-light .zi,.pop-light .zl{color:#999}
   .pop-dark .zs{background:#444}.pop-dark .zs::-webkit-slider-thumb{background:#fff;border-color:#1e1e1e}.pop-dark .zi,.pop-dark .zl{color:#666}
+
+  /* ─── PRESETS PANEL ─── */
+  .presets-panel{position:absolute;inset:0;z-index:50;background:var(--card-bg,#191919);display:flex;flex-direction:column;opacity:0;pointer-events:none;transition:opacity 0.2s}
+  .presets-panel.open{opacity:1;pointer-events:auto}
+  .presets-hd{display:flex;justify-content:space-between;align-items:center;padding:12px 14px;border-bottom:1px solid var(--border-color,rgba(255,255,255,0.08));flex-shrink:0;transition:border-color 0.3s}
+  .presets-title{font-size:13px;font-weight:700;color:var(--text-color,#fff);transition:color 0.3s}
+  .presets-close{width:26px;height:26px;background:none;border:none;cursor:pointer;display:flex;align-items:center;justify-content:center;border-radius:6px;font-size:16px;color:var(--text-muted,rgba(255,255,255,0.6));transition:background 0.15s}
+  .presets-close:hover{background:var(--hover-bg,rgba(255,255,255,0.1))}
+  .presets-body{flex:1;overflow-y:auto;padding:4px 0}
+  .presets-body::-webkit-scrollbar{width:4px}.presets-body::-webkit-scrollbar-track{background:transparent}.presets-body::-webkit-scrollbar-thumb{border-radius:4px;background:var(--border-color,rgba(255,255,255,0.15))}
+  .presets-cat{font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.12em;color:var(--text-muted,rgba(255,255,255,0.6));padding:12px 14px 6px;transition:color 0.3s}
+  .preset-item{display:flex;align-items:center;gap:10px;padding:10px 14px;min-height:40px;cursor:pointer;transition:background 0.15s}
+  .preset-item:hover{background:var(--hover-bg,rgba(255,255,255,0.06))}
+  .preset-icon{width:14px;height:14px;flex-shrink:0;display:flex;align-items:center;justify-content:center}
+  .preset-icon svg{display:block;width:14px;height:14px}
+  .preset-info{display:flex;flex-direction:column;gap:2px;min-width:0;flex:1}
+  .preset-name{font-size:12px;font-weight:600;color:var(--text-color,#fff);transition:color 0.3s;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  .preset-cat-label{font-size:10px;color:var(--text-muted,rgba(255,255,255,0.5));transition:color 0.3s}
+
+  /* ─── RECENT CHIPS ─── */
+  .recent-lbl{font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.12em;color:var(--text-muted,rgba(255,255,255,0.6));margin-bottom:6px;transition:color 0.3s}
+  .recent-chip{display:flex;align-items:center;gap:7px;width:100%;border:1px solid var(--border-color,rgba(255,255,255,0.08));border-radius:6px;padding:8px 12px;background:var(--input-bg,rgba(255,255,255,0.05));cursor:pointer;transition:filter 0.15s;margin-bottom:4px}
+  .recent-chip:last-child{margin-bottom:0}
+  .recent-chip:hover{filter:brightness(1.1)}
+  .recent-chip-icon{width:13px;height:13px;flex-shrink:0;display:flex;align-items:center;justify-content:center}
+  .recent-chip-icon svg{width:13px;height:13px;display:block}
+  .recent-chip-label{flex:1;font-size:11.5px;font-weight:500;color:var(--text-color,#fff);transition:color 0.3s;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  .recent-chip-x{width:24px;height:24px;flex-shrink:0;background:none;border:none;cursor:pointer;display:flex;align-items:center;justify-content:center;color:var(--text-muted,rgba(255,255,255,0.5));border-radius:4px;padding:0;transition:color 0.15s;font-size:13px;line-height:1}
+  .recent-chip-x:hover{color:var(--text-color,#fff)}
+
+  /* ─── PRESET DELETE BUTTON ─── */
+  .preset-del{flex-shrink:0;width:20px;height:20px;background:none;border:none;cursor:pointer;display:flex;align-items:center;justify-content:center;color:var(--text-muted,rgba(255,255,255,0.35));border-radius:4px;padding:0;font-size:12px;line-height:1;transition:color 0.15s}
+  .preset-del:hover{color:var(--text-color,#fff)}
+
+  /* ─── SAVE AS PRESET PANEL ─── */
+  .sp-body{padding:14px;display:flex;flex-direction:column;gap:10px}
+  .sp-lbl{font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.12em;color:var(--text-muted,rgba(255,255,255,0.6));transition:color 0.3s}
+  .sp-url-info{display:flex;align-items:center;gap:8px;padding:8px 10px;border-radius:6px;background:var(--input-bg,rgba(255,255,255,0.05));border:1px solid var(--border-color,rgba(255,255,255,0.08))}
+  .sp-url-text{font-size:11px;color:var(--text-muted,rgba(255,255,255,0.6));white-space:nowrap;overflow:hidden;text-overflow:ellipsis;flex:1;transition:color 0.3s}
+  .sp-input{width:100%;height:34px;border-radius:6px;border:1px solid var(--input-border,rgba(255,255,255,0.15));background:var(--input-bg,rgba(255,255,255,0.06));padding:0 10px;font-family:'Inter',sans-serif;font-size:12px;color:var(--text-color,#fff);outline:none;transition:border-color 0.2s}
+  .sp-input:focus{border-color:var(--svc-accent,#1DB954)}
+  .sp-input::placeholder{color:var(--text-muted,rgba(255,255,255,0.4))}
+  .sp-error{font-size:10px;color:#ff6b6b;min-height:13px;font-weight:500;margin-top:-4px}
+  .sp-actions{display:flex;gap:8px}
+  .sp-btn-save{flex:1;padding:8px;border-radius:8px;border:none;background:var(--text-color,#fff);color:var(--card-bg,#191919);font-family:'Inter',sans-serif;font-size:12px;font-weight:600;cursor:pointer;transition:filter 0.15s}
+  .sp-btn-save:hover{filter:brightness(1.1)}
+  .sp-btn-cancel{flex:1;padding:8px;border-radius:8px;border:1px solid var(--border-color,rgba(255,255,255,0.15));background:none;color:var(--text-muted,rgba(255,255,255,0.6));font-family:'Inter',sans-serif;font-size:12px;font-weight:500;cursor:pointer;transition:all 0.15s}
+  .sp-btn-cancel:hover{background:var(--hover-bg,rgba(255,255,255,0.06));color:var(--text-color,#fff)}
 </style>
 </head>
 <body>
@@ -180,43 +218,30 @@ box-shadow:
         <button class="icon-btn" id="toggleBtn" style="display:none" title="Toggle view">
           <svg id="toggleIcon" viewBox="0 0 24 24"><path d="M3 6h18v2H3zm0 5h18v2H3zm0 5h18v2H3z"/></svg>
         </button>
+        <button class="icon-btn" id="savePresetBtn" style="display:none" title="Save as Preset">
+          <svg viewBox="0 0 24 24"><path d="M17 3H7c-1.1 0-1.99.9-1.99 2L5 21l7-3 7 3V5c0-1.1-.9-2-2-2zm0 15l-5-2.18L7 18V5h10v13z"/></svg>
+        </button>
+        <button class="icon-btn" id="presetsBtn" title="Focus Presets">
+          <svg viewBox="0 0 24 24"><path d="M12 3v10.55c-.59-.34-1.27-.55-2-.55-2.21 0-4 1.79-4 4s1.79 4 4 4 4-1.79 4-4V7h4V3h-6z"/></svg>
+        </button>
         <button class="icon-btn" id="gearBtn" style="display:none" title="Settings">
           <svg viewBox="0 0 24 24"><path d="M19.14 12.94c.04-.31.06-.63.06-.94 0-.31-.02-.63-.06-.94l2.03-1.58a.49.49 0 00.12-.61l-1.92-3.32a.49.49 0 00-.59-.22l-2.39.96a7.04 7.04 0 00-1.62-.94l-.36-2.54a.48.48 0 00-.48-.41h-3.84a.48.48 0 00-.48.41l-.36 2.54c-.59.24-1.13.57-1.62.94l-2.39-.96a.49.49 0 00-.59.22L2.74 8.87a.49.49 0 00.12.61l2.03 1.58c-.04.31-.06.63-.06.94 0 .31.02.63.06.94l-2.03 1.58a.49.49 0 00-.12.61l1.92 3.32c.12.22.37.29.59.22l2.39-.96c.5.38 1.03.7 1.62.94l.36 2.54c.05.24.26.41.48.41h3.84c.24 0 .44-.17.48-.41l.36-2.54c.59-.24 1.13-.57 1.62-.94l2.39.96c.22.08.47 0 .59-.22l1.92-3.32a.49.49 0 00-.12-.61l-2.03-1.58zM12 15.6A3.6 3.6 0 1112 8.4a3.6 3.6 0 010 7.2z"/></svg>
         </button>
       </div>
     </div>
 
-    <!-- SERVICE SELECTION -->
-    <div class="screen" id="svc-screen">
-      <div class="svc-wrap">
-        <div class="svc-title">Choose your music service</div>
-        <div class="svc-cards">
-          <div class="svc-card" id="card-spotify" data-svc="spotify">
-            <div class="svc-icon">
-              <svg viewBox="0 0 24 24" fill="#1DB954"><path d="M12 0C5.4 0 0 5.4 0 12s5.4 12 12 12 12-5.4 12-12S18.66 0 12 0zm5.521 17.34c-.24.359-.66.48-1.021.24-2.82-1.74-6.36-2.101-10.561-1.141-.418.122-.779-.179-.899-.539-.12-.421.18-.78.54-.9 4.56-1.021 8.52-.6 11.64 1.32.42.18.479.659.301 1.02zm1.44-3.3c-.301.42-.841.6-1.262.3-3.239-1.98-8.159-2.58-11.939-1.38-.479.12-1.02-.12-1.14-.6-.12-.48.12-1.021.6-1.141C9.6 9.9 15 10.561 18.72 12.84c.361.181.54.78.241 1.2zm.12-3.36C15.24 8.4 8.82 8.16 5.16 9.301c-.6.179-1.2-.181-1.38-.721-.18-.601.18-1.2.72-1.381 4.26-1.26 11.28-1.02 15.721 1.621.539.3.719 1.02.42 1.56-.301.42-1.02.599-1.561.3z"/></svg>
-            </div>
-            <div class="svc-card-name">Spotify</div>
-            <div class="svc-card-desc">Playlists, albums, tracks &amp; podcasts</div>
-          </div>
-          <div class="svc-card" id="card-yt" data-svc="youtube">
-            <div class="svc-icon">
-              <svg viewBox="0 0 24 24"><path fill="#FF0000" d="M23.498 6.186a3.016 3.016 0 00-2.122-2.136C19.505 3.545 12 3.545 12 3.545s-7.505 0-9.377.505A3.017 3.017 0 00.502 6.186C0 8.07 0 12 0 12s0 3.93.502 5.814a3.016 3.016 0 002.122 2.136c1.871.505 9.376.505 9.376.505s7.505 0 9.377-.505a3.015 3.015 0 002.122-2.136C24 15.93 24 12 24 12s0-3.93-.502-5.814z"/><polygon fill="#fff" points="9.545,15.568 15.818,12 9.545,8.432"/></svg>
-            </div>
-            <div class="svc-card-name">YouTube Music</div>
-            <div class="svc-card-desc">YouTube playlists, videos &amp; mixes</div>
-          </div>
-        </div>
-      </div>
-    </div>
-
     <!-- URL INPUT -->
     <div class="screen" id="url-screen">
       <div class="url-wrap">
-        <div class="url-icon" id="urlIcon">🎵</div>
+        <div class="url-icon">🎵</div>
         <div class="url-title">Add Your Study Soundtrack</div>
-        <div class="url-sub" id="urlSub">Paste your Spotify playlist, album, or track link.</div>
-        <input class="url-input" id="urlInput" placeholder="Paste link here..." spellcheck="false">
+        <div class="url-sub">Supports Spotify playlists, albums, tracks and YouTube Music links.</div>
+        <input class="url-input" id="urlInput" placeholder="Paste Spotify or YouTube link..." spellcheck="false">
         <div class="url-error" id="urlError"></div>
+        <div id="recentSection" style="display:none;width:100%;max-width:300px">
+          <div class="recent-lbl">Recent</div>
+          <div id="recentList"></div>
+        </div>
         <button class="url-btn" id="urlBtn">Save</button>
       </div>
     </div>
@@ -231,6 +256,37 @@ box-shadow:
       <iframe id="ytFrame" src="" allow="autoplay; clipboard-write; encrypted-media; fullscreen; picture-in-picture" loading="lazy"></iframe>
     </div>
 
+    <!-- PRESETS PANEL -->
+    <div class="presets-panel" id="presetsPanel">
+      <div class="presets-hd">
+        <span class="presets-title">Focus Presets</span>
+        <button class="presets-close" id="presetsClose">✕</button>
+      </div>
+      <div class="presets-body" id="presetsBody"></div>
+    </div>
+
+    <!-- SAVE AS PRESET PANEL -->
+    <div class="presets-panel" id="savePresetPanel">
+      <div class="presets-hd">
+        <span class="presets-title">Save as Preset</span>
+        <button class="presets-close" id="savePresetClose">✕</button>
+      </div>
+      <div class="sp-body">
+        <div class="sp-lbl">Current Link</div>
+        <div class="sp-url-info">
+          <div class="preset-icon" id="spUrlIcon"></div>
+          <div class="sp-url-text" id="spUrlText"></div>
+        </div>
+        <div class="sp-lbl">Preset Name</div>
+        <input class="sp-input" id="spNameInput" placeholder="e.g. Morning Lo-Fi" spellcheck="false">
+        <div class="sp-error" id="spError"></div>
+        <div class="sp-actions">
+          <button class="sp-btn-cancel" id="spCancel">Cancel</button>
+          <button class="sp-btn-save" id="spSave">Save</button>
+        </div>
+      </div>
+    </div>
+
   </div>
 </div>
 
@@ -241,8 +297,10 @@ box-shadow:
 
   <div class="lbl">Theme</div>
   <div class="tg" id="gTheme">
-    <button class="tb" data-v="light">Light</button>
+    <button class="tb" data-v="minimal">Minimal</button>
     <button class="tb on" data-v="dark">Dark</button>
+    <button class="tb" data-v="oled">OLED</button>
+    <button class="tb" data-v="mono">Mono</button>
   </div>
   <div class="sep"></div>
 
@@ -255,7 +313,14 @@ box-shadow:
   </div>
   <div class="sep"></div>
 
-  <div class="lbl" id="popUrlLbl">Spotify Link</div>
+  <div class="lbl">Ambient Glow</div>
+  <div class="tg" id="gGlow">
+    <button class="tb on" data-v="false">Off</button>
+    <button class="tb" data-v="true">On</button>
+  </div>
+  <div class="sep"></div>
+
+  <div class="lbl">Link</div>
   <div class="pop-input-row">
     <input class="pop-input" id="popInput" placeholder="Paste link here" spellcheck="false">
     <button class="pop-apply" id="popApply">Apply</button>
@@ -271,7 +336,7 @@ box-shadow:
 
   <div class="sep"></div>
   <div class="lbl">Service</div>
-  <button class="svc-sw-btn" id="switchSvcBtn">Switch to YouTube Music</button>
+  <button class="svc-sw-btn" id="switchSvcBtn">Change link</button>
 
   <div class="rst" id="rstBtn">Reset to defaults</div>
   <div class="rst-confirm" id="rstConfirm">
@@ -282,7 +347,7 @@ box-shadow:
 </div>
 
 <script>
-const DEF={theme:'dark',zoom:100,service:'',spotifyUrl:'',ytUrl:'',spotifyView:'full',ytView:'full'};
+const DEF={theme:'dark',zoom:100,glow:false,service:'',spotifyUrl:'',ytUrl:'',spotifyView:'full',recentLinks:[],customPresets:[],deletedPresets:[]};
 let S={...DEF};
 
 const INSTANCE_ID = new URLSearchParams(window.location.search).get('instance') || 'default';
@@ -321,39 +386,34 @@ const YT_ICON=`<svg viewBox="0 0 24 24"><path fill="#FF0000" d="M23.498 6.186a3.
 const NOTE_ICON=`<svg viewBox="0 0 24 24" fill="rgba(255,255,255,0.5)"><path d="M12 3v10.55c-.59-.34-1.27-.55-2-.55-2.21 0-4 1.79-4 4s1.79 4 4 4 4-1.79 4-4V7h4V3h-6z"/></svg>`;
 
 // ─── THEME ─────────────────────────────────────────────────────────────────────
+const THEMES={
+  dark:    {cb:'#191919',  tc:'#fff',    tm:'rgba(255,255,255,0.6)',  bc:'rgba(255,255,255,0.08)', hb:'rgba(255,255,255,0.1)',  ib:'rgba(255,255,255,0.05)', ibr:'rgba(255,255,255,0.15)', pb:'#191919',    pop:'pop-dark'},
+  oled:    {cb:'#000000',  tc:'#ffffff', tm:'rgba(255,255,255,0.5)',  bc:'rgba(255,255,255,0.06)', hb:'rgba(255,255,255,0.08)', ib:'rgba(255,255,255,0.04)', ibr:'rgba(255,255,255,0.12)', pb:'#000000',    pop:'pop-dark'},
+  minimal: {cb:'#f8f8f8',  tc:'#111111', tm:'rgba(0,0,0,0.45)',      bc:'rgba(0,0,0,0.06)',       hb:'rgba(0,0,0,0.04)',       ib:'rgba(0,0,0,0.03)',        ibr:'rgba(0,0,0,0.10)',       pb:'transparent',pop:'pop-light'},
+  mono:    {cb:'#2b2b2b',  tc:'#e0e0e0', tm:'rgba(255,255,255,0.45)',bc:'rgba(255,255,255,0.07)', hb:'rgba(255,255,255,0.08)', ib:'rgba(255,255,255,0.05)', ibr:'rgba(255,255,255,0.12)', pb:'transparent',pop:'pop-dark'},
+};
+
 function applyTheme(){
   const r=document.documentElement.style;
-  if(S.theme==='dark'){
-    r.setProperty('--card-bg','#191919');
-    r.setProperty('--text-color','#fff');
-    r.setProperty('--text-muted','rgba(255,255,255,0.6)');
-    r.setProperty('--border-color','rgba(255,255,255,0.08)');
-    r.setProperty('--hover-bg','rgba(255,255,255,0.1)');
-    r.setProperty('--input-bg','rgba(255,255,255,0.05)');
-    r.setProperty('--input-border','rgba(255,255,255,0.15)');
-    r.setProperty('--bar-bg','rgba(255,255,255,0.15)');
-    r.setProperty('--art-bg','#111');
-  }else{
-    r.setProperty('--card-bg','#ffffff');
-    r.setProperty('--text-color','#1a1a1a');
-    r.setProperty('--text-muted','rgba(0,0,0,0.55)');
-    r.setProperty('--border-color','rgba(0,0,0,0.08)');
-    r.setProperty('--hover-bg','rgba(0,0,0,0.06)');
-    r.setProperty('--input-bg','rgba(0,0,0,0.04)');
-    r.setProperty('--input-border','rgba(0,0,0,0.12)');
-    r.setProperty('--bar-bg','rgba(0,0,0,0.15)');
-    r.setProperty('--art-bg','#f0f0f0');
-  }
-  // Service accent (drives input focus + apply button + URL btn)
-  r.setProperty('--page-bg',S.theme==='dark'?'#191919':'#ffffff');
+  const t=THEMES[S.theme]||THEMES.dark;
+  r.setProperty('--card-bg',t.cb);
+  r.setProperty('--text-color',t.tc);
+  r.setProperty('--text-muted',t.tm);
+  r.setProperty('--border-color',t.bc);
+  r.setProperty('--hover-bg',t.hb);
+  r.setProperty('--input-bg',t.ib);
+  r.setProperty('--input-border',t.ibr);
+  r.setProperty('--page-bg',t.pb);
   r.setProperty('--svc-accent',S.service==='youtube'?'#FF0000':'#1DB954');
   const p=document.getElementById('pop');
   p.classList.remove('pop-light','pop-dark');
-  p.classList.add(S.theme==='dark'?'pop-dark':'pop-light');
+  p.classList.add(t.pop);
 }
 
-function applyZoom(){document.getElementById('wrapper').style.transform=`scale(${S.zoom/100})`;}
-function applyAll(){applyTheme();applyZoom();}
+const wrapper=document.getElementById('wrapper');
+function applyZoom(){wrapper.style.transform=`scale(${S.zoom/100})`;}
+function applyGlow(){wrapper.classList.toggle('glow-active',S.glow===true||S.glow==='true');}
+function applyAll(){applyTheme();applyZoom();applyGlow();}
 
 // ─── HEADER ────────────────────────────────────────────────────────────────────
 function updateHeader(){
@@ -361,28 +421,37 @@ function updateHeader(){
   const title=document.getElementById('hdrTitle');
   const backBtn=document.getElementById('backBtn');
   const toggleBtn=document.getElementById('toggleBtn');
-  const gearBtn=document.getElementById('gearBtn');
+  const savePresetBtn=document.getElementById('savePresetBtn');
 
-  const hasService=!!S.service;
   const hasUrl=S.service==='spotify'?!!S.spotifyUrl:S.service==='youtube'?!!S.ytUrl:false;
 
-  if(!hasService){
+  if(!hasUrl){
     icon.innerHTML=NOTE_ICON;title.textContent='Music Player';
-    backBtn.style.display='none';toggleBtn.style.display='none';gearBtn.style.display='none';
-  }else if(!hasUrl){
-    icon.innerHTML=S.service==='spotify'?SPOTIFY_ICON:YT_ICON;
-    title.textContent=S.service==='spotify'?'Spotify':'YouTube Music';
-    backBtn.style.display='';toggleBtn.style.display='none';gearBtn.style.display='';
+    backBtn.style.display='none';toggleBtn.style.display='none';savePresetBtn.style.display='none';gearBtn.style.display='';
   }else if(S.service==='spotify'){
     const parsed=parseSpotifyUrl(S.spotifyUrl);
     icon.innerHTML=SPOTIFY_ICON;
     title.textContent=parsed?(SPOTIFY_LABELS[parsed.type]||'Spotify'):'Spotify';
-    backBtn.style.display='none';toggleBtn.style.display='';gearBtn.style.display='';
+    backBtn.style.display='';toggleBtn.style.display='';savePresetBtn.style.display='';gearBtn.style.display='';
     updateToggleIcon();
   }else{
     icon.innerHTML=YT_ICON;title.textContent='Now Playing';
-    backBtn.style.display='none';toggleBtn.style.display='';gearBtn.style.display='';
+    backBtn.style.display='';toggleBtn.style.display='none';savePresetBtn.style.display='';gearBtn.style.display='';
   }
+  updateSavePresetBtn();
+}
+
+function updateSavePresetBtn(){
+  const url=currentUrl();
+  if(!url)return;
+  const btn=document.getElementById('savePresetBtn');
+  const deletedSet=Array.isArray(S.deletedPresets)?S.deletedPresets:[];
+  const isSaved=(Array.isArray(S.customPresets)&&S.customPresets.some(p=>p.url===url))
+              ||PRESETS.some(p=>p.url===url&&!deletedSet.includes(p.url));
+  btn.innerHTML=isSaved
+    ?'<svg viewBox="0 0 24 24"><path d="M17 3H7c-1.1 0-2 .9-2 2v16l7-3 7 3V5c0-1.1-.9-2-2-2z"/></svg>'
+    :'<svg viewBox="0 0 24 24"><path d="M17 3H7c-1.1 0-1.99.9-1.99 2L5 21l7-3 7 3V5c0-1.1-.9-2-2-2zm0 15l-5-2.18L7 18V5h10v13z"/></svg>';
+  btn.title=isSaved?'Saved as Preset':'Save as Preset';
 }
 
 // ─── ROUTING ───────────────────────────────────────────────────────────────────
@@ -392,68 +461,53 @@ function setActive(ids,activeId){
 
 function route(){
   applyAll();
-  const SCREENS=['svc-screen','url-screen'];
+  const SCREENS=['url-screen'];
   const PLAYERS=['spotify-player','yt-player'];
 
-  if(!S.service){
-    setActive(SCREENS,'svc-screen');setActive(PLAYERS,null);
-  }else if(S.service==='spotify'){
-    if(S.spotifyUrl){
-      setActive(SCREENS,null);setActive(PLAYERS,'spotify-player');
-      loadSpotifyPlayer();
-    }else{
-      setupUrlScreen('spotify');
-      setActive(SCREENS,'url-screen');setActive(PLAYERS,null);
-    }
-  }else{ // youtube
-    if(S.ytUrl){
-      setActive(SCREENS,null);setActive(PLAYERS,'yt-player');
-      loadYTPlayer();
-    }else{
-      setupUrlScreen('youtube');
-      setActive(SCREENS,'url-screen');setActive(PLAYERS,null);
-    }
+  if(S.service==='spotify'&&S.spotifyUrl){
+    setActive(SCREENS,null);setActive(PLAYERS,'spotify-player');
+    loadSpotifyPlayer();
+  }else if(S.service==='youtube'&&S.ytUrl){
+    setActive(SCREENS,null);setActive(PLAYERS,'yt-player');
+    loadYTPlayer();
+  }else{
+    document.getElementById('urlInput').value='';
+    document.getElementById('urlError').textContent='';
+    setActive(SCREENS,'url-screen');setActive(PLAYERS,null);
+    renderRecents();
   }
   updateHeader();updatePopupContent();
 }
 
-// ─── SERVICE SELECTION ─────────────────────────────────────────────────────────
-document.querySelectorAll('.svc-card').forEach(card=>{
-  card.addEventListener('click',()=>{S.service=card.dataset.svc;save();route();
-adaptivePlayerMode();});
-});
+// ─── HELPERS ───────────────────────────────────────────────────────────────────
+function currentUrl(){return S.service==='spotify'?S.spotifyUrl:S.ytUrl;}
+function svcIcon(service){return service==='spotify'?SPOTIFY_ICON:YT_ICON;}
 
-// ─── URL INPUT ─────────────────────────────────────────────────────────────────
-function setupUrlScreen(svc){
-  document.getElementById('urlIcon').textContent=svc==='spotify'?'🎵':'▶️';
-  document.getElementById('urlSub').textContent=svc==='spotify'
-    ?'Paste your Spotify playlist, album, track, or podcast link.'
-    :'Paste your YouTube or YouTube Music playlist or video link.';
-  document.getElementById('urlInput').placeholder=svc==='spotify'
-    ?'https://open.spotify.com/playlist/...'
-    :'https://music.youtube.com/playlist?list=...';
-  document.getElementById('urlInput').value='';
-  document.getElementById('urlError').textContent='';
+function applyUrl(trimmed,errorEl){
+  const spotify=parseSpotifyUrl(trimmed);
+  if(spotify){S.service='spotify';S.spotifyUrl=trimmed;errorEl.textContent='';pushRecent(trimmed,'spotify');return true;}
+  const yt=parseYTUrl(trimmed);
+  if(yt){S.service='youtube';S.ytUrl=trimmed;errorEl.textContent='';pushRecent(trimmed,'youtube');return true;}
+  errorEl.textContent='Not a valid Spotify or YouTube link.';return false;
 }
 
+// ─── URL INPUT ─────────────────────────────────────────────────────────────────
 function trySaveUrlFromInput(value,errorEl){
   const trimmed=(value||'').trim();
   if(!trimmed){errorEl.textContent='Please paste a link.';return false;}
-  if(S.service==='spotify'){
-    if(!parseSpotifyUrl(trimmed)){errorEl.textContent='Not a valid Spotify link.';return false;}
-    S.spotifyUrl=trimmed;
-  }else{
-    if(!parseYTUrl(trimmed)){errorEl.textContent='Not a valid YouTube link.';return false;}
-    S.ytUrl=trimmed;
-  }
-  errorEl.textContent='';save();route();return true;
+  if(applyUrl(trimmed,errorEl)){route();return true;}
+  return false;
 }
 
 document.getElementById('urlBtn').addEventListener('click',()=>trySaveUrlFromInput(document.getElementById('urlInput').value,document.getElementById('urlError')));
 document.getElementById('urlInput').addEventListener('keydown',e=>{if(e.key==='Enter')trySaveUrlFromInput(document.getElementById('urlInput').value,document.getElementById('urlError'));});
 document.getElementById('urlInput').addEventListener('input',()=>{document.getElementById('urlError').textContent='';});
 
-document.getElementById('backBtn').addEventListener('click',()=>{S.service='';save();route();});
+document.getElementById('backBtn').addEventListener('click',()=>{
+  if(S.service==='spotify')S.spotifyUrl='';
+  else if(S.service==='youtube')S.ytUrl='';
+  S.service='';save();route();
+});
 
 // ─── SPOTIFY PLAYER ────────────────────────────────────────────────────────────
 function applySpotifyView(){
@@ -462,11 +516,6 @@ function applySpotifyView(){
   player.classList.add(S.spotifyView);
 }
 
-function applyYTView(){
-  const player=document.getElementById('yt-player');
-  player.classList.remove('full','compact');
-  player.classList.add(S.ytView);
-}
 function loadSpotifyPlayer(){
   const parsed=parseSpotifyUrl(S.spotifyUrl);if(!parsed)return;
   const frame=document.getElementById('spotifyFrame');
@@ -478,17 +527,7 @@ function loadSpotifyPlayer(){
 function updateToggleIcon(){
   const icon=document.getElementById('toggleIcon');
   const btn=document.getElementById('toggleBtn');
-
-  let mode='full';
-
-  if(S.service==='spotify'){
-    mode=S.spotifyView;
-  }
-
-  if(S.service==='youtube'){
-    mode=S.ytView;
-  }
-
+  const mode=S.spotifyView;
   if(mode==='full'){
     icon.innerHTML='<path d="M3 11h18v2H3z"/>';
     btn.title='Compact mode';
@@ -499,20 +538,13 @@ function updateToggleIcon(){
 }
 
 document.getElementById('toggleBtn').addEventListener('click',()=>{
-
   if(S.service==='spotify'){
     S.spotifyView=S.spotifyView==='full'?'compact':'full';
     applySpotifyView();
     syncTg('gView',S.spotifyView);
+    save();
+    updateToggleIcon();
   }
-
-  if(S.service==='youtube'){
-    S.ytView=S.ytView==='full'?'compact':'full';
-    applyYTView();
-  }
-
-  save();
-  updateToggleIcon();
 });
 
 // ─── YOUTUBE PLAYER (native embed) ─────────────────────────────────────────────
@@ -528,25 +560,19 @@ function loadYTPlayer(){
   const src=buildYTEmbedUrl(parsed);if(!src)return;
   const frame=document.getElementById('ytFrame');
   if(frame.dataset.src!==src){frame.src=src;frame.dataset.src=src;}
-  applyYTView();
 }
 
 // ─── SETTINGS POPUP ────────────────────────────────────────────────────────────
 const gearBtn=document.getElementById('gearBtn'),pop=document.getElementById('pop'),ov=document.getElementById('ov');
 
 function updatePopupContent(){
-  document.getElementById('popUrlLbl').textContent=S.service==='youtube'?'YouTube Music Link':'Spotify Link';
   document.querySelectorAll('.spotify-only').forEach(el=>el.classList.toggle('show',S.service==='spotify'));
-  const swBtn=document.getElementById('switchSvcBtn');
-  if(S.service==='spotify')swBtn.textContent='Switch to YouTube Music';
-  else if(S.service==='youtube')swBtn.textContent='Switch to Spotify';
-  else swBtn.textContent='Choose service';
 }
 
 function openPop(){
   pop.classList.add('open');ov.classList.add('open');
-  document.getElementById('popInput').value=(S.service==='spotify'?S.spotifyUrl:S.ytUrl)||'';
-  document.getElementById('popInput').placeholder=S.service==='youtube'?'https://music.youtube.com/...':'https://open.spotify.com/...';
+  document.getElementById('popInput').value=currentUrl()||'';
+  document.getElementById('popInput').placeholder='Paste Spotify or YouTube link...';
   document.getElementById('popError').textContent='';
   updatePopupContent();
 }
@@ -558,21 +584,15 @@ document.getElementById('popApply').addEventListener('click',()=>{
   const val=document.getElementById('popInput').value.trim();
   const errorEl=document.getElementById('popError');
   if(!val){errorEl.textContent='Please paste a link.';return;}
-  if(S.service==='spotify'){
-    if(!parseSpotifyUrl(val)){errorEl.textContent='Not a valid Spotify link.';return;}
-    S.spotifyUrl=val;
-  }else{
-    if(!parseYTUrl(val)){errorEl.textContent='Not a valid YouTube link.';return;}
-    S.ytUrl=val;
-  }
-  errorEl.textContent='';save();closePop();route();
+  if(applyUrl(val,errorEl)){closePop();route();}
 });
 document.getElementById('popInput').addEventListener('keydown',e=>{if(e.key==='Enter')document.getElementById('popApply').click();});
 document.getElementById('popInput').addEventListener('input',()=>{document.getElementById('popError').textContent='';});
 
 document.getElementById('switchSvcBtn').addEventListener('click',()=>{
-  S.service=S.service==='spotify'?'youtube':S.service==='youtube'?'spotify':'';
-  save();closePop();route();
+  if(S.service==='spotify')S.spotifyUrl='';
+  else if(S.service==='youtube')S.ytUrl='';
+  S.service='';save();closePop();route();
 });
 
 // ─── TOGGLES ───────────────────────────────────────────────────────────────────
@@ -583,6 +603,7 @@ setupTg('gView','spotifyView',()=>{
   applySpotifyView();
   updateToggleIcon();
 });
+setupTg('gGlow','glow',applyGlow);
 
 // Zoom slider
 const zSlider=document.getElementById('zSlider'),zLabel=document.getElementById('zLabel');
@@ -607,36 +628,191 @@ document.getElementById('rstYes').addEventListener('click',()=>{
   const yf=document.getElementById('ytFrame');yf.src='';yf.dataset.src='';
   S={...DEF};save();
   hideResetConfirm();closePop();
-  syncTg('gTheme',S.theme);syncTg('gView',S.spotifyView);
+  syncTg('gTheme',S.theme);syncTg('gView',S.spotifyView);syncTg('gGlow',String(S.glow));
   zSlider.value=S.zoom;zLabel.textContent=S.zoom+'%';
   applyAll();
   route();
 });
 
-
-function adaptivePlayerMode(){
-  const h=window.innerHeight;
-
-  if(S.service==='spotify'){
-    S.spotifyView = h < 320 ? 'compact' : 'full';
-    applySpotifyView();
-  }
-
-  if(S.service==='youtube'){
-    S.ytView = h < 320 ? 'compact' : 'full';
-    applyYTView();
-  }
-
-  updateToggleIcon();
+// ─── RECENT LINKS ──────────────────────────────────────────────────────────────
+function makeRecentLabel(url,service){
+  if(service==='spotify'){const p=parseSpotifyUrl(url);return p?'Spotify '+(SPOTIFY_LABELS[p.type]||'Link'):'Spotify Link';}
+  if(service==='youtube'){const p=parseYTUrl(url);return p?(p.listId?'YouTube Playlist':'YouTube Video'):'YouTube Link';}
+  return 'Link';
 }
 
-window.addEventListener('resize',adaptivePlayerMode);
+function pushRecent(url,service){
+  if(!Array.isArray(S.recentLinks))S.recentLinks=[];
+  S.recentLinks=S.recentLinks.filter(r=>r.url!==url);
+  S.recentLinks.unshift({url,service,label:makeRecentLabel(url,service)});
+  if(S.recentLinks.length>5)S.recentLinks.length=5;
+  save();
+}
+
+function renderRecents(){
+  const section=document.getElementById('recentSection');
+  const list=document.getElementById('recentList');
+  const links=Array.isArray(S.recentLinks)?S.recentLinks:[];
+  if(!links.length){section.style.display='none';return;}
+  section.style.display='';
+  list.innerHTML=links.map((r,i)=>{
+    const icon=svcIcon(r.service);
+    return `<div class="recent-chip" data-idx="${i}"><div class="recent-chip-icon">${icon}</div><div class="recent-chip-label">${r.label}</div><button class="recent-chip-x" data-del="${i}" title="Remove">✕</button></div>`;
+  }).join('');
+  list.querySelectorAll('.recent-chip').forEach(chip=>{
+    chip.addEventListener('click',e=>{
+      if(e.target.closest('[data-del]'))return;
+      const r=S.recentLinks[+chip.dataset.idx];
+      if(!r)return;
+      S.service=r.service;
+      if(r.service==='spotify')S.spotifyUrl=r.url;
+      else S.ytUrl=r.url;
+      save();route();
+    });
+  });
+  list.querySelectorAll('[data-del]').forEach(btn=>{
+    btn.addEventListener('click',e=>{
+      e.stopPropagation();
+      S.recentLinks.splice(+btn.dataset.del,1);
+      save();renderRecents();
+    });
+  });
+}
+
+// ─── PRESETS PANEL ─────────────────────────────────────────────────────────────
+const PRESETS=[
+  {category:'Lo-Fi Study',name:'Lofi Beats',service:'spotify',url:'https://open.spotify.com/playlist/37i9dQZF1DWWQRwui0ExPn'},
+  {category:'Lo-Fi Study',name:'Lofi Cafe',service:'spotify',url:'https://open.spotify.com/playlist/37i9dQZF1DX0SM0LYsmbcd'},
+  {category:'Deep Focus',name:'Deep Focus',service:'spotify',url:'https://open.spotify.com/playlist/37i9dQZF1DWZeKCadgRdKQ'},
+  {category:'Deep Focus',name:'Peaceful Piano',service:'spotify',url:'https://open.spotify.com/playlist/37i9dQZF1DX4sWSpwq3LiO'},
+  {category:'Ambient Sounds',name:'Brown Noise',service:'youtube',url:'https://www.youtube.com/watch?v=RqzGzwTY-6w'},
+  {category:'Ambient Sounds',name:'Rain Sounds',service:'youtube',url:'https://www.youtube.com/watch?v=yIQd2Ya0Ziw'},
+  {category:'Ambient Sounds',name:'Fireplace',service:'youtube',url:'https://www.youtube.com/watch?v=L1YmKPJPKKE'},
+  {category:'Jazz & Cafe',name:'Jazz Classics',service:'spotify',url:'https://open.spotify.com/playlist/37i9dQZF1DXbITWG1ZJKYt'},
+  {category:'Jazz & Cafe',name:'Coffee House',service:'spotify',url:'https://open.spotify.com/playlist/37i9dQZF1DX6ziVCJnEm59'}
+];
+
+function buildPresets(){
+  if(!Array.isArray(S.customPresets))S.customPresets=[];
+  if(!Array.isArray(S.deletedPresets))S.deletedPresets=[];
+  let html='';
+
+  if(S.customPresets.length>0){
+    html+=`<div class="presets-cat">My Presets</div>`;
+    S.customPresets.forEach((p,i)=>{
+      const icon=svcIcon(p.service);
+      const svcLabel=p.service==='spotify'?'Spotify':'YouTube';
+      html+=`<div class="preset-item" data-type="custom" data-idx="${i}"><div class="preset-icon">${icon}</div><div class="preset-info"><div class="preset-name">${p.name}</div><div class="preset-cat-label">${svcLabel}</div></div><button class="preset-del" data-type="custom" data-idx="${i}" title="Remove">✕</button></div>`;
+    });
+  }
+
+  let lastCat='';
+  PRESETS.forEach((p,i)=>{
+    if(S.deletedPresets.includes(p.url))return;
+    if(p.category!==lastCat){html+=`<div class="presets-cat">${p.category}</div>`;lastCat=p.category;}
+    const icon=svcIcon(p.service);
+    html+=`<div class="preset-item" data-type="builtin" data-idx="${i}"><div class="preset-icon">${icon}</div><div class="preset-info"><div class="preset-name">${p.name}</div><div class="preset-cat-label">${p.category}</div></div><button class="preset-del" data-type="builtin" data-idx="${i}" title="Remove">✕</button></div>`;
+  });
+
+  const body=document.getElementById('presetsBody');
+  body.innerHTML=html;
+
+  body.querySelectorAll('.preset-item').forEach(el=>{
+    el.addEventListener('click',e=>{
+      if(e.target.closest('.preset-del'))return;
+      const type=el.dataset.type;
+      const idx=+el.dataset.idx;
+      const p=type==='custom'?S.customPresets[idx]:PRESETS[idx];
+      if(!p)return;
+      S.service=p.service;
+      if(p.service==='spotify')S.spotifyUrl=p.url;
+      else S.ytUrl=p.url;
+      save();closePresets();route();
+    });
+  });
+
+  body.querySelectorAll('.preset-del').forEach(btn=>{
+    btn.addEventListener('click',e=>{
+      e.stopPropagation();
+      const type=btn.dataset.type;
+      const idx=+btn.dataset.idx;
+      if(type==='custom'){
+        S.customPresets.splice(idx,1);
+      }else{
+        const url=PRESETS[idx].url;
+        if(!S.deletedPresets.includes(url))S.deletedPresets.push(url);
+      }
+      save();buildPresets();updateSavePresetBtn();
+    });
+  });
+}
+
+const presetsPanel=document.getElementById('presetsPanel');
+function openPresets(){closeSavePreset();presetsPanel.classList.add('open');}
+function closePresets(){presetsPanel.classList.remove('open');}
+document.getElementById('presetsBtn').addEventListener('click',openPresets);
+document.getElementById('presetsClose').addEventListener('click',closePresets);
+
+// ─── SAVE AS PRESET ────────────────────────────────────────────────────────────
+let savePresetTimer=null;
+
+function openSavePreset(){
+  closePresets();
+  const url=currentUrl();
+  document.getElementById('spUrlIcon').innerHTML=svcIcon(S.service);
+  document.getElementById('spUrlText').textContent=url;
+  document.getElementById('spNameInput').value='';
+  document.getElementById('spError').textContent='';
+  document.getElementById('savePresetPanel').classList.add('open');
+  setTimeout(()=>document.getElementById('spNameInput').focus(),120);
+}
+
+function closeSavePreset(){
+  document.getElementById('savePresetPanel').classList.remove('open');
+}
+
+function flashSaveSuccess(){
+  const btn=document.getElementById('savePresetBtn');
+  btn.innerHTML='<svg viewBox="0 0 24 24"><path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"/></svg>';
+  btn.title='Saved!';
+  clearTimeout(savePresetTimer);
+  savePresetTimer=setTimeout(()=>updateSavePresetBtn(),1500);
+}
+
+document.getElementById('savePresetBtn').addEventListener('click',openSavePreset);
+document.getElementById('savePresetClose').addEventListener('click',closeSavePreset);
+document.getElementById('spCancel').addEventListener('click',closeSavePreset);
+
+document.getElementById('spSave').addEventListener('click',()=>{
+  const name=document.getElementById('spNameInput').value.trim();
+  const errorEl=document.getElementById('spError');
+  if(!name){errorEl.textContent='Please enter a name.';return;}
+  if(!Array.isArray(S.customPresets))S.customPresets=[];
+  const url=currentUrl();
+  S.customPresets.unshift({name,service:S.service,url});
+  save();
+  buildPresets();
+  closeSavePreset();
+  flashSaveSuccess();
+});
+
+document.getElementById('spNameInput').addEventListener('keydown',e=>{if(e.key==='Enter')document.getElementById('spSave').click();});
+document.getElementById('spNameInput').addEventListener('input',()=>{document.getElementById('spError').textContent='';});
+
+// ─── KEYBOARD SHORTCUTS ────────────────────────────────────────────────────────
+document.addEventListener('keydown',e=>{
+  if(e.key!=='Escape')return;
+  if(document.getElementById('savePresetPanel').classList.contains('open')){closeSavePreset();}
+  else if(presetsPanel.classList.contains('open')){closePresets();}
+  else if(pop.classList.contains('open')){closePop();}
+});
 
 // ─── INIT ──────────────────────────────────────────────────────────────────────
 load();
-syncTg('gTheme',S.theme);syncTg('gView',S.spotifyView);
+syncTg('gTheme',S.theme);syncTg('gView',S.spotifyView);syncTg('gGlow',String(S.glow));
 zSlider.value=S.zoom;zLabel.textContent=S.zoom+'%';
 applyAll();
+buildPresets();
 route();
 </script>
 </body>
