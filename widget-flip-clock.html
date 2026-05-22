@@ -236,7 +236,7 @@ function applyResponsive(){
   const colons=document.querySelectorAll('.colon');
   const tiles=document.querySelectorAll('.tile');
   const nums=document.querySelectorAll('.half .num,.flap .num');
-  const botNums=document.querySelectorAll('.half.bot .num');
+  const topNums=document.querySelectorAll('.half.top .num');
   if(med){
     $wrapper.style.gap='5px';
     $wrapper.style.padding='14px 18px';
@@ -246,14 +246,14 @@ function applyResponsive(){
     const f=FONT_MAP[S.font]||FONT_MAP['Anton'];
     const medSize=Math.round(parseFloat(f.size)*0.88)+'px';
     nums.forEach(n=>n.style.fontSize=medSize);
-    botNums.forEach(n=>n.style.top='-42px');
+    topNums.forEach(n=>n.style.top='-5px');
   }else{
     $wrapper.style.gap='';
     $wrapper.style.padding='';
     colons.forEach(c=>c.style.fontSize='');
     tiles.forEach(t=>{t.style.width='';t.style.height='';});
     nums.forEach(n=>n.style.fontSize='');
-    botNums.forEach(n=>n.style.top='');
+    topNums.forEach(n=>n.style.top='');
   }
   updateDate(new Date());
 }
