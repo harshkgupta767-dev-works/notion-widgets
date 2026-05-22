@@ -30,11 +30,11 @@
   .half.bot{bottom:0;border-radius:0 0 10px 10px;filter:brightness(0.9)}
   .half .num,.flap .num{position:absolute;left:0;width:100%;height:110px;line-height:110px;text-align:center;font-size:var(--digit-size,82px);font-weight:400;color:var(--time-text,#fff);pointer-events:none;letter-spacing:var(--digit-ls,0.02em);font-family:var(--digit-font,'Anton');text-shadow:2px 4px 6px rgba(0,0,0,0.35)}
   .half .num{transition:color 0.3s}
-  .half.top .num{top:0}.half.bot .num{top:-55px}
+  .half.top .num{top:4px}.half.bot .num{top:-51px}
   .flap{position:absolute;left:0;right:0;height:50%;overflow:hidden;z-index:5}
-  .flap-top{top:0;background:var(--tile-bg,#2a2a2a);border-radius:10px 10px 0 0;border-bottom:1px solid rgba(128,128,128,0.15);transform-origin:bottom center;animation:fd var(--flip-top-dur) var(--flip-top-ease) forwards}.flap-top .num{top:0}
+  .flap-top{top:0;background:var(--tile-bg,#2a2a2a);border-radius:10px 10px 0 0;border-bottom:1px solid rgba(128,128,128,0.15);transform-origin:bottom center;animation:fd var(--flip-top-dur) var(--flip-top-ease) forwards}.flap-top .num{top:4px}
   .flap-top::after{content:'';position:absolute;inset:0;z-index:1;pointer-events:none;animation:fds var(--flip-top-dur) var(--flip-top-ease) both}
-  .flap-bot{bottom:0;background:var(--tile-bg,#2a2a2a);filter:brightness(0.9);border-radius:0 0 10px 10px;transform-origin:top center;transform:rotateX(90deg);animation:fu var(--flip-bot-dur) var(--flip-bot-ease) var(--flip-bot-delay) forwards}.flap-bot .num{top:-55px}
+  .flap-bot{bottom:0;background:var(--tile-bg,#2a2a2a);filter:brightness(0.9);border-radius:0 0 10px 10px;transform-origin:top center;transform:rotateX(90deg);animation:fu var(--flip-bot-dur) var(--flip-bot-ease) var(--flip-bot-delay) forwards}.flap-bot .num{top:-51px}
   .flap-bot::after{content:'';position:absolute;inset:0;z-index:1;pointer-events:none;animation:fus var(--flip-bot-dur) var(--flip-bot-ease) var(--flip-bot-delay) both}
   @keyframes fd{0%{transform:rotateX(0)}100%{transform:rotateX(-90deg)}}
   @keyframes fu{0%{transform:rotateX(90deg)}83%{transform:rotateX(-3deg)}100%{transform:rotateX(0)}}
@@ -246,7 +246,7 @@ function applyResponsive(){
     const f=FONT_MAP[S.font]||FONT_MAP['Anton'];
     const medSize=Math.round(parseFloat(f.size)*0.88)+'px';
     nums.forEach(n=>n.style.fontSize=medSize);
-    botNums.forEach(n=>n.style.top='-46px');
+    botNums.forEach(n=>n.style.top='-42px');
   }else{
     $wrapper.style.gap='';
     $wrapper.style.padding='';
