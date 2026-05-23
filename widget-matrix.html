@@ -125,8 +125,7 @@ function parseColor(s){
 }
 
 const DEF={theme:'dark',charset:'latin',color:'#ffffff',speed:2,size:14,trail:5};
-const CGAP=8; // extra horizontal gap between columns (reduces stream count)
-const GAP=4;  // vertical gap between rows
+const GAP=4; // px gap between characters horizontally and vertically
 let S={...DEF};
 function load(){try{const d=localStorage.getItem('wmx2');if(d)S={...DEF,...JSON.parse(d)};}catch(e){}}
 function save(){try{localStorage.setItem('wmx2',JSON.stringify(S));}catch(e){}}
@@ -171,7 +170,7 @@ function streamLen(){
 
 function initGrid(){
   charW=measureCharW();
-  colStride=charW+CGAP;rowStride=S.size+GAP;
+  colStride=charW+GAP;rowStride=S.size+GAP;
   cols=Math.max(1,Math.floor(canvas.width/colStride));
   rows=Math.max(1,Math.floor(canvas.height/rowStride)+2);
 
