@@ -7,7 +7,7 @@
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@500;600;700&display=swap" rel="stylesheet">
 <style>
 *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
-html,body{width:100%;height:100%;overflow:hidden}
+html,body{width:100%;height:100%;margin:0;padding:0;overflow:hidden;background:transparent}
 canvas{display:block;width:100%;height:100%}
 .gear{position:fixed;top:8px;left:8px;width:28px;height:28px;background:rgba(0,0,0,0.4);border:1px solid rgba(255,255,255,0.1);border-radius:6px;cursor:pointer;display:flex;align-items:center;justify-content:center;z-index:10;opacity:0;transform:scale(0.8);transition:opacity 0.2s,transform 0.2s,background 0.2s;pointer-events:none}
 body:hover .gear,.gear.pin{opacity:0.65;transform:scale(1);pointer-events:auto}
@@ -242,9 +242,10 @@ function tick(){
   }
 }
 
+function applyTheme(){document.body.style.background=S.theme==='light'?'#f0f0f0':'#000000';}
+
 function draw(){
-  ctx.fillStyle=S.theme==='light'?'#f0f0f0':'#000000';
-  ctx.fillRect(0,0,canvas.width,canvas.height);
+  ctx.clearRect(0,0,canvas.width,canvas.height);
 
   const rgb=hexRgb(S.color);
   ctx.font='bold '+S.size+'px monospace';
@@ -287,7 +288,7 @@ document.getElementById('popX').addEventListener('click',closePop);
 
 document.getElementById('gTheme').addEventListener('click',e=>{
   const b=e.target.closest('.tb');if(!b)return;
-  S.theme=b.dataset.v;save();syncTg('gTheme',S.theme);
+  S.theme=b.dataset.v;save();syncTg('gTheme',S.theme);applyTheme();
 });
 document.getElementById('gCharset').addEventListener('click',e=>{
   const b=e.target.closest('.tb');if(!b)return;
@@ -334,7 +335,7 @@ function syncAll(){
 
 document.getElementById('rstBtn').addEventListener('click',()=>{S={...DEF};save();syncAll();restart();});
 
-load();applyUrl();syncAll();resize();restart();
+load();applyUrl();syncAll();applyTheme();resize();restart();
 </script>
 </body>
 </html>
