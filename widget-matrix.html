@@ -124,7 +124,7 @@ function parseColor(s){
   return null;
 }
 
-const DEF={theme:'dark',charset:'latin',color:'#ffffff',speed:5,size:13,trail:5};
+const DEF={theme:'dark',charset:'latin',color:'#ffffff',speed:5,size:15,trail:5};
 const GAP=4; // px gap between characters horizontally and vertically
 let S={...DEF};
 function load(){try{const d=localStorage.getItem('wmx2');if(d)S={...DEF,...JSON.parse(d)};}catch(e){}}
@@ -158,7 +158,7 @@ const PEAK=0.92;
 function rc(){const s=CHARSETS[S.charset]||CHARSETS.latin;return s[Math.random()*s.length|0];}
 function hexRgb(h){const m=(h||'').match(/^#?([0-9a-f]{6})/i);if(!m)return{r:255,g:255,b:255};const n=parseInt(m[1],16);return{r:(n>>16)&255,g:(n>>8)&255,b:n&255};}
 
-function measureCharW(){ctx.font=S.size+'px monospace';return Math.ceil(ctx.measureText('W').width);}
+function measureCharW(){ctx.font='bold '+S.size+'px monospace';return Math.ceil(ctx.measureText('W').width);}
 
 function resize(){canvas.width=window.innerWidth;canvas.height=window.innerHeight;initGrid();}
 
@@ -247,7 +247,7 @@ function draw(){
   ctx.fillRect(0,0,canvas.width,canvas.height);
 
   const rgb=hexRgb(S.color);
-  ctx.font=S.size+'px monospace';
+  ctx.font='bold '+S.size+'px monospace';
   ctx.textBaseline='top';
 
   for(let col=0;col<cols;col++){
