@@ -92,11 +92,11 @@ body:hover .gear,.gear.pin{opacity:0.65;transform:scale(1);pointer-events:auto}
   <div class="sp"></div>
 
   <div class="lb">Speed</div>
-  <div class="zr"><span class="zi">Slow</span><input type="range" class="zs" id="speedSl" min="1" max="10" step="1"><span class="zi r">Fast</span><span class="zl" id="speedLb"></span></div>
+  <div class="zr"><span class="zi">Slow</span><input type="range" class="zs" id="speedSl" min="1" max="3" step="0.5"><span class="zi r">Fast</span><span class="zl" id="speedLb"></span></div>
   <div class="sp"></div>
 
   <div class="lb">Font Size</div>
-  <div class="zr"><span class="zi">−</span><input type="range" class="zs" id="sizeSl" min="8" max="28" step="2"><span class="zi r">+</span><span class="zl" id="sizeLb"></span></div>
+  <div class="zr"><span class="zi">−</span><input type="range" class="zs" id="sizeSl" min="8" max="20" step="2"><span class="zi r">+</span><span class="zl" id="sizeLb"></span></div>
   <div class="sp"></div>
 
   <div class="lb">Trail Length</div>
@@ -124,8 +124,9 @@ function parseColor(s){
   return null;
 }
 
-const DEF={theme:'dark',charset:'latin',color:'#ffffff',speed:5,size:15,trail:5};
-const GAP=4; // px gap between characters horizontally and vertically
+const DEF={theme:'dark',charset:'latin',color:'#ffffff',speed:2,size:14,trail:5};
+const CGAP=8; // extra horizontal gap between columns (reduces stream count)
+const GAP=4;  // vertical gap between rows
 let S={...DEF};
 function load(){try{const d=localStorage.getItem('wmx2');if(d)S={...DEF,...JSON.parse(d)};}catch(e){}}
 function save(){try{localStorage.setItem('wmx2',JSON.stringify(S));}catch(e){}}
@@ -133,8 +134,8 @@ function applyUrl(){
   if(P.get('charset')&&CHARSETS[P.get('charset')])S.charset=P.get('charset');
   if(P.get('theme')==='dark'||P.get('theme')==='light')S.theme=P.get('theme');
   const c=parseColor(P.get('color'));if(c)S.color=c;
-  if(P.get('speed'))S.speed=Math.max(1,Math.min(10,+P.get('speed')));
-  if(P.get('size'))S.size=Math.max(8,Math.min(28,+P.get('size')));
+  if(P.get('speed'))S.speed=Math.max(1,Math.min(3,+P.get('speed')));
+  if(P.get('size'))S.size=Math.max(8,Math.min(20,+P.get('size')));
   if(P.get('trail'))S.trail=Math.max(1,Math.min(9,+P.get('trail')));
 }
 
@@ -170,7 +171,7 @@ function streamLen(){
 
 function initGrid(){
   charW=measureCharW();
-  colStride=charW+GAP;rowStride=S.size+GAP;
+  colStride=charW+CGAP;rowStride=S.size+GAP;
   cols=Math.max(1,Math.floor(canvas.width/colStride));
   rows=Math.max(1,Math.floor(canvas.height/rowStride)+2);
 
@@ -191,7 +192,7 @@ function initGrid(){
 
 function tick(){
   // How many rows each column advances per tick, scaled by speed
-  const advPerTick=(S.speed/5)*0.55;
+  const advPerTick=(S.speed/2)*0.55;
 
   // Chars only flicker while the stream is actively passing through
   const inStreamRate=0.45;
@@ -235,7 +236,7 @@ function tick(){
       }
 
       // Char changes: only while stream is passing through this cell
-      if(inStream&&Math.random()<inStreamRate){
+      if(dist<1&&Math.random()<inStreamRate){
         charGrid[col][row]=rc();
       }
     }
