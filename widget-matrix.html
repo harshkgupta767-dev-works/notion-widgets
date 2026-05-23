@@ -124,7 +124,7 @@ function parseColor(s){
   return null;
 }
 
-const DEF={theme:'dark',charset:'latin',color:'#ffffff',speed:5,size:25,trail:5};
+const DEF={theme:'dark',charset:'latin',color:'#ffffff',speed:5,size:15,trail:5};
 const GAP=4; // px gap between characters horizontally and vertically
 let S={...DEF};
 function load(){try{const d=localStorage.getItem('wmx2');if(d)S={...DEF,...JSON.parse(d)};}catch(e){}}
