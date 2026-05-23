@@ -194,11 +194,8 @@ function tick(){
   // How many rows each column advances per tick, scaled by speed
   const advPerTick=(S.speed/5)*0.55;
 
-  // Char change rates:
-  // HIGH in stream → chars flicker rapidly, preventing smooth-gradient look
-  // LOW outside → ambient chars slowly drift
+  // Chars only flicker while the stream is actively passing through
   const inStreamRate=0.45;
-  const ambientRate=0.018;
 
   for(let col=0;col<cols;col++){
     phase[col]=(phase[col]+colSpeed[col]*advPerTick)%rows;
@@ -237,8 +234,8 @@ function tick(){
         alphaGrid[col][row]=cur+(target-cur)*0.18; // slow fade
       }
 
-      // Char changes: rapid in stream (flickering), slow outside
-      if(Math.random()<(inStream?inStreamRate:ambientRate)){
+      // Char changes: only while stream is passing through this cell
+      if(inStream&&Math.random()<inStreamRate){
         charGrid[col][row]=rc();
       }
     }
