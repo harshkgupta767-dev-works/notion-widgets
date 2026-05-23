@@ -144,6 +144,7 @@ const ctx=canvas.getContext('2d');
 // Per-cell state
 let charGrid=[];   // char value
 let alphaGrid=[];  // current rendered alpha (0-1)
+let visitedGrid=[];// true once a stream has passed through this cell
 let phase=[];      // stream head position per column (float, wraps)
 let colSpeed=[];   // rows per tick, unique per column
 let colSLen=[];    // stream length per column
@@ -175,10 +176,8 @@ function initGrid(){
 
   charGrid=Array.from({length:cols},()=>Array.from({length:rows},rc));
 
-  // Randomise alphas at ambient level with slight noise so screen looks alive immediately
-  alphaGrid=Array.from({length:cols},()=>
-    Array.from({length:rows},()=>BASE+Math.random()*0.08)
-  );
+  alphaGrid=Array.from({length:cols},()=>Array(rows).fill(0));
+  visitedGrid=Array.from({length:cols},()=>Array(rows).fill(false));
 
   // Evenly stagger stream heads across full height — prevents any grouping
   phase=Array.from({length:cols},(_,i)=>(i/cols)*rows);
@@ -205,6 +204,7 @@ function tick(){
     for(let row=0;row<rows;row++){
       const dist=(head-row+rows)%rows;
       const inStream=dist<sl;
+      if(inStream) visitedGrid[col][row]=true;
 
       // --- TARGET ALPHA ---
       let target;
@@ -217,13 +217,13 @@ function tick(){
         const t=1-(dist-1)/(sl-1);
         target=BASE+(PEAK-BASE)*Math.pow(t,3);
       } else {
-        target=BASE;
+        target=visitedGrid[col][row]?BASE:0;
       }
 
       // Add small per-char random noise so no two chars have the same alpha
       // This breaks up any residual smooth-gradient appearance
       target+=( Math.random()-0.5 )*0.06;
-      target=Math.max(BASE-0.04,Math.min(PEAK,target));
+      target=Math.max(visitedGrid[col][row]?BASE-0.04:0,Math.min(PEAK,target));
 
       // Move current alpha TOWARD target (not snap) for natural look
       // Fast approach when illuminating, slower when fading — mimics phosphor decay
