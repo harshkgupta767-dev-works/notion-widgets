@@ -128,15 +128,6 @@ transform-origin:center center
   .spotify-only{display:none}
   .spotify-only.show{display:block}
 
-  /* ─── ZOOM ─── */
-  .zr{display:flex;align-items:center;gap:8px}
-  .zi{font-size:16px;user-select:none;cursor:default;line-height:1}
-  .zs{flex:1;-webkit-appearance:none;appearance:none;height:4px;border-radius:4px;outline:none}
-  .zs::-webkit-slider-thumb{-webkit-appearance:none;width:16px;height:16px;border-radius:50%;cursor:pointer;border:2px solid;box-shadow:0 1px 4px rgba(0,0,0,.3)}
-  .zl{font-size:11px;font-weight:600;min-width:34px;text-align:center}
-  .pop-light .zs{background:#ddd}.pop-light .zs::-webkit-slider-thumb{background:#222;border-color:#fff}.pop-light .zi,.pop-light .zl{color:#999}
-  .pop-dark .zs{background:#444}.pop-dark .zs::-webkit-slider-thumb{background:#fff;border-color:#1e1e1e}.pop-dark .zi,.pop-dark .zl{color:#666}
-
   /* ─── PRESETS PANEL ─── */
   .presets-panel{position:absolute;inset:0;z-index:50;background:var(--card-bg,#191919);display:flex;flex-direction:column;opacity:0;pointer-events:none;transition:opacity 0.2s}
   .presets-panel.open{opacity:1;pointer-events:auto}
@@ -290,15 +281,6 @@ transform-origin:center center
   </div>
   <div class="sep"></div>
 
-  <div class="lbl">Zoom</div>
-  <div class="zr">
-    <span class="zi">−</span>
-    <input type="range" class="zs" id="zSlider" min="50" max="150" value="100" step="5">
-    <span class="zi">+</span>
-    <span class="zl" id="zLabel">100%</span>
-  </div>
-  <div class="sep"></div>
-
   <div class="lbl">Ambient Glow</div>
   <div class="tg" id="gGlow">
     <button class="tb on" data-v="false">Off</button>
@@ -333,7 +315,7 @@ transform-origin:center center
 </div>
 
 <script>
-const DEF={theme:'dark',zoom:100,glow:false,service:'',spotifyUrl:'',ytUrl:'',spotifyView:'full',recentLinks:[],customPresets:[],deletedPresets:[]};
+const DEF={theme:'dark',glow:false,service:'',spotifyUrl:'',ytUrl:'',spotifyView:'full',recentLinks:[],customPresets:[],deletedPresets:[]};
 let S={...DEF};
 
 const INSTANCE_ID = new URLSearchParams(window.location.search).get('instance') || 'default';
@@ -397,9 +379,8 @@ function applyTheme(){
 }
 
 const wrapper=document.getElementById('wrapper');
-function applyZoom(){wrapper.style.transform=`scale(${S.zoom/100})`;}
 function applyGlow(){wrapper.classList.toggle('glow-active',S.glow===true||S.glow==='true');}
-function applyAll(){applyTheme();applyZoom();applyGlow();}
+function applyAll(){applyTheme();applyGlow();}
 
 // ─── HEADER ────────────────────────────────────────────────────────────────────
 function updateHeader(){
@@ -591,14 +572,6 @@ setupTg('gView','spotifyView',()=>{
 });
 setupTg('gGlow','glow',applyGlow);
 
-// Zoom slider
-const zSlider=document.getElementById('zSlider'),zLabel=document.getElementById('zLabel');
-zSlider.addEventListener('input',e=>{
-  S.zoom=parseInt(e.target.value);
-  zLabel.textContent=S.zoom+'%';
-  save();applyZoom();
-});
-
 // ─── RESET ─────────────────────────────────────────────────────────────────────
 function hideResetConfirm(){
   document.getElementById('rstConfirm').classList.remove('show');
@@ -615,7 +588,6 @@ document.getElementById('rstYes').addEventListener('click',()=>{
   S={...DEF};save();
   hideResetConfirm();closePop();
   syncTg('gTheme',S.theme);syncTg('gView',S.spotifyView);syncTg('gGlow',String(S.glow));
-  zSlider.value=S.zoom;zLabel.textContent=S.zoom+'%';
   applyAll();
   route();
 });
@@ -796,7 +768,6 @@ document.addEventListener('keydown',e=>{
 // ─── INIT ──────────────────────────────────────────────────────────────────────
 load();
 syncTg('gTheme',S.theme);syncTg('gView',S.spotifyView);syncTg('gGlow',String(S.glow));
-zSlider.value=S.zoom;zLabel.textContent=S.zoom+'%';
 applyAll();
 buildPresets();
 route();
