@@ -148,6 +148,7 @@ let visitedGrid=[];// true once a stream has passed through this cell
 let phase=[];      // stream head position per column (float, wraps)
 let colSpeed=[];   // rows per tick, unique per column
 let colSLen=[];    // stream length per column
+let colCooldown=[]; // ticks to rest before next stream; 0 = streaming now
 
 let cols=0,rows=0,charW=1,colStride=1,rowStride=1;
 
@@ -187,6 +188,9 @@ function initGrid(){
 
   const sl=streamLen();
   colSLen=Array.from({length:cols},()=>sl+Math.floor(Math.random()*3)-1);
+
+  // Stagger initial cooldowns so ~35% of columns start resting
+  colCooldown=Array.from({length:cols},()=>Math.random()<0.35?80+Math.floor(Math.random()*120):0);
 }
 
 function tick(){
@@ -197,7 +201,19 @@ function tick(){
   const inStreamRate=0.45;
 
   for(let col=0;col<cols;col++){
-    phase[col]=(phase[col]+colSpeed[col]*advPerTick)%rows;
+    if(colCooldown[col]>0){
+      colCooldown[col]--;
+      // Fade all cells toward their resting alpha while column waits
+      for(let row=0;row<rows;row++){
+        const cur=alphaGrid[col][row];
+        const tgt=visitedGrid[col][row]?BASE:0;
+        alphaGrid[col][row]=cur+(tgt-cur)*0.18;
+      }
+      continue;
+    }
+    const next=phase[col]+colSpeed[col]*advPerTick;
+    if(next>=rows&&Math.random()<0.4) colCooldown[col]=80+Math.floor(Math.random()*120);
+    phase[col]=next%rows;
     const head=phase[col];
     const sl=colSLen[col];
 
