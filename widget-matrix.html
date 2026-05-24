@@ -113,12 +113,6 @@ body:hover .gear{opacity:.7;transform:scale(1);pointer-events:auto}
     <div class="blk">
       <div class="lb">Colour</div>
       <div class="sr" id="gColor">
-        <div class="sw" data-c="#00ff41" style="background:#00ff41"></div>
-        <div class="sw" data-c="#ffffff" style="background:#fff"></div>
-        <div class="sw" data-c="#00cfff" style="background:#00cfff"></div>
-        <div class="sw" data-c="#ff3322" style="background:#ff3322"></div>
-        <div class="sw" data-c="#cc44ff" style="background:#cc44ff"></div>
-        <div class="sw" data-c="#ffaa00" style="background:#ffaa00"></div>
         <div class="sw sw-cu" id="cuSw"></div>
       </div>
       <div class="cpk" id="cpk-color"><div class="cpk-box"><div class="cpk-box-hue"></div><div class="cpk-box-white"></div><div class="cpk-box-black"></div><div class="cpk-dot"></div></div><div class="cpk-hue"><div class="cpk-hue-thumb"></div></div><div class="cpk-bottom"><div class="cpk-preview"></div><input class="cpk-hex" maxlength="7" spellcheck="false"></div></div>
@@ -126,17 +120,17 @@ body:hover .gear{opacity:.7;transform:scale(1);pointer-events:auto}
 
     <div class="blk">
       <div class="sl-hd"><span class="sl-lbl">Speed</span><span class="sl-val" id="speedLb"></span></div>
-      <div class="sl-row"><span class="sl-cap">Slow</span><input type="range" class="zs" id="speedSl" min="1" max="4" step="0.5"><span class="sl-cap r">Fast</span></div>
+      <div class="sl-row"><span class="sl-cap">Slow</span><input type="range" class="zs" id="speedSl" min="1" max="4" step="0.25"><span class="sl-cap r">Fast</span></div>
     </div>
 
     <div class="blk">
       <div class="sl-hd"><span class="sl-lbl">Font Size</span><span class="sl-val" id="sizeLb"></span></div>
-      <div class="sl-row"><span class="sl-cap">−</span><input type="range" class="zs" id="sizeSl" min="8" max="20" step="2"><span class="sl-cap r">+</span></div>
+      <div class="sl-row"><span class="sl-cap">−</span><input type="range" class="zs" id="sizeSl" min="8" max="20" step="1"><span class="sl-cap r">+</span></div>
     </div>
 
     <div class="blk">
       <div class="sl-hd"><span class="sl-lbl">Trail Length</span><span class="sl-val" id="trailLb"></span></div>
-      <div class="sl-row"><span class="sl-cap">Short</span><input type="range" class="zs" id="trailSl" min="3" max="13" step="1"><span class="sl-cap r">Long</span></div>
+      <div class="sl-row"><span class="sl-cap">Short</span><input type="range" class="zs" id="trailSl" min="2" max="14" step="1"><span class="sl-cap r">Long</span></div>
     </div>
 
     <button class="rst" id="rstBtn">Reset to defaults</button>
@@ -163,6 +157,10 @@ function parseColor(s){
 }
 
 const DEF={theme:'dark',charset:'latin',color:'#ffffff',speed:2.5,size:14,trail:8,bold:true};
+const PRESETS={
+  dark:['#00ff41','#ffffff','#00cfff','#ff3322','#cc44ff','#ffaa00'],
+  light:['#111111','#0a8a2e','#0066cc','#c41414','#7733bb','#cc6600']
+};
 const HGAP=6; // horizontal gap between columns
 const VGAP=2; // vertical gap between rows
 let S={...DEF};
@@ -174,7 +172,7 @@ function applyUrl(){
   const c=parseColor(P.get('color'));if(c)S.color=c;
   if(P.get('speed'))S.speed=Math.max(1,Math.min(4,+P.get('speed')));
   if(P.get('size'))S.size=Math.max(8,Math.min(20,+P.get('size')));
-  if(P.get('trail'))S.trail=Math.max(3,Math.min(13,+P.get('trail')));
+  if(P.get('trail'))S.trail=Math.max(2,Math.min(14,+P.get('trail')));
 }
 
 const canvas=document.getElementById('c');
@@ -347,7 +345,12 @@ document.getElementById('gBold').addEventListener('click',e=>{
 });
 document.getElementById('gTheme').addEventListener('click',e=>{
   const b=e.target.closest('[data-v]');if(!b)return;
-  S.theme=b.dataset.v;save();syncTg('gTheme',S.theme);applyTheme();
+  if(S.theme===b.dataset.v)return;
+  const prev=S.theme;
+  S.theme=b.dataset.v;
+  const idx=PRESETS[prev].findIndex(p=>p.toLowerCase()===S.color.toLowerCase());
+  if(idx>=0) S.color=PRESETS[S.theme][idx];
+  save();syncTg('gTheme',S.theme);applyTheme();renderSwatches();
 });
 document.getElementById('gCharset').addEventListener('click',e=>{
   const b=e.target.closest('[data-v]');if(!b)return;
@@ -360,6 +363,20 @@ document.getElementById('gColor').addEventListener('click',e=>{
   document.getElementById('cpk-color').classList.remove('open');
   syncColor();
 });
+
+function renderSwatches(){
+  const sr=document.getElementById('gColor');
+  const cuSw=document.getElementById('cuSw');
+  sr.querySelectorAll('.sw:not(.sw-cu)').forEach(s=>s.remove());
+  PRESETS[S.theme].forEach(c=>{
+    const sw=document.createElement('div');
+    sw.className='sw';
+    sw.dataset.c=c;
+    sw.style.background=c;
+    sr.insertBefore(sw,cuSw);
+  });
+  syncColor();
+}
 
 function syncColor(){
   const col=S.color.toLowerCase();
@@ -410,13 +427,13 @@ mkSlider('trailSl','trailLb','trail',parseInt,()=>{
 
 function syncTg(id,val){document.querySelectorAll('#'+id+' [data-v]').forEach(b=>b.classList.toggle('on',b.dataset.v===val));}
 function syncAll(){
-  syncTg('gTheme',S.theme);syncTg('gBold',String(S.bold));syncTg('gCharset',S.charset);syncColor();
+  syncTg('gTheme',S.theme);syncTg('gBold',String(S.bold));syncTg('gCharset',S.charset);renderSwatches();
   [['speed','speedSl','speedLb'],['size','sizeSl','sizeLb'],['trail','trailSl','trailLb']].forEach(([k,si,li])=>{
     document.getElementById(si).value=S[k];document.getElementById(li).textContent=S[k];
   });
 }
 
-document.getElementById('rstBtn').addEventListener('click',()=>{S={...DEF};save();syncAll();restart();});
+document.getElementById('rstBtn').addEventListener('click',()=>{S={...DEF};save();syncAll();applyTheme();restart();});
 
 load();applyUrl();syncAll();applyTheme();initColorPicker();resize();restart();
 </script>
