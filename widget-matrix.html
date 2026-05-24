@@ -195,8 +195,7 @@ function initGrid(){
   colSLen=Array.from({length:cols},()=>sl+Math.floor(Math.random()*3)-1);
 
   // Stagger initial cooldowns so ~35% of columns start resting
-  const restP=(11-S.streams)*0.06;
-  colCooldown=Array.from({length:cols},()=>Math.random()<restP?80+Math.floor(Math.random()*120):0);
+  colCooldown=Array.from({length:cols},()=>Math.random()*20);
 }
 
 function tick(dt){
