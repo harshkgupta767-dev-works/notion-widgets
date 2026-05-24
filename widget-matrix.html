@@ -191,7 +191,7 @@ function initGrid(){
   colSLen=Array.from({length:cols},()=>sl+Math.floor(Math.random()*3)-1);
 
   // Stagger initial cooldowns so ~35% of columns start resting
-  colCooldown=Array.from({length:cols},()=>Math.random()<0.15?80+Math.floor(Math.random()*120):0);
+  colCooldown=Array.from({length:cols},()=>Math.random()<0.05?80+Math.floor(Math.random()*120):0);
 }
 
 function tick(dt){
@@ -212,7 +212,7 @@ function tick(dt){
       continue;
     }
     const next=phase[col]+colSpeed[col]*advPerTick;
-    if(next>=rows&&Math.random()<0.2) colCooldown[col]=80+Math.floor(Math.random()*120);
+    if(next>=rows&&Math.random()<0.1) colCooldown[col]=80+Math.floor(Math.random()*120);
     phase[col]=next%rows;
     const head=phase[col];
     const sl=colSLen[col];
