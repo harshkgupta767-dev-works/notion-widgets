@@ -164,8 +164,8 @@ const PRESETS={
 const HGAP=6; // horizontal gap between columns
 const VGAP=2; // vertical gap between rows
 let S={...DEF};
-function load(){try{const d=localStorage.getItem('wmx2');if(d)S={...DEF,...JSON.parse(d)};}catch(e){}}
-function save(){try{localStorage.setItem('wmx2',JSON.stringify(S));}catch(e){}}
+function load(){try{const d=localStorage.getItem('wmx3');if(d)S={...DEF,...JSON.parse(d)};}catch(e){}}
+function save(){try{localStorage.setItem('wmx3',JSON.stringify(S));}catch(e){}}
 function applyUrl(){
   if(P.get('charset')&&CHARSETS[P.get('charset')])S.charset=P.get('charset');
   if(P.get('theme')==='dark'||P.get('theme')==='light')S.theme=P.get('theme');
