@@ -9,17 +9,16 @@
 *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
 html,body{width:100%;height:100%;margin:0;padding:0;overflow:hidden;background:transparent}
 canvas{display:block;width:100%;height:100%}
-.gear{position:fixed;top:8px;left:8px;width:28px;height:28px;background:rgba(0,0,0,0.4);border:1px solid rgba(255,255,255,0.1);border-radius:6px;cursor:pointer;display:flex;align-items:center;justify-content:center;z-index:10;opacity:0;transform:scale(0.8);transition:opacity 0.2s,transform 0.2s,background 0.2s;pointer-events:none}
-body:hover .gear,.gear.pin{opacity:0.65;transform:scale(1);pointer-events:auto}
-.gear:hover{opacity:1!important;background:rgba(0,0,0,0.8)!important}
-.gear svg{width:14px;height:14px;fill:#bbb}
-.ov{position:fixed;inset:0;background:rgba(0,0,0,.55);z-index:200;opacity:0;pointer-events:none;transition:opacity .2s}.ov.open{opacity:1;pointer-events:auto}
-.pop{position:fixed;top:50%;left:50%;transform:translate(-50%,-50%) scale(.93);width:300px;max-height:86vh;border-radius:14px;z-index:210;padding:20px;opacity:0;pointer-events:none;transition:opacity .2s,transform .2s;font-family:'Inter',sans-serif;background:#181818;color:#ddd;border:1px solid #2a2a2a;box-shadow:0 16px 60px rgba(0,0,0,.85);display:flex;flex-direction:column}
-.pop.open{opacity:1;pointer-events:auto;transform:translate(-50%,-50%) scale(1)}
-.ph{display:flex;justify-content:space-between;align-items:center;margin-bottom:14px;padding-bottom:14px;border-bottom:1px solid #232323;flex-shrink:0}
-.ph span{font-size:14px;font-weight:700;color:#e8e8e8}
-.px{width:26px;height:26px;background:none;border:none;cursor:pointer;display:flex;align-items:center;justify-content:center;border-radius:6px;font-size:16px;color:#555;transition:background .15s,color .15s}
-.px:hover{background:rgba(255,255,255,.07);color:#999}
+.gear{position:fixed;top:8px;left:8px;width:30px;height:30px;background:rgba(0,0,0,.55);border:1px solid rgba(255,255,255,.1);border-radius:8px;cursor:pointer;display:flex;align-items:center;justify-content:center;z-index:220;opacity:0;transform:scale(.85);transition:opacity .2s,transform .2s,background .2s;pointer-events:none}
+body:hover .gear,.gear.pin{opacity:.7;transform:scale(1);pointer-events:auto}
+.gear:hover{opacity:1!important;background:rgba(0,0,0,.85)!important}
+.gear svg{width:14px;height:14px;fill:#bbb;color:#bbb}
+.gear .i-close{display:none}
+.gear.pin{opacity:1;background:rgba(0,0,0,.85)}
+.gear.pin .i-gear{display:none}
+.gear.pin .i-close{display:block}
+.pop{position:fixed;top:44px;left:8px;width:300px;max-height:calc(100vh - 52px);border-radius:14px;z-index:210;padding:16px;opacity:0;pointer-events:none;transform:scale(.92);transform-origin:top left;transition:opacity .22s ease,transform .22s ease;font-family:'Inter',sans-serif;background:#181818;color:#ddd;border:1px solid #2a2a2a;box-shadow:0 16px 60px rgba(0,0,0,.85);display:flex;flex-direction:column}
+.pop.open{opacity:1;pointer-events:auto;transform:scale(1)}
 .pop-body{display:flex;flex-direction:column;gap:10px;overflow-y:auto;flex:1}
 .pop-body::-webkit-scrollbar{width:4px}.pop-body::-webkit-scrollbar-thumb{background:#333;border-radius:4px}
 .blk{background:#1e1e1e;border-radius:10px;padding:12px 14px;display:flex;flex-direction:column;gap:9px}
@@ -52,9 +51,6 @@ body:hover .gear,.gear.pin{opacity:0.65;transform:scale(1);pointer-events:auto}
 .cpk-bottom{display:flex;align-items:center;gap:8px;margin-top:8px}
 .cpk-preview{width:26px;height:26px;border-radius:6px;border:1px solid #333;flex-shrink:0}
 .cpk-hex{flex:1;height:28px;border:1px solid #333;border-radius:6px;padding:0 8px;font-family:'Inter',sans-serif;font-size:12px;font-weight:600;outline:none;text-transform:uppercase;letter-spacing:.04em;background:#2a2a2a;color:#ccc}
-.zr{display:flex;align-items:center;gap:8px}
-.zi{font-size:10px;color:#444;font-weight:700;min-width:30px}
-.zi.r{text-align:right}
 .zs{flex:1;appearance:none;-webkit-appearance:none;height:4px;border-radius:4px;background:#2a2a2a;outline:none;cursor:pointer}
 .zs::-webkit-slider-thumb{appearance:none;-webkit-appearance:none;width:15px;height:15px;border-radius:50%;background:#ccc;border:2px solid #1e1e1e;cursor:pointer}
 .rst{display:block;font-size:11px;font-weight:600;text-align:center;cursor:pointer;color:#333;border:1px solid #272727;border-radius:8px;padding:8px;background:none;transition:color .15s,border-color .15s;width:100%}
@@ -64,11 +60,10 @@ body:hover .gear,.gear.pin{opacity:0.65;transform:scale(1);pointer-events:auto}
 <body>
 <canvas id="c"></canvas>
 <button class="gear" id="gearBtn" title="Settings">
-  <svg viewBox="0 0 24 24"><path d="M19.14 12.94c.04-.31.06-.63.06-.94 0-.31-.02-.63-.06-.94l2.03-1.58a.49.49 0 00.12-.61l-1.92-3.32a.49.49 0 00-.59-.22l-2.39.96a7.04 7.04 0 00-1.62-.94l-.36-2.54a.48.48 0 00-.48-.41h-3.84a.48.48 0 00-.48.41l-.36 2.54c-.59.24-1.13.57-1.62.94l-2.39-.96a.49.49 0 00-.59.22L2.74 8.87a.49.49 0 00.12.61l2.03 1.58c-.04.31-.06.63-.06.94 0 .31.02.63.06.94l-2.03 1.58a.49.49 0 00-.12.61l1.92 3.32c.12.22.37.29.59.22l2.39-.96c.5.38 1.03.7 1.62.94l.36 2.54c.05.24.26.41.48.41h3.84c.24 0 .44-.17.48-.41l.36-2.54c.59-.24 1.13-.57 1.62-.94l2.39.96c.22.08.47 0 .59-.22l1.92-3.32a.49.49 0 00-.12-.61l-2.03-1.58zM12 15.6A3.6 3.6 0 1112 8.4a3.6 3.6 0 010 7.2z"/></svg>
+  <svg class="i-gear" viewBox="0 0 24 24"><path d="M19.14 12.94c.04-.31.06-.63.06-.94 0-.31-.02-.63-.06-.94l2.03-1.58a.49.49 0 00.12-.61l-1.92-3.32a.49.49 0 00-.59-.22l-2.39.96a7.04 7.04 0 00-1.62-.94l-.36-2.54a.48.48 0 00-.48-.41h-3.84a.48.48 0 00-.48.41l-.36 2.54c-.59.24-1.13.57-1.62.94l-2.39-.96a.49.49 0 00-.59.22L2.74 8.87a.49.49 0 00.12.61l2.03 1.58c-.04.31-.06.63-.06.94 0 .31.02.63.06.94l-2.03 1.58a.49.49 0 00-.12.61l1.92 3.32c.12.22.37.29.59.22l2.39-.96c.5.38 1.03.7 1.62.94l.36 2.54c.05.24.26.41.48.41h3.84c.24 0 .44-.17.48-.41l.36-2.54c.59-.24 1.13-.57 1.62-.94l2.39.96c.22.08.47 0 .59-.22l1.92-3.32a.49.49 0 00-.12-.61l-2.03-1.58zM12 15.6A3.6 3.6 0 1112 8.4a3.6 3.6 0 010 7.2z"/></svg>
+  <svg class="i-close" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><path d="M18 6L6 18M6 6l12 12"/></svg>
 </button>
-<div class="ov" id="ov"></div>
 <div class="pop" id="pop">
-  <div class="ph"><span>Settings</span><button class="px" id="popX">✕</button></div>
   <div class="pop-body">
 
     <div class="blk">
@@ -226,59 +221,61 @@ function initGrid(){
   colCooldown=Array.from({length:cols},()=>Math.random()*20);
 }
 
+const PEAK=1.0;
+const FLOOR=BASE-0.04;
+
 function tick(dt){
-  const PEAK=1.0;
   const dtScale=dt/50;
   const advPerTick=(S.speed/2)*0.55*dtScale;
   const brightRate=1-Math.pow(0.35,dtScale);
   const fadeRate=1-Math.pow(0.82,dtScale);
 
   for(let col=0;col<cols;col++){
+    const aCol=alphaGrid[col];
+    const vCol=visitedGrid[col];
+    const cCol=charGrid[col];
+
     if(colCooldown[col]>0){
       colCooldown[col]-=dtScale;
       for(let row=0;row<rows;row++){
-        const cur=alphaGrid[col][row];
-        const tgt=visitedGrid[col][row]?BASE:0;
-        alphaGrid[col][row]=cur+(tgt-cur)*fadeRate;
+        const cur=aCol[row];
+        const tgt=vCol[row]?BASE:0;
+        aCol[row]=cur+(tgt-cur)*fadeRate;
       }
       continue;
     }
+
     const next=phase[col]+colSpeed[col]*advPerTick;
-    if(next>=rows&&Math.random()<0.06) colCooldown[col]=80+Math.floor(Math.random()*120);
-    phase[col]=next%rows;
+    if(next>=rows&&Math.random()<0.06) colCooldown[col]=80+(Math.random()*120|0);
+    phase[col]=next>=rows?next-rows:next;
     const head=phase[col];
     const sl=colSLen[col];
+    const slInv=1/(sl-1);
 
     for(let row=0;row<rows;row++){
-      const dist=(head-row+rows)%rows;
-      const inStream=dist<sl;
-      if(dist<1){
-        if(!visitedGrid[col][row]) charGrid[col][row]=rc();
-        visitedGrid[col][row]=true;
-      }
+      let dist=head-row;
+      if(dist<0) dist+=rows;
 
-      // --- TARGET ALPHA ---
+      if(dist<1&&!vCol[row]){cCol[row]=rc();vCol[row]=true;}
+      const visited=vCol[row];
+
       let target;
       if(dist<1){
         target=PEAK;
-      } else if(inStream&&visitedGrid[col][row]){
-        // Body only visible for cells the head has already passed through
-        const t=1-(dist-1)/(sl-1);
-        target=BASE+(PEAK-BASE)*Math.pow(t,3);
+      } else if(dist<sl&&visited){
+        const t=1-(dist-1)*slInv;
+        target=BASE+(PEAK-BASE)*t*t*t;
       } else {
-        target=visitedGrid[col][row]?BASE:0;
+        target=visited?BASE:0;
       }
 
-      target+=( Math.random()-0.5 )*0.06;
-      target=Math.max(visitedGrid[col][row]?BASE-0.04:0,Math.min(PEAK,target));
+      target+=(Math.random()-0.5)*0.06;
+      const lo=visited?FLOOR:0;
+      target=target<lo?lo:target>PEAK?PEAK:target;
 
-      const cur=alphaGrid[col][row];
-      if(target>cur){
-        alphaGrid[col][row]=cur+(target-cur)*brightRate;
-      } else {
-        alphaGrid[col][row]=cur+(target-cur)*fadeRate;
-      }
-
+      const cur=aCol[row];
+      const rate=target>cur?brightRate:fadeRate;
+      aCol[row]=cur+(target-cur)*rate;
     }
   }
 }
@@ -291,15 +288,20 @@ function draw(){
   const rgb=hexRgb(S.color);
   ctx.font=fontStr();
   ctx.textBaseline='top';
+  ctx.fillStyle=`rgb(${rgb.r},${rgb.g},${rgb.b})`;
 
   for(let col=0;col<cols;col++){
+    const aCol=alphaGrid[col];
+    const cCol=charGrid[col];
+    const x=col*colStride;
     for(let row=0;row<rows;row++){
-      const a=alphaGrid[col][row];
+      const a=aCol[row];
       if(a<0.04)continue;
-      ctx.fillStyle=`rgba(${rgb.r},${rgb.g},${rgb.b},${a.toFixed(3)})`;
-      ctx.fillText(charGrid[col][row],col*colStride,row*rowStride);
+      ctx.globalAlpha=a;
+      ctx.fillText(cCol[row],x,row*rowStride);
     }
   }
+  ctx.globalAlpha=1;
 }
 
 let raf,lastTime=0;
@@ -313,15 +315,14 @@ function loop(ts){
 
 function restart(){if(raf)cancelAnimationFrame(raf);initGrid();lastTime=0;raf=requestAnimationFrame(loop);}
 
-window.addEventListener('resize',resize);
+let resizeT;
+window.addEventListener('resize',()=>{clearTimeout(resizeT);resizeT=setTimeout(resize,80);});
 
 // ── POPUP ────────────────────────────────────────────
-const gearBtn=document.getElementById('gearBtn'),pop=document.getElementById('pop'),ov=document.getElementById('ov');
-function openPop(){pop.classList.add('open');ov.classList.add('open');gearBtn.classList.add('pin');}
-function closePop(){pop.classList.remove('open');ov.classList.remove('open');gearBtn.classList.remove('pin');}
+const gearBtn=document.getElementById('gearBtn'),pop=document.getElementById('pop');
+function openPop(){pop.classList.add('open');gearBtn.classList.add('pin');}
+function closePop(){pop.classList.remove('open');gearBtn.classList.remove('pin');}
 gearBtn.addEventListener('click',()=>pop.classList.contains('open')?closePop():openPop());
-ov.addEventListener('click',closePop);
-document.getElementById('popX').addEventListener('click',closePop);
 
 document.getElementById('gBold').addEventListener('click',e=>{
   const b=e.target.closest('.tb');if(!b)return;
