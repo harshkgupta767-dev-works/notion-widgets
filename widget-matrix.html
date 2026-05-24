@@ -208,7 +208,7 @@ function tick(dt){
       continue;
     }
     const next=phase[col]+colSpeed[col]*advPerTick;
-    if(next>=rows&&Math.random()<0.12) colCooldown[col]=80+Math.floor(Math.random()*120);
+    if(next>=rows&&Math.random()<0.06) colCooldown[col]=80+Math.floor(Math.random()*120);
     phase[col]=next%rows;
     const head=phase[col];
     const sl=colSLen[col];
