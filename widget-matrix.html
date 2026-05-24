@@ -10,15 +10,17 @@
 html,body{width:100%;height:100%;margin:0;padding:0;overflow:hidden;background:transparent}
 canvas{display:block;width:100%;height:100%}
 .gear{position:fixed;top:8px;left:8px;width:30px;height:30px;background:rgba(0,0,0,.55);border:1px solid rgba(255,255,255,.1);border-radius:8px;cursor:pointer;display:flex;align-items:center;justify-content:center;z-index:220;opacity:0;transform:scale(.85);transition:opacity .2s,transform .2s,background .2s;pointer-events:none}
-body:hover .gear,.gear.pin{opacity:.7;transform:scale(1);pointer-events:auto}
+body:hover .gear{opacity:.7;transform:scale(1);pointer-events:auto}
 .gear:hover{opacity:1!important;background:rgba(0,0,0,.85)!important}
-.gear svg{width:14px;height:14px;fill:#bbb;color:#bbb}
-.gear .i-close{display:none}
-.gear.pin{opacity:1;background:rgba(0,0,0,.85)}
-.gear.pin .i-gear{display:none}
-.gear.pin .i-close{display:block}
-.pop{position:fixed;top:44px;left:8px;width:300px;max-height:calc(100vh - 52px);border-radius:14px;z-index:210;padding:16px;opacity:0;pointer-events:none;transform:scale(.92);transform-origin:top left;transition:opacity .22s ease,transform .22s ease;font-family:'Inter',sans-serif;background:#181818;color:#ddd;border:1px solid #2a2a2a;box-shadow:0 16px 60px rgba(0,0,0,.85);display:flex;flex-direction:column}
+.gear svg{width:14px;height:14px;fill:#bbb}
+.gear.hide{display:none}
+.pop{position:fixed;top:8px;left:8px;width:300px;max-height:calc(100vh - 16px);border-radius:14px;z-index:210;padding:14px;opacity:0;pointer-events:none;transform:scale(.92);transform-origin:top left;transition:opacity .22s ease,transform .22s ease;font-family:'Inter',sans-serif;background:#181818;color:#ddd;border:1px solid #2a2a2a;box-shadow:0 16px 60px rgba(0,0,0,.85);display:flex;flex-direction:column}
 .pop.open{opacity:1;pointer-events:auto;transform:scale(1)}
+.pop-hdr{position:relative;display:flex;align-items:center;justify-content:center;padding-bottom:12px;margin-bottom:12px;border-bottom:1px solid #232323;flex-shrink:0;min-height:30px}
+.pop-x{position:absolute;left:0;top:0;width:30px;height:30px;background:rgba(255,255,255,.04);border:1px solid #2a2a2a;border-radius:8px;cursor:pointer;display:flex;align-items:center;justify-content:center;color:#aaa;transition:background .15s,color .15s,border-color .15s}
+.pop-x:hover{background:rgba(255,255,255,.1);color:#fff;border-color:#3a3a3a}
+.pop-x svg{width:12px;height:12px}
+.pop-ttl{font-size:13px;font-weight:700;color:#e0e0e0;letter-spacing:.02em;line-height:30px}
 .pop-body{display:flex;flex-direction:column;gap:10px;overflow-y:auto;flex:1}
 .pop-body::-webkit-scrollbar{width:4px}.pop-body::-webkit-scrollbar-thumb{background:#333;border-radius:4px}
 .blk{background:#1e1e1e;border-radius:10px;padding:12px 14px;display:flex;flex-direction:column;gap:9px}
@@ -28,8 +30,15 @@ body:hover .gear,.gear.pin{opacity:.7;transform:scale(1);pointer-events:auto}
 .tb:first-child{border-left:none}
 .tb.on{background:#e0e0e0;color:#111}
 .tb:hover:not(.on){background:#232323;color:#888}
-.sr{display:flex;flex-wrap:wrap;gap:8px}
-.sw{width:26px;height:26px;border-radius:50%;border:2.5px solid transparent;cursor:pointer;transition:transform .12s,border-color .12s;flex-shrink:0}
+.cgrid{display:grid;grid-template-columns:repeat(3,1fr);gap:6px}
+.cbtn{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:3px;padding:9px 4px;background:#1a1a1a;border:1px solid #272727;border-radius:8px;cursor:pointer;transition:all .15s;color:#666}
+.cbtn:hover{background:#232323;color:#aaa;border-color:#333}
+.cbtn.on{background:#e0e0e0;color:#111;border-color:#e0e0e0}
+.cbtn .csm{font-family:monospace;font-size:14px;font-weight:700;line-height:1;opacity:.7}
+.cbtn.on .csm{opacity:1}
+.cbtn .cnm{font-size:10px;font-weight:600;letter-spacing:.02em;line-height:1}
+.sr{display:flex;flex-wrap:wrap;gap:8px;align-items:center}
+.sw{position:relative;width:26px;height:26px;border-radius:50%;border:2.5px solid transparent;cursor:pointer;transition:transform .12s,border-color .12s,box-shadow .12s;flex-shrink:0}
 .sw:hover{transform:scale(1.13)}
 .sw.on{border-color:rgba(255,255,255,.85)}
 .sl-hd{display:flex;justify-content:space-between;align-items:center}
@@ -38,7 +47,9 @@ body:hover .gear,.gear.pin{opacity:.7;transform:scale(1);pointer-events:auto}
 .sl-row{display:flex;align-items:center;gap:8px}
 .sl-cap{font-size:10px;color:#444;font-weight:600;min-width:28px}
 .sl-cap.r{text-align:right}
-.sw-cu{background:conic-gradient(hsl(0,80%,60%),hsl(60,80%,52%),hsl(120,65%,45%),hsl(180,75%,45%),hsl(240,65%,58%),hsl(300,65%,55%),hsl(360,80%,60%))}
+.sw-cu{overflow:hidden;border:none!important;background:conic-gradient(hsl(0,80%,60%),hsl(30,80%,55%),hsl(60,80%,52%),hsl(120,65%,45%),hsl(180,75%,45%),hsl(210,80%,52%),hsl(240,65%,58%),hsl(300,65%,55%),hsl(330,75%,55%),hsl(360,80%,60%));box-shadow:inset 0 0 4px rgba(0,0,0,.25),0 1px 2px rgba(0,0,0,.4)}
+.sw-cu::before{content:'';position:absolute;inset:0;border-radius:50%;background:radial-gradient(circle at 35% 30%,rgba(255,255,255,.55) 0%,rgba(255,255,255,.1) 40%,transparent 70%);pointer-events:none}
+.sw-cu.on{border:none!important;box-shadow:0 0 0 2.5px rgba(255,255,255,.85),inset 0 0 4px rgba(0,0,0,.25)}
 .cpk{display:none;margin-top:8px;padding:10px;border-radius:10px;background:#1e1e1e}
 .cpk.open{display:block}
 .cpk-box{position:relative;width:100%;height:120px;border-radius:8px;overflow:hidden;cursor:crosshair;touch-action:none}
@@ -60,10 +71,15 @@ body:hover .gear,.gear.pin{opacity:.7;transform:scale(1);pointer-events:auto}
 <body>
 <canvas id="c"></canvas>
 <button class="gear" id="gearBtn" title="Settings">
-  <svg class="i-gear" viewBox="0 0 24 24"><path d="M19.14 12.94c.04-.31.06-.63.06-.94 0-.31-.02-.63-.06-.94l2.03-1.58a.49.49 0 00.12-.61l-1.92-3.32a.49.49 0 00-.59-.22l-2.39.96a7.04 7.04 0 00-1.62-.94l-.36-2.54a.48.48 0 00-.48-.41h-3.84a.48.48 0 00-.48.41l-.36 2.54c-.59.24-1.13.57-1.62.94l-2.39-.96a.49.49 0 00-.59.22L2.74 8.87a.49.49 0 00.12.61l2.03 1.58c-.04.31-.06.63-.06.94 0 .31.02.63.06.94l-2.03 1.58a.49.49 0 00-.12.61l1.92 3.32c.12.22.37.29.59.22l2.39-.96c.5.38 1.03.7 1.62.94l.36 2.54c.05.24.26.41.48.41h3.84c.24 0 .44-.17.48-.41l.36-2.54c.59-.24 1.13-.57 1.62-.94l2.39.96c.22.08.47 0 .59-.22l1.92-3.32a.49.49 0 00-.12-.61l-2.03-1.58zM12 15.6A3.6 3.6 0 1112 8.4a3.6 3.6 0 010 7.2z"/></svg>
-  <svg class="i-close" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><path d="M18 6L6 18M6 6l12 12"/></svg>
+  <svg viewBox="0 0 24 24"><path d="M19.14 12.94c.04-.31.06-.63.06-.94 0-.31-.02-.63-.06-.94l2.03-1.58a.49.49 0 00.12-.61l-1.92-3.32a.49.49 0 00-.59-.22l-2.39.96a7.04 7.04 0 00-1.62-.94l-.36-2.54a.48.48 0 00-.48-.41h-3.84a.48.48 0 00-.48.41l-.36 2.54c-.59.24-1.13.57-1.62.94l-2.39-.96a.49.49 0 00-.59.22L2.74 8.87a.49.49 0 00.12.61l2.03 1.58c-.04.31-.06.63-.06.94 0 .31.02.63.06.94l-2.03 1.58a.49.49 0 00-.12.61l1.92 3.32c.12.22.37.29.59.22l2.39-.96c.5.38 1.03.7 1.62.94l.36 2.54c.05.24.26.41.48.41h3.84c.24 0 .44-.17.48-.41l.36-2.54c.59-.24 1.13-.57 1.62-.94l2.39.96c.22.08.47 0 .59-.22l1.92-3.32a.49.49 0 00-.12-.61l-2.03-1.58zM12 15.6A3.6 3.6 0 1112 8.4a3.6 3.6 0 010 7.2z"/></svg>
 </button>
 <div class="pop" id="pop">
+  <div class="pop-hdr">
+    <button class="pop-x" id="popX" title="Close">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><path d="M18 6L6 18M6 6l12 12"/></svg>
+    </button>
+    <div class="pop-ttl">Settings</div>
+  </div>
   <div class="pop-body">
 
     <div class="blk">
@@ -84,13 +100,13 @@ body:hover .gear,.gear.pin{opacity:.7;transform:scale(1);pointer-events:auto}
 
     <div class="blk">
       <div class="lb">Characters</div>
-      <div class="tg" id="gCharset">
-        <button class="tb" data-v="katakana">Matrix</button>
-        <button class="tb" data-v="latin">Alpha</button>
-        <button class="tb" data-v="binary">Binary</button>
-        <button class="tb" data-v="numbers">Digits</button>
-        <button class="tb" data-v="symbols">Glitch</button>
-        <button class="tb" data-v="mixed">Chaos</button>
+      <div class="cgrid" id="gCharset">
+        <button class="cbtn" data-v="katakana"><span class="csm">カ</span><span class="cnm">Matrix</span></button>
+        <button class="cbtn" data-v="latin"><span class="csm">A</span><span class="cnm">Alpha</span></button>
+        <button class="cbtn" data-v="binary"><span class="csm">01</span><span class="cnm">Binary</span></button>
+        <button class="cbtn" data-v="numbers"><span class="csm">7</span><span class="cnm">Digits</span></button>
+        <button class="cbtn" data-v="symbols"><span class="csm">#</span><span class="cnm">Glitch</span></button>
+        <button class="cbtn" data-v="mixed"><span class="csm">∆</span><span class="cnm">Chaos</span></button>
       </div>
     </div>
 
@@ -120,7 +136,7 @@ body:hover .gear,.gear.pin{opacity:.7;transform:scale(1);pointer-events:auto}
 
     <div class="blk">
       <div class="sl-hd"><span class="sl-lbl">Trail Length</span><span class="sl-val" id="trailLb"></span></div>
-      <div class="sl-row"><span class="sl-cap">Short</span><input type="range" class="zs" id="trailSl" min="1" max="9" step="1"><span class="sl-cap r">Long</span></div>
+      <div class="sl-row"><span class="sl-cap">Short</span><input type="range" class="zs" id="trailSl" min="3" max="13" step="1"><span class="sl-cap r">Long</span></div>
     </div>
 
     <button class="rst" id="rstBtn">Reset to defaults</button>
@@ -158,7 +174,7 @@ function applyUrl(){
   const c=parseColor(P.get('color'));if(c)S.color=c;
   if(P.get('speed'))S.speed=Math.max(1,Math.min(3,+P.get('speed')));
   if(P.get('size'))S.size=Math.max(8,Math.min(20,+P.get('size')));
-  if(P.get('trail'))S.trail=Math.max(1,Math.min(9,+P.get('trail')));
+  if(P.get('trail'))S.trail=Math.max(3,Math.min(13,+P.get('trail')));
 }
 
 const canvas=document.getElementById('c');
@@ -320,20 +336,21 @@ window.addEventListener('resize',()=>{clearTimeout(resizeT);resizeT=setTimeout(r
 
 // ── POPUP ────────────────────────────────────────────
 const gearBtn=document.getElementById('gearBtn'),pop=document.getElementById('pop');
-function openPop(){pop.classList.add('open');gearBtn.classList.add('pin');}
-function closePop(){pop.classList.remove('open');gearBtn.classList.remove('pin');}
-gearBtn.addEventListener('click',()=>pop.classList.contains('open')?closePop():openPop());
+function openPop(){pop.classList.add('open');gearBtn.classList.add('hide');}
+function closePop(){pop.classList.remove('open');gearBtn.classList.remove('hide');}
+gearBtn.addEventListener('click',openPop);
+document.getElementById('popX').addEventListener('click',closePop);
 
 document.getElementById('gBold').addEventListener('click',e=>{
-  const b=e.target.closest('.tb');if(!b)return;
+  const b=e.target.closest('[data-v]');if(!b)return;
   S.bold=b.dataset.v==='true';save();syncTg('gBold',String(S.bold));restart();
 });
 document.getElementById('gTheme').addEventListener('click',e=>{
-  const b=e.target.closest('.tb');if(!b)return;
+  const b=e.target.closest('[data-v]');if(!b)return;
   S.theme=b.dataset.v;save();syncTg('gTheme',S.theme);applyTheme();
 });
 document.getElementById('gCharset').addEventListener('click',e=>{
-  const b=e.target.closest('.tb');if(!b)return;
+  const b=e.target.closest('[data-v]');if(!b)return;
   S.charset=b.dataset.v;save();syncTg('gCharset',S.charset);
   for(let c=0;c<cols;c++)for(let r=0;r<rows;r++)charGrid[c][r]=rc();
 });
@@ -391,7 +408,7 @@ mkSlider('trailSl','trailLb','trail',parseInt,()=>{
   for(let c=0;c<cols;c++)colSLen[c]=sl+Math.floor(Math.random()*3)-1;
 });
 
-function syncTg(id,val){document.querySelectorAll('#'+id+' .tb').forEach(b=>b.classList.toggle('on',b.dataset.v===val));}
+function syncTg(id,val){document.querySelectorAll('#'+id+' [data-v]').forEach(b=>b.classList.toggle('on',b.dataset.v===val));}
 function syncAll(){
   syncTg('gTheme',S.theme);syncTg('gBold',String(S.bold));syncTg('gCharset',S.charset);syncColor();
   [['speed','speedSl','speedLb'],['size','sizeSl','sizeLb'],['trail','trailSl','trailLb']].forEach(([k,si,li])=>{
