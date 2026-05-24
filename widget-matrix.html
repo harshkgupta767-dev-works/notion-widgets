@@ -32,10 +32,19 @@ body:hover .gear,.gear.pin{opacity:0.65;transform:scale(1);pointer-events:auto}
 .sw{width:26px;height:26px;border-radius:50%;border:2.5px solid transparent;cursor:pointer;transition:transform .12s,border-color .12s;flex-shrink:0}
 .sw:hover{transform:scale(1.13)}
 .sw.on{border-color:rgba(255,255,255,.85)}
-.hi{display:flex;gap:8px;align-items:center}
-.hip{width:30px;height:30px;border-radius:6px;border:1px solid #333;flex-shrink:0;transition:background .15s}
-.hi input{flex:1;height:30px;background:#222;border:1px solid #333;border-radius:6px;color:#ccc;padding:0 10px;font-size:12px;font-family:'Inter',sans-serif;outline:none;letter-spacing:.05em}
-.hi input:focus{border-color:#555}
+.sw-cu{background:conic-gradient(hsl(0,80%,60%),hsl(60,80%,52%),hsl(120,65%,45%),hsl(180,75%,45%),hsl(240,65%,58%),hsl(300,65%,55%),hsl(360,80%,60%))}
+.cpk{display:none;margin-top:8px;padding:10px;border-radius:10px;background:#1e1e1e}
+.cpk.open{display:block}
+.cpk-box{position:relative;width:100%;height:120px;border-radius:8px;overflow:hidden;cursor:crosshair;touch-action:none}
+.cpk-box-hue{position:absolute;inset:0}
+.cpk-box-white{position:absolute;inset:0;background:linear-gradient(to right,#fff,transparent)}
+.cpk-box-black{position:absolute;inset:0;background:linear-gradient(to bottom,transparent,#000)}
+.cpk-dot{position:absolute;width:12px;height:12px;border-radius:50%;border:2px solid #fff;box-shadow:0 0 0 1px rgba(0,0,0,.3),0 2px 4px rgba(0,0,0,.3);transform:translate(-50%,-50%);pointer-events:none;z-index:2}
+.cpk-hue{position:relative;width:100%;height:12px;margin-top:8px;border-radius:6px;background:linear-gradient(to right,#f00,#ff0,#0f0,#0ff,#00f,#f0f,#f00);cursor:pointer;touch-action:none}
+.cpk-hue-thumb{position:absolute;top:50%;width:16px;height:16px;border-radius:50%;border:3px solid #fff;box-shadow:0 0 0 1px rgba(0,0,0,.15),0 2px 4px rgba(0,0,0,.25);transform:translate(-50%,-50%);pointer-events:none}
+.cpk-bottom{display:flex;align-items:center;gap:8px;margin-top:8px}
+.cpk-preview{width:26px;height:26px;border-radius:6px;border:1px solid #333;flex-shrink:0}
+.cpk-hex{flex:1;height:28px;border:1px solid #333;border-radius:6px;padding:0 8px;font-family:'Inter',sans-serif;font-size:12px;font-weight:600;outline:none;text-transform:uppercase;letter-spacing:.04em;background:#2a2a2a;color:#ccc}
 .zr{display:flex;align-items:center;gap:8px}
 .zi{font-size:10px;color:#444;font-weight:700;min-width:30px}
 .zi.r{text-align:right}
@@ -88,11 +97,9 @@ body:hover .gear,.gear.pin{opacity:0.65;transform:scale(1);pointer-events:auto}
     <div class="sw" data-c="#ff3322" style="background:#ff3322"></div>
     <div class="sw" data-c="#cc44ff" style="background:#cc44ff"></div>
     <div class="sw" data-c="#ffaa00" style="background:#ffaa00"></div>
+    <div class="sw sw-cu" id="cuSw"></div>
   </div>
-  <div class="hi">
-    <div class="hip" id="hexPrev"></div>
-    <input type="text" id="hexIn" maxlength="7" placeholder="#RRGGBB" spellcheck="false">
-  </div>
+  <div class="cpk" id="cpk-color"><div class="cpk-box"><div class="cpk-box-hue"></div><div class="cpk-box-white"></div><div class="cpk-box-black"></div><div class="cpk-dot"></div></div><div class="cpk-hue"><div class="cpk-hue-thumb"></div></div><div class="cpk-bottom"><div class="cpk-preview"></div><input class="cpk-hex" maxlength="7" spellcheck="false"></div></div>
   <div class="sp"></div>
 
   <div class="lb">Speed</div>
@@ -319,22 +326,46 @@ document.getElementById('gCharset').addEventListener('click',e=>{
   for(let c=0;c<cols;c++)for(let r=0;r<rows;r++)charGrid[c][r]=rc();
 });
 document.getElementById('gColor').addEventListener('click',e=>{
-  const sw=e.target.closest('.sw');if(!sw)return;
-  S.color=sw.dataset.c;save();hlColor();
+  const sw=e.target.closest('.sw:not(.sw-cu)');if(!sw)return;
+  S.color=sw.dataset.c;save();
+  document.getElementById('cpk-color').classList.remove('open');
+  syncColor();
 });
 
-const hexIn=document.getElementById('hexIn'),hexPrev=document.getElementById('hexPrev');
-hexIn.addEventListener('input',()=>{
-  let v=hexIn.value.trim();if(v&&v[0]!=='#')v='#'+v;
-  if(/^#[0-9a-f]{6}$/i.test(v)){S.color=v.toLowerCase();save();hlColor(true);}
-});
-hexIn.addEventListener('blur',()=>{hexIn.value=S.color.toUpperCase();});
-
-function hlColor(skipInput){
+function syncColor(){
   const col=S.color.toLowerCase();
-  document.querySelectorAll('#gColor .sw').forEach(s=>s.classList.toggle('on',s.dataset.c.toLowerCase()===col));
-  hexPrev.style.background=S.color;
-  if(!skipInput)hexIn.value=S.color.toUpperCase();
+  const presets=document.querySelectorAll('#gColor .sw:not(.sw-cu)');
+  const isCustom=![...presets].some(s=>s.dataset.c.toLowerCase()===col);
+  presets.forEach(s=>s.classList.toggle('on',s.dataset.c.toLowerCase()===col));
+  document.getElementById('cuSw').classList.toggle('on',isCustom);
+}
+
+function hexToHsv(hex){const r=parseInt(hex.slice(1,3),16)/255,g=parseInt(hex.slice(3,5),16)/255,b=parseInt(hex.slice(5,7),16)/255;const mx=Math.max(r,g,b),mn=Math.min(r,g,b),d=mx-mn;let h=0;if(d){if(mx===r)h=((g-b)/d+6)%6;else if(mx===g)h=(b-r)/d+2;else h=(r-g)/d+4;h/=6;}return{h,s:mx?d/mx:0,v:mx};}
+function hsvToHex(h,s,v){h*=6;const i=Math.floor(h),f=h-i,p=v*(1-s),q=v*(1-s*f),t=v*(1-s*(1-f));let r,g,b;switch(i%6){case 0:r=v;g=t;b=p;break;case 1:r=q;g=v;b=p;break;case 2:r=p;g=v;b=t;break;case 3:r=p;g=q;b=v;break;case 4:r=t;g=p;b=v;break;case 5:r=v;g=p;b=q;break;}return'#'+[r,g,b].map(x=>Math.round(x*255).toString(16).padStart(2,'0')).join('');}
+function isValidHex(h){return/^#[0-9a-fA-F]{6}$/.test(h);}
+
+function initColorPicker(){
+  const cpk=document.getElementById('cpk-color');
+  const box=cpk.querySelector('.cpk-box'),boxHue=cpk.querySelector('.cpk-box-hue'),dot=cpk.querySelector('.cpk-dot');
+  const hueBar=cpk.querySelector('.cpk-hue'),hueThumb=cpk.querySelector('.cpk-hue-thumb');
+  const preview=cpk.querySelector('.cpk-preview'),hexIn=cpk.querySelector('.cpk-hex');
+  let h=0,s=0,v=1;
+  function updUI(){const hex=hsvToHex(h,s,v);boxHue.style.background=`hsl(${(h*360).toFixed(1)},100%,50%)`;dot.style.left=s*100+'%';dot.style.top=(1-v)*100+'%';hueThumb.style.left=h*100+'%';preview.style.background=hex;hexIn.value=hex.toUpperCase();}
+  function setHex(hex){if(!isValidHex(hex))return;const hsv=hexToHsv(hex);h=hsv.h;s=hsv.s;v=hsv.v;updUI();}
+  function emit(){S.color=hsvToHex(h,s,v);save();syncColor();}
+  function bMove(e){const r=box.getBoundingClientRect();s=Math.max(0,Math.min(1,(e.clientX-r.left)/r.width));v=1-Math.max(0,Math.min(1,(e.clientY-r.top)/r.height));updUI();emit();}
+  function hMove(e){const r=hueBar.getBoundingClientRect();h=Math.max(0,Math.min(1,(e.clientX-r.left)/r.width));updUI();emit();}
+  box.addEventListener('pointerdown',e=>{e.preventDefault();box.setPointerCapture(e.pointerId);bMove(e);});
+  box.addEventListener('pointermove',e=>{if(e.buttons)bMove(e);});
+  hueBar.addEventListener('pointerdown',e=>{e.preventDefault();hueBar.setPointerCapture(e.pointerId);hMove(e);});
+  hueBar.addEventListener('pointermove',e=>{if(e.buttons)hMove(e);});
+  hexIn.addEventListener('input',()=>{let val=hexIn.value;if(val[0]!=='#')val='#'+val;if(isValidHex(val)){setHex(val);emit();}});
+  hexIn.addEventListener('blur',()=>{hexIn.value=hsvToHex(h,s,v).toUpperCase();});
+  document.getElementById('cuSw').addEventListener('click',()=>{
+    const wasOpen=cpk.classList.contains('open');
+    document.querySelectorAll('.cpk').forEach(p=>p.classList.remove('open'));
+    if(!wasOpen){cpk.classList.add('open');setHex(isValidHex(S.color)?S.color:'#00ff41');}
+  });
 }
 
 function mkSlider(id,lbId,key,cb){
@@ -351,7 +382,7 @@ mkSlider('trailSl','trailLb','trail',()=>{
 
 function syncTg(id,val){document.querySelectorAll('#'+id+' .tb').forEach(b=>b.classList.toggle('on',b.dataset.v===val));}
 function syncAll(){
-  syncTg('gTheme',S.theme);syncTg('gBold',String(S.bold));syncTg('gCharset',S.charset);hlColor();
+  syncTg('gTheme',S.theme);syncTg('gBold',String(S.bold));syncTg('gCharset',S.charset);syncColor();
   [['speed','speedSl','speedLb'],['size','sizeSl','sizeLb'],['trail','trailSl','trailLb'],['brightness','brightSl','brightLb']].forEach(([k,si,li])=>{
     document.getElementById(si).value=S[k];document.getElementById(li).textContent=S[k];
   });
@@ -359,7 +390,7 @@ function syncAll(){
 
 document.getElementById('rstBtn').addEventListener('click',()=>{S={...DEF};save();syncAll();restart();});
 
-load();applyUrl();syncAll();applyTheme();resize();restart();
+load();applyUrl();syncAll();applyTheme();initColorPicker();resize();restart();
 </script>
 </body>
 </html>
