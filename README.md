@@ -34,9 +34,9 @@ Hosted on GitHub Pages — embed using Notion's `/embed` block.
 - `widget-flip-clock.html` — Flip clock with Standard (4-tile) and Compact (2-tile) modes. Settings include:
   - **Fonts** — Anton, Bebas Neue, Oswald, JetBrains Mono, Squada One, Chakra Petch
   - **Tile presets** — 7 built-in colour presets + custom colour picker
-  - **Colour pickers** — separate controls for tile, number, and date/day colours
+  - **Colour pickers** — separate controls for tile, number, and date/day colours; the **number** and **date** swatch palettes adapt to the selected theme so the colours always contrast the background they sit on (custom colour stays available in both themes)
   - **Motion** — Smooth, Mechanical, Minimal, or Instant flip animation
-  - **Theme** — Light or Dark settings panel
+  - **Theme** — Light or Dark
   - **Format** — 12 HR or 24 HR
   - **Display** — Day & Date, Date only, Day only, or None
   - **Zoom** — 50 – 150 % scale
@@ -66,9 +66,11 @@ Hosted on GitHub Pages — embed using Notion's `/embed` block.
 
 - `widget-matrix.html` — Fullscreen Matrix-style digital rain. Settings include:
   - **Theme** — Dark or Light canvas background
-  - **Characters** — Katakana (カナ), Latin (ABC), Binary (01), Numbers (123), Symbols (!@#), or Mixed
-  - **Colour** — 9 preset swatches + custom hex input
-  - **Speed** — slow to fast slider
-  - **Font Size** — 8 – 28 px slider
-  - **Trail Length** — short to long fade trail slider
+  - **Style** — Bold or Normal characters
+  - **Characters** — Matrix (カナ), Alpha (ABC), Binary (01), Digits (123), Glitch (!@#), or Chaos — picked from a tile grid that previews a sample character
+  - **Colour** — 6 theme-aware preset swatches (bright tones on the dark theme, deeper tones on the light theme) plus a full HSV custom colour picker; switching theme migrates the choice by index so the rain stays visible
+  - **Speed** — 1 – 4 (step 0.25)
+  - **Font Size** — 8 – 20 px (step 1)
+  - **Trail Length** — 2 – 14 (step 1)
+  - Settings panel opens in the top-left corner with no overlay so live changes are visible behind it
   - Fills any embed size; settings accessible via gear icon

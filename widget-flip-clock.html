@@ -161,12 +161,6 @@
 
   <div class="lbl">Number Colour</div>
   <div class="sr" data-group="timeText">
-    <div class="sw lt sw-wh" data-c="#ffffff" style="background:#fff"></div>
-    <div class="sw dk" data-c="#2a2a2a" style="background:#2a2a2a"></div>
-    <div class="sw dk" data-c="#d9730d" style="background:#d9730d"></div>
-    <div class="sw dk" data-c="#448361" style="background:#448361"></div>
-    <div class="sw dk" data-c="#337ea9" style="background:#337ea9"></div>
-    <div class="sw dk" data-c="#9065b0" style="background:#9065b0"></div>
     <div class="sw sw-cu" data-target="timeText"></div>
   </div>
   <div class="cpk" id="cpk-timeText"><div class="cpk-box"><div class="cpk-box-hue"></div><div class="cpk-box-white"></div><div class="cpk-box-black"></div><div class="cpk-dot"></div></div><div class="cpk-hue"><div class="cpk-hue-thumb"></div></div><div class="cpk-bottom"><div class="cpk-preview"></div><input class="cpk-hex-input" maxlength="7" value="#ffffff" spellcheck="false"></div></div>
@@ -174,12 +168,6 @@
 
   <div class="lbl">Date & Day Colour</div>
   <div class="sr" data-group="dateText">
-    <div class="sw lt sw-wh" data-c="#ffffff" style="background:#fff"></div>
-    <div class="sw dk" data-c="#2a2a2a" style="background:#2a2a2a"></div>
-    <div class="sw dk" data-c="#d9730d" style="background:#d9730d"></div>
-    <div class="sw dk" data-c="#448361" style="background:#448361"></div>
-    <div class="sw dk" data-c="#337ea9" style="background:#337ea9"></div>
-    <div class="sw dk" data-c="#9065b0" style="background:#9065b0"></div>
     <div class="sw sw-cu" data-target="dateText"></div>
   </div>
   <div class="cpk" id="cpk-dateText"><div class="cpk-box"><div class="cpk-box-hue"></div><div class="cpk-box-white"></div><div class="cpk-box-black"></div><div class="cpk-dot"></div></div><div class="cpk-hue"><div class="cpk-hue-thumb"></div></div><div class="cpk-bottom"><div class="cpk-preview"></div><input class="cpk-hex-input" maxlength="7" value="#2a2a2a" spellcheck="false"></div></div>
@@ -218,6 +206,21 @@ const PRESETS=[
   {id:'gold',      name:'Gold',      tile:'#1a1508'},
   {id:'parchment', name:'Parchment', tile:'#f0f0f0'},
 ];
+
+// Theme-aware swatch palettes — each text colour group gets options that pop
+// against the background it actually sits on in that theme.
+// In dark theme: tiles default to white (so number text needs dark colours) and
+// the body bg is dark (so date text needs light colours). Light theme is the inverse.
+const SWATCH_PALETTES={
+  timeText:{
+    dark: ['#111111','#0a8a2e','#0066cc','#c41414','#7733bb','#cc6600'],
+    light:['#ffffff','#00ff41','#00cfff','#ffaa44','#cc99ff','#ffd700']
+  },
+  dateText:{
+    dark: ['#ffffff','#aaaaaa','#00ff41','#00cfff','#ffaa44','#cc99ff'],
+    light:['#111111','#666666','#0a8a2e','#0066cc','#c41414','#7733bb']
+  }
+};
 
 const FONT_MAP={
   'Anton':          {family:"'Anton','Roboto Condensed',sans-serif",      size:'82px', ls:'0.02em'},
@@ -506,6 +509,22 @@ document.querySelectorAll('.sw-cu').forEach(sw=>{
 });
 
 // SWATCH SYSTEM
+function renderSwatches(){
+  ['timeText','dateText'].forEach(key=>{
+    const container=document.querySelector('.sr[data-group="'+key+'"]');
+    if(!container)return;
+    container.querySelectorAll('.sw:not(.sw-cu)').forEach(s=>s.remove());
+    const cuSw=container.querySelector('.sw-cu');
+    SWATCH_PALETTES[key][S.theme].forEach(c=>{
+      const sw=document.createElement('div');
+      const light=getTileTextColor(c)==='#1a1a1a';
+      sw.className='sw '+(light?'lt':'dk')+(c.toLowerCase()==='#ffffff'?' sw-wh':'');
+      sw.dataset.c=c;
+      sw.style.background=c;
+      container.insertBefore(sw,cuSw);
+    });
+  });
+}
 function hlGroup(key){
   const container=document.querySelector('.sr[data-group="'+key+'"]');
   if(!container)return;
@@ -517,12 +536,15 @@ function hlGroup(key){
 }
 function hlAll(){pickerKeys.forEach(hlGroup);}
 
-pickerKeys.forEach(key=>{
+// Event delegation so dynamically-inserted swatches still respond
+['timeText','dateText'].forEach(key=>{
   const container=document.querySelector('.sr[data-group="'+key+'"]');
   if(!container)return;
-  container.querySelectorAll('.sw:not(.sw-cu)').forEach(s=>s.addEventListener('click',()=>{
+  container.addEventListener('click',e=>{
+    const s=e.target.closest('.sw:not(.sw-cu)');
+    if(!s||!container.contains(s))return;
     S[key]=s.dataset.c;save();applyAll();hlGroup(key);pickers[key].cpk.classList.remove('open');hlPreset();
-  }));
+  });
 });
 
 // TOGGLES
@@ -531,16 +553,24 @@ function syncTg(id,val){document.querySelectorAll('#'+id+' .tb').forEach(b=>b.cl
 setupTg('gMode','mode',renderClock);
 setupTg('gMotion','motion',applyMotion);
 setupTg('gTheme','theme',()=>{
-  if(S.theme==='dark'){S.tile='#ffffff';S.timeText='#111111';S.dateText='#ffffff';S.bg='#191919';}
-  else{S.tile='#2a2a2a';S.timeText='#ffffff';S.dateText='#2a2a2a';S.bg='#ffffff';}
-  save();applyAll();hlAll();hlPreset();
+  const prev=S.theme==='dark'?'light':'dark';
+  // Migrate text colours: if current value is at index i of the prev palette,
+  // adopt the new palette's index i. Custom values (not in either palette) stay.
+  ['timeText','dateText'].forEach(k=>{
+    const idx=SWATCH_PALETTES[k][prev].findIndex(c=>c.toLowerCase()===String(S[k]).toLowerCase());
+    if(idx>=0) S[k]=SWATCH_PALETTES[k][S.theme][idx];
+  });
+  // Tile + body bg follow the theme's defaults
+  if(S.theme==='dark'){S.tile='#ffffff';S.bg='#191919';}
+  else{S.tile='#2a2a2a';S.bg='#ffffff';}
+  save();applyAll();renderSwatches();hlAll();hlPreset();
 });
 setupTg('gFmt','format',()=>tick(false));
 setupTg('gDisp','display',()=>tick(false));
 const zSlider=document.getElementById('zSlider'),zLabel=document.getElementById('zLabel');
 zSlider.addEventListener('input',e=>{S.zoom=parseInt(e.target.value);zLabel.textContent=S.zoom+'%';save();applyAll();applyResponsive();});
 document.getElementById('rstBtn').addEventListener('click',()=>{
-  S={...DEF};save();applyAll();applyFont();applyMotion();hlAll();
+  S={...DEF};save();applyAll();applyFont();applyMotion();renderSwatches();hlAll();
   syncTg('gMode',S.mode);syncTg('gTheme',S.theme);syncTg('gFmt',S.format);syncTg('gDisp',S.display);syncTg('gMotion',S.motion);
   zSlider.value=S.zoom;zLabel.textContent=S.zoom+'%';
   pickerKeys.forEach(k=>pickers[k].cpk.classList.remove('open'));
@@ -548,7 +578,7 @@ document.getElementById('rstBtn').addEventListener('click',()=>{
 });
 
 // INIT
-load();applyAll();applyFont();applyMotion();hlAll();
+load();applyAll();applyFont();applyMotion();renderSwatches();hlAll();
 buildPresetGrid();hlPreset();syncFont();
 renderClock();
 syncTg('gMode',S.mode);syncTg('gTheme',S.theme);syncTg('gFmt',S.format);syncTg('gDisp',S.display);syncTg('gMotion',S.motion);
