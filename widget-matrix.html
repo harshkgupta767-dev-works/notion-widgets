@@ -14,24 +14,31 @@ body:hover .gear,.gear.pin{opacity:0.65;transform:scale(1);pointer-events:auto}
 .gear:hover{opacity:1!important;background:rgba(0,0,0,0.8)!important}
 .gear svg{width:14px;height:14px;fill:#bbb}
 .ov{position:fixed;inset:0;background:rgba(0,0,0,.55);z-index:200;opacity:0;pointer-events:none;transition:opacity .2s}.ov.open{opacity:1;pointer-events:auto}
-.pop{position:fixed;top:50%;left:50%;transform:translate(-50%,-50%) scale(.93);width:300px;max-height:86vh;overflow-y:auto;border-radius:14px;z-index:210;padding:20px;opacity:0;pointer-events:none;transition:opacity .2s,transform .2s;font-family:'Inter',sans-serif;background:#181818;color:#ddd;border:1px solid #2a2a2a;box-shadow:0 16px 60px rgba(0,0,0,.85)}
+.pop{position:fixed;top:50%;left:50%;transform:translate(-50%,-50%) scale(.93);width:300px;max-height:86vh;border-radius:14px;z-index:210;padding:20px;opacity:0;pointer-events:none;transition:opacity .2s,transform .2s;font-family:'Inter',sans-serif;background:#181818;color:#ddd;border:1px solid #2a2a2a;box-shadow:0 16px 60px rgba(0,0,0,.85);display:flex;flex-direction:column}
 .pop.open{opacity:1;pointer-events:auto;transform:translate(-50%,-50%) scale(1)}
-.pop::-webkit-scrollbar{width:4px}.pop::-webkit-scrollbar-thumb{background:#333;border-radius:4px}
-.ph{display:flex;justify-content:space-between;align-items:center;margin-bottom:18px}
+.ph{display:flex;justify-content:space-between;align-items:center;margin-bottom:14px;padding-bottom:14px;border-bottom:1px solid #232323;flex-shrink:0}
 .ph span{font-size:14px;font-weight:700;color:#e8e8e8}
 .px{width:26px;height:26px;background:none;border:none;cursor:pointer;display:flex;align-items:center;justify-content:center;border-radius:6px;font-size:16px;color:#555;transition:background .15s,color .15s}
 .px:hover{background:rgba(255,255,255,.07);color:#999}
-.lb{font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.12em;color:#555;margin:14px 0 8px}.lb:first-of-type{margin-top:0}
-.sp{height:1px;background:#222;margin:14px 0}
-.tg{display:flex;border-radius:8px;overflow:hidden;border:1px solid #272727}
-.tb{flex:1;padding:7px 3px;font-size:10.5px;font-weight:600;text-align:center;background:#1e1e1e;color:#444;border:none;cursor:pointer;transition:all .15s;white-space:nowrap;border-left:1px solid #272727}
+.pop-body{display:flex;flex-direction:column;gap:10px;overflow-y:auto;flex:1}
+.pop-body::-webkit-scrollbar{width:4px}.pop-body::-webkit-scrollbar-thumb{background:#333;border-radius:4px}
+.blk{background:#1e1e1e;border-radius:10px;padding:12px 14px;display:flex;flex-direction:column;gap:9px}
+.lb{font-size:9.5px;font-weight:700;text-transform:uppercase;letter-spacing:.15em;color:#666}
+.tg{display:flex;border-radius:10px;overflow:hidden;border:1px solid #272727}
+.tb{flex:1;padding:8px 3px;font-size:10.5px;font-weight:600;text-align:center;background:#1a1a1a;color:#444;border:none;cursor:pointer;transition:all .15s;white-space:nowrap;border-left:1px solid #272727}
 .tb:first-child{border-left:none}
-.tb.on{background:#e8e8e8;color:#111}
-.tb:hover:not(.on){background:#252525;color:#888}
-.sr{display:flex;flex-wrap:wrap;gap:8px;margin-bottom:10px}
+.tb.on{background:#e0e0e0;color:#111}
+.tb:hover:not(.on){background:#232323;color:#888}
+.sr{display:flex;flex-wrap:wrap;gap:8px}
 .sw{width:26px;height:26px;border-radius:50%;border:2.5px solid transparent;cursor:pointer;transition:transform .12s,border-color .12s;flex-shrink:0}
 .sw:hover{transform:scale(1.13)}
 .sw.on{border-color:rgba(255,255,255,.85)}
+.sl-hd{display:flex;justify-content:space-between;align-items:center}
+.sl-lbl{font-size:9.5px;font-weight:700;text-transform:uppercase;letter-spacing:.15em;color:#666}
+.sl-val{font-size:12px;font-weight:700;color:#bbb}
+.sl-row{display:flex;align-items:center;gap:8px}
+.sl-cap{font-size:10px;color:#444;font-weight:600;min-width:28px}
+.sl-cap.r{text-align:right}
 .sw-cu{background:conic-gradient(hsl(0,80%,60%),hsl(60,80%,52%),hsl(120,65%,45%),hsl(180,75%,45%),hsl(240,65%,58%),hsl(300,65%,55%),hsl(360,80%,60%))}
 .cpk{display:none;margin-top:8px;padding:10px;border-radius:10px;background:#1e1e1e}
 .cpk.open{display:block}
@@ -49,10 +56,9 @@ body:hover .gear,.gear.pin{opacity:0.65;transform:scale(1);pointer-events:auto}
 .zi{font-size:10px;color:#444;font-weight:700;min-width:30px}
 .zi.r{text-align:right}
 .zs{flex:1;appearance:none;-webkit-appearance:none;height:4px;border-radius:4px;background:#2a2a2a;outline:none;cursor:pointer}
-.zs::-webkit-slider-thumb{appearance:none;-webkit-appearance:none;width:15px;height:15px;border-radius:50%;background:#ccc;border:2px solid #181818;cursor:pointer}
-.zl{font-size:11px;font-weight:600;color:#444;min-width:24px;text-align:center}
-.rst{display:block;margin-top:16px;font-size:11px;text-align:center;cursor:pointer;color:#333;transition:color .15s;padding:3px}
-.rst:hover{color:#888}
+.zs::-webkit-slider-thumb{appearance:none;-webkit-appearance:none;width:15px;height:15px;border-radius:50%;background:#ccc;border:2px solid #1e1e1e;cursor:pointer}
+.rst{display:block;font-size:11px;font-weight:600;text-align:center;cursor:pointer;color:#333;border:1px solid #272727;border-radius:8px;padding:8px;background:none;transition:color .15s,border-color .15s;width:100%}
+.rst:hover{color:#888;border-color:#444}
 </style>
 </head>
 <body>
@@ -63,57 +69,67 @@ body:hover .gear,.gear.pin{opacity:0.65;transform:scale(1);pointer-events:auto}
 <div class="ov" id="ov"></div>
 <div class="pop" id="pop">
   <div class="ph"><span>Settings</span><button class="px" id="popX">✕</button></div>
+  <div class="pop-body">
 
-  <div class="lb">Theme</div>
-  <div class="tg" id="gTheme">
-    <button class="tb" data-v="dark">Dark</button>
-    <button class="tb" data-v="light">Light</button>
+    <div class="blk">
+      <div class="lb">Theme</div>
+      <div class="tg" id="gTheme">
+        <button class="tb" data-v="dark">Dark</button>
+        <button class="tb" data-v="light">Light</button>
+      </div>
+    </div>
+
+    <div class="blk">
+      <div class="lb">Style</div>
+      <div class="tg" id="gBold">
+        <button class="tb" data-v="true">Bold</button>
+        <button class="tb" data-v="false">Normal</button>
+      </div>
+    </div>
+
+    <div class="blk">
+      <div class="lb">Characters</div>
+      <div class="tg" id="gCharset">
+        <button class="tb" data-v="katakana">Matrix</button>
+        <button class="tb" data-v="latin">Alpha</button>
+        <button class="tb" data-v="binary">Binary</button>
+        <button class="tb" data-v="numbers">Digits</button>
+        <button class="tb" data-v="symbols">Glitch</button>
+        <button class="tb" data-v="mixed">Chaos</button>
+      </div>
+    </div>
+
+    <div class="blk">
+      <div class="lb">Colour</div>
+      <div class="sr" id="gColor">
+        <div class="sw" data-c="#00ff41" style="background:#00ff41"></div>
+        <div class="sw" data-c="#ffffff" style="background:#fff"></div>
+        <div class="sw" data-c="#00cfff" style="background:#00cfff"></div>
+        <div class="sw" data-c="#ff3322" style="background:#ff3322"></div>
+        <div class="sw" data-c="#cc44ff" style="background:#cc44ff"></div>
+        <div class="sw" data-c="#ffaa00" style="background:#ffaa00"></div>
+        <div class="sw sw-cu" id="cuSw"></div>
+      </div>
+      <div class="cpk" id="cpk-color"><div class="cpk-box"><div class="cpk-box-hue"></div><div class="cpk-box-white"></div><div class="cpk-box-black"></div><div class="cpk-dot"></div></div><div class="cpk-hue"><div class="cpk-hue-thumb"></div></div><div class="cpk-bottom"><div class="cpk-preview"></div><input class="cpk-hex" maxlength="7" spellcheck="false"></div></div>
+    </div>
+
+    <div class="blk">
+      <div class="sl-hd"><span class="sl-lbl">Speed</span><span class="sl-val" id="speedLb"></span></div>
+      <div class="sl-row"><span class="sl-cap">Slow</span><input type="range" class="zs" id="speedSl" min="1" max="3" step="0.5"><span class="sl-cap r">Fast</span></div>
+    </div>
+
+    <div class="blk">
+      <div class="sl-hd"><span class="sl-lbl">Font Size</span><span class="sl-val" id="sizeLb"></span></div>
+      <div class="sl-row"><span class="sl-cap">−</span><input type="range" class="zs" id="sizeSl" min="8" max="20" step="2"><span class="sl-cap r">+</span></div>
+    </div>
+
+    <div class="blk">
+      <div class="sl-hd"><span class="sl-lbl">Trail Length</span><span class="sl-val" id="trailLb"></span></div>
+      <div class="sl-row"><span class="sl-cap">Short</span><input type="range" class="zs" id="trailSl" min="1" max="9" step="1"><span class="sl-cap r">Long</span></div>
+    </div>
+
+    <button class="rst" id="rstBtn">Reset to defaults</button>
   </div>
-  <div class="sp"></div>
-
-  <div class="lb">Style</div>
-  <div class="tg" id="gBold">
-    <button class="tb" data-v="true">Bold</button>
-    <button class="tb" data-v="false">Normal</button>
-  </div>
-  <div class="sp"></div>
-
-  <div class="lb">Characters</div>
-  <div class="tg" id="gCharset">
-    <button class="tb" data-v="katakana">Matrix</button>
-    <button class="tb" data-v="latin">Alpha</button>
-    <button class="tb" data-v="binary">Binary</button>
-    <button class="tb" data-v="numbers">Digits</button>
-    <button class="tb" data-v="symbols">Glitch</button>
-    <button class="tb" data-v="mixed">Chaos</button>
-  </div>
-  <div class="sp"></div>
-
-  <div class="lb">Colour</div>
-  <div class="sr" id="gColor">
-    <div class="sw" data-c="#00ff41" style="background:#00ff41"></div>
-    <div class="sw" data-c="#ffffff" style="background:#fff"></div>
-    <div class="sw" data-c="#00cfff" style="background:#00cfff"></div>
-    <div class="sw" data-c="#ff3322" style="background:#ff3322"></div>
-    <div class="sw" data-c="#cc44ff" style="background:#cc44ff"></div>
-    <div class="sw" data-c="#ffaa00" style="background:#ffaa00"></div>
-    <div class="sw sw-cu" id="cuSw"></div>
-  </div>
-  <div class="cpk" id="cpk-color"><div class="cpk-box"><div class="cpk-box-hue"></div><div class="cpk-box-white"></div><div class="cpk-box-black"></div><div class="cpk-dot"></div></div><div class="cpk-hue"><div class="cpk-hue-thumb"></div></div><div class="cpk-bottom"><div class="cpk-preview"></div><input class="cpk-hex" maxlength="7" spellcheck="false"></div></div>
-  <div class="sp"></div>
-
-  <div class="lb">Speed</div>
-  <div class="zr"><span class="zi">Slow</span><input type="range" class="zs" id="speedSl" min="1" max="3" step="0.5"><span class="zi r">Fast</span><span class="zl" id="speedLb"></span></div>
-  <div class="sp"></div>
-
-  <div class="lb">Font Size</div>
-  <div class="zr"><span class="zi">−</span><input type="range" class="zs" id="sizeSl" min="8" max="20" step="2"><span class="zi r">+</span><span class="zl" id="sizeLb"></span></div>
-  <div class="sp"></div>
-
-  <div class="lb">Trail Length</div>
-  <div class="zr"><span class="zi">Short</span><input type="range" class="zs" id="trailSl" min="1" max="9" step="1"><span class="zi r">Long</span><span class="zl" id="trailLb"></span></div>
-
-  <div class="rst" id="rstBtn">Reset to defaults</div>
 </div>
 
 <script>
@@ -135,7 +151,7 @@ function parseColor(s){
   return null;
 }
 
-const DEF={theme:'dark',charset:'latin',color:'#ffffff',speed:2,size:14,trail:5,bold:true};
+const DEF={theme:'dark',charset:'latin',color:'#ffffff',speed:2.5,size:14,trail:8,bold:true};
 const HGAP=6; // horizontal gap between columns
 const VGAP=2; // vertical gap between rows
 let S={...DEF};
@@ -363,13 +379,13 @@ function initColorPicker(){
   });
 }
 
-function mkSlider(id,lbId,key,cb){
+function mkSlider(id,lbId,key,parse,cb){
   const el=document.getElementById(id),lb=document.getElementById(lbId);
-  el.addEventListener('input',()=>{S[key]=parseInt(el.value);lb.textContent=el.value;save();if(cb)cb();});
+  el.addEventListener('input',()=>{S[key]=parse(el.value);lb.textContent=el.value;save();if(cb)cb();});
 }
-mkSlider('speedSl','speedLb','speed');
-mkSlider('sizeSl','sizeLb','size',()=>{charW=measureCharW();initGrid();});
-mkSlider('trailSl','trailLb','trail',()=>{
+mkSlider('speedSl','speedLb','speed',parseFloat);
+mkSlider('sizeSl','sizeLb','size',parseInt,()=>{charW=measureCharW();initGrid();});
+mkSlider('trailSl','trailLb','trail',parseInt,()=>{
   const sl=streamLen();
   for(let c=0;c<cols;c++)colSLen[c]=sl+Math.floor(Math.random()*3)-1;
 });
