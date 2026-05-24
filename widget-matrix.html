@@ -125,7 +125,7 @@ function parseColor(s){
 }
 
 const DEF={theme:'dark',charset:'latin',color:'#ffffff',speed:2,size:14,trail:5};
-const HGAP=8; // horizontal gap between columns
+const HGAP=6; // horizontal gap between columns
 const VGAP=4; // vertical gap between rows
 let S={...DEF};
 function load(){try{const d=localStorage.getItem('wmx2');if(d)S={...DEF,...JSON.parse(d)};}catch(e){}}
@@ -194,21 +194,20 @@ function initGrid(){
   colCooldown=Array.from({length:cols},()=>Math.random()<0.35?80+Math.floor(Math.random()*120):0);
 }
 
-function tick(){
-  // How many rows each column advances per tick, scaled by speed
-  const advPerTick=(S.speed/2)*0.55;
-
-  // Chars only flicker while the stream is actively passing through
+function tick(dt){
+  const dtScale=dt/50;
+  const advPerTick=(S.speed/2)*0.55*dtScale;
+  const brightRate=1-Math.pow(0.35,dtScale);
+  const fadeRate=1-Math.pow(0.82,dtScale);
   const inStreamRate=0.45;
 
   for(let col=0;col<cols;col++){
     if(colCooldown[col]>0){
-      colCooldown[col]--;
-      // Fade all cells toward their resting alpha while column waits
+      colCooldown[col]-=dtScale;
       for(let row=0;row<rows;row++){
         const cur=alphaGrid[col][row];
         const tgt=visitedGrid[col][row]?BASE:0;
-        alphaGrid[col][row]=cur+(tgt-cur)*0.18;
+        alphaGrid[col][row]=cur+(tgt-cur)*fadeRate;
       }
       continue;
     }
@@ -221,37 +220,30 @@ function tick(){
     for(let row=0;row<rows;row++){
       const dist=(head-row+rows)%rows;
       const inStream=dist<sl;
-      if(inStream) visitedGrid[col][row]=true;
+      if(dist<1) visitedGrid[col][row]=true;
 
       // --- TARGET ALPHA ---
       let target;
       if(dist<1){
-        // Tip: spike to peak
         target=PEAK;
-      } else if(inStream){
-        // Stream body: steep power-curve falloff — NOT linear, drops off fast
-        // Power 3 makes it fall quickly then level out near BASE
+      } else if(inStream&&visitedGrid[col][row]){
+        // Body only visible for cells the head has already passed through
         const t=1-(dist-1)/(sl-1);
         target=BASE+(PEAK-BASE)*Math.pow(t,3);
       } else {
         target=visitedGrid[col][row]?BASE:0;
       }
 
-      // Add small per-char random noise so no two chars have the same alpha
-      // This breaks up any residual smooth-gradient appearance
       target+=( Math.random()-0.5 )*0.06;
       target=Math.max(visitedGrid[col][row]?BASE-0.04:0,Math.min(PEAK,target));
 
-      // Move current alpha TOWARD target (not snap) for natural look
-      // Fast approach when illuminating, slower when fading — mimics phosphor decay
       const cur=alphaGrid[col][row];
       if(target>cur){
-        alphaGrid[col][row]=cur+(target-cur)*0.65; // fast brighten
+        alphaGrid[col][row]=cur+(target-cur)*brightRate;
       } else {
-        alphaGrid[col][row]=cur+(target-cur)*0.18; // slow fade
+        alphaGrid[col][row]=cur+(target-cur)*fadeRate;
       }
 
-      // Char changes: only while stream is passing through this cell
       if(dist<1&&Math.random()<inStreamRate){
         charGrid[col][row]=rc();
       }
@@ -278,16 +270,12 @@ function draw(){
   }
 }
 
-// Tick at ~20fps (interval driven) — stepped, not silky smooth
-// This makes stream positions feel discrete rather than continuously flowing,
-// which breaks the "smooth gradient beam" appearance
 let raf,lastTime=0;
 function loop(ts){
   raf=requestAnimationFrame(loop);
-  const interval=Math.max(16,55-S.speed*4); // speed1→51ms≈20fps, speed10→15ms≈66fps
-  if(ts-lastTime<interval)return;
+  const dt=lastTime?Math.min(ts-lastTime,100):16;
   lastTime=ts;
-  tick();
+  tick(dt);
   draw();
 }
 
