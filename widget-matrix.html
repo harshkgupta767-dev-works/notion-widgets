@@ -126,7 +126,7 @@ function parseColor(s){
 
 const DEF={theme:'dark',charset:'latin',color:'#ffffff',speed:2,size:14,trail:5};
 const HGAP=6; // horizontal gap between columns
-const VGAP=4; // vertical gap between rows
+const VGAP=2; // vertical gap between rows
 let S={...DEF};
 function load(){try{const d=localStorage.getItem('wmx2');if(d)S={...DEF,...JSON.parse(d)};}catch(e){}}
 function save(){try{localStorage.setItem('wmx2',JSON.stringify(S));}catch(e){}}
