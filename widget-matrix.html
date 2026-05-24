@@ -101,6 +101,10 @@ body:hover .gear,.gear.pin{opacity:0.65;transform:scale(1);pointer-events:auto}
 
   <div class="lb">Trail Length</div>
   <div class="zr"><span class="zi">Short</span><input type="range" class="zs" id="trailSl" min="1" max="9" step="1"><span class="zi r">Long</span><span class="zl" id="trailLb"></span></div>
+  <div class="sp"></div>
+
+  <div class="lb">Streams</div>
+  <div class="zr"><span class="zi">Few</span><input type="range" class="zs" id="streamsSl" min="1" max="10" step="1"><span class="zi r">Many</span><span class="zl" id="streamsLb"></span></div>
 
   <div class="rst" id="rstBtn">Reset to defaults</div>
 </div>
@@ -124,7 +128,7 @@ function parseColor(s){
   return null;
 }
 
-const DEF={theme:'dark',charset:'latin',color:'#ffffff',speed:2,size:14,trail:5};
+const DEF={theme:'dark',charset:'latin',color:'#ffffff',speed:2,size:14,trail:5,streams:9};
 const HGAP=6; // horizontal gap between columns
 const VGAP=2; // vertical gap between rows
 let S={...DEF};
@@ -191,7 +195,8 @@ function initGrid(){
   colSLen=Array.from({length:cols},()=>sl+Math.floor(Math.random()*3)-1);
 
   // Stagger initial cooldowns so ~35% of columns start resting
-  colCooldown=Array.from({length:cols},()=>Math.random()<0.05?80+Math.floor(Math.random()*120):0);
+  const restP=(11-S.streams)*0.06;
+  colCooldown=Array.from({length:cols},()=>Math.random()<restP?80+Math.floor(Math.random()*120):0);
 }
 
 function tick(dt){
@@ -212,7 +217,7 @@ function tick(dt){
       continue;
     }
     const next=phase[col]+colSpeed[col]*advPerTick;
-    if(next>=rows&&Math.random()<0.1) colCooldown[col]=80+Math.floor(Math.random()*120);
+    if(next>=rows&&Math.random()<(11-S.streams)*0.06) colCooldown[col]=80+Math.floor(Math.random()*120);
     phase[col]=next%rows;
     const head=phase[col];
     const sl=colSLen[col];
@@ -329,11 +334,12 @@ mkSlider('trailSl','trailLb','trail',()=>{
   const sl=streamLen();
   for(let c=0;c<cols;c++)colSLen[c]=sl+Math.floor(Math.random()*3)-1;
 });
+mkSlider('streamsSl','streamsLb','streams');
 
 function syncTg(id,val){document.querySelectorAll('#'+id+' .tb').forEach(b=>b.classList.toggle('on',b.dataset.v===val));}
 function syncAll(){
   syncTg('gTheme',S.theme);syncTg('gCharset',S.charset);hlColor();
-  [['speed','speedSl','speedLb'],['size','sizeSl','sizeLb'],['trail','trailSl','trailLb']].forEach(([k,si,li])=>{
+  [['speed','speedSl','speedLb'],['size','sizeSl','sizeLb'],['trail','trailSl','trailLb'],['streams','streamsSl','streamsLb']].forEach(([k,si,li])=>{
     document.getElementById(si).value=S[k];document.getElementById(li).textContent=S[k];
   });
 }
