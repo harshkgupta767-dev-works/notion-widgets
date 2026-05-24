@@ -216,7 +216,6 @@ function tick(dt){
   const advPerTick=(S.speed/2)*0.55*dtScale;
   const brightRate=1-Math.pow(0.35,dtScale);
   const fadeRate=1-Math.pow(0.82,dtScale);
-  const inStreamRate=0.45;
 
   for(let col=0;col<cols;col++){
     if(colCooldown[col]>0){
@@ -237,7 +236,10 @@ function tick(dt){
     for(let row=0;row<rows;row++){
       const dist=(head-row+rows)%rows;
       const inStream=dist<sl;
-      if(dist<1) visitedGrid[col][row]=true;
+      if(dist<1){
+        if(!visitedGrid[col][row]) charGrid[col][row]=rc();
+        visitedGrid[col][row]=true;
+      }
 
       // --- TARGET ALPHA ---
       let target;
@@ -261,9 +263,6 @@ function tick(dt){
         alphaGrid[col][row]=cur+(target-cur)*fadeRate;
       }
 
-      if(dist<1&&Math.random()<inStreamRate){
-        charGrid[col][row]=rc();
-      }
     }
   }
 }
