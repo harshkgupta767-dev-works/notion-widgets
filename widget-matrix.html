@@ -105,6 +105,10 @@ body:hover .gear,.gear.pin{opacity:0.65;transform:scale(1);pointer-events:auto}
 
   <div class="lb">Trail Length</div>
   <div class="zr"><span class="zi">Short</span><input type="range" class="zs" id="trailSl" min="1" max="9" step="1"><span class="zi r">Long</span><span class="zl" id="trailLb"></span></div>
+  <div class="sp"></div>
+
+  <div class="lb">Brightness</div>
+  <div class="zr"><span class="zi">Dim</span><input type="range" class="zs" id="brightSl" min="1" max="10" step="1"><span class="zi r">Bright</span><span class="zl" id="brightLb"></span></div>
 
   <div class="rst" id="rstBtn">Reset to defaults</div>
 </div>
@@ -128,7 +132,7 @@ function parseColor(s){
   return null;
 }
 
-const DEF={theme:'dark',charset:'latin',color:'#ffffff',speed:2,size:14,trail:5,bold:true};
+const DEF={theme:'dark',charset:'latin',color:'#ffffff',speed:2,size:14,trail:5,bold:true,brightness:9};
 const HGAP=6; // horizontal gap between columns
 const VGAP=2; // vertical gap between rows
 let S={...DEF};
@@ -160,7 +164,6 @@ let cols=0,rows=0,charW=1,colStride=1,rowStride=1;
 // AMBIENT floor — chars never drop below this
 const BASE=0.32;
 // Peak brightness at stream tip
-const PEAK=0.82;
 
 function rc(){const s=CHARSETS[S.charset]||CHARSETS.latin;return s[Math.random()*s.length|0];}
 function hexRgb(h){const m=(h||'').match(/^#?([0-9a-f]{6})/i);if(!m)return{r:255,g:255,b:255};const n=parseInt(m[1],16);return{r:(n>>16)&255,g:(n>>8)&255,b:n&255};}
@@ -205,6 +208,7 @@ function initGrid(){
 }
 
 function tick(dt){
+  const PEAK=0.2+(S.brightness-1)/9*0.8;
   const dtScale=dt/50;
   const advPerTick=(S.speed/2)*0.55*dtScale;
   const brightRate=1-Math.pow(0.35,dtScale);
@@ -339,6 +343,7 @@ function mkSlider(id,lbId,key,cb){
 }
 mkSlider('speedSl','speedLb','speed');
 mkSlider('sizeSl','sizeLb','size',()=>{charW=measureCharW();initGrid();});
+mkSlider('brightSl','brightLb','brightness');
 mkSlider('trailSl','trailLb','trail',()=>{
   const sl=streamLen();
   for(let c=0;c<cols;c++)colSLen[c]=sl+Math.floor(Math.random()*3)-1;
@@ -347,7 +352,7 @@ mkSlider('trailSl','trailLb','trail',()=>{
 function syncTg(id,val){document.querySelectorAll('#'+id+' .tb').forEach(b=>b.classList.toggle('on',b.dataset.v===val));}
 function syncAll(){
   syncTg('gTheme',S.theme);syncTg('gBold',String(S.bold));syncTg('gCharset',S.charset);hlColor();
-  [['speed','speedSl','speedLb'],['size','sizeSl','sizeLb'],['trail','trailSl','trailLb']].forEach(([k,si,li])=>{
+  [['speed','speedSl','speedLb'],['size','sizeSl','sizeLb'],['trail','trailSl','trailLb'],['brightness','brightSl','brightLb']].forEach(([k,si,li])=>{
     document.getElementById(si).value=S[k];document.getElementById(li).textContent=S[k];
   });
 }
