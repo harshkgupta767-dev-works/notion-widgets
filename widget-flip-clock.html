@@ -190,22 +190,33 @@
 <script>
 const DAYS=['Sunday','Monday','Tuesday','Wednesday','Thursday','Friday','Saturday'];
 const MONTHS=['January','February','March','April','May','June','July','August','September','October','November','December'];
-const DEF={mode:'standard',theme:'light',tile:'#2a2a2a',timeText:'#ffffff',dateText:'#2a2a2a',bg:'#ffffff',format:'24',display:'both',zoom:100,preset:null,font:'Anton',motion:'smooth'};
+const DEF={mode:'standard',theme:'light',tile:'#2a2a2a',timeText:'#ffffff',dateText:'#111111',bg:'#ffffff',format:'24',display:'both',zoom:100,preset:null,font:'Anton',motion:'smooth'};
 let S={...DEF};
 let currentBreak='large';
 const $cont=document.getElementById('cont');const $wrapper=document.getElementById('wrapper');
 function load(){try{const d=localStorage.getItem('flipclock-v1');if(d){const p=JSON.parse(d);S={...DEF,...p};if(!p.bg)S.bg=S.theme==='dark'?'#191919':'#ffffff';if(S.font==='Orbitron')S.font='Anton';}}catch(e){}}
-function save(){const m=PRESETS.find(p=>p.tile===S.tile);S.preset=m?m.id:'custom';try{localStorage.setItem('flipclock-v1',JSON.stringify(S));}catch(e){}}
+function save(){const m=TILE_PRESETS[S.theme].find(p=>p.tile===S.tile);S.preset=m?m.id:'custom';try{localStorage.setItem('flipclock-v1',JSON.stringify(S));}catch(e){}}
 
-const PRESETS=[
-  {id:'charcoal',  name:'Charcoal',  tile:'#2a2a2a'},
-  {id:'obsidian',  name:'Obsidian',  tile:'#111111'},
-  {id:'nord',      name:'Nord',      tile:'#3b4252'},
-  {id:'coffee',    name:'Coffee',    tile:'#3d2b1f'},
-  {id:'cyber',     name:'Cyber',     tile:'#0a1628'},
-  {id:'gold',      name:'Gold',      tile:'#1a1508'},
-  {id:'parchment', name:'Parchment', tile:'#f0f0f0'},
-];
+// Theme-aware tile presets: dark theme → bright tiles (high contrast on dark bg)
+// light theme → dark tiles (high contrast on light bg). Migration by index on switch.
+const TILE_PRESETS={
+  light:[
+    {id:'charcoal', name:'Charcoal', tile:'#2a2a2a'},
+    {id:'obsidian', name:'Obsidian', tile:'#111111'},
+    {id:'nord',     name:'Nord',     tile:'#3b4252'},
+    {id:'coffee',   name:'Coffee',   tile:'#3d2b1f'},
+    {id:'cyber',    name:'Cyber',    tile:'#0a1628'},
+    {id:'gold',     name:'Gold',     tile:'#1a1508'},
+  ],
+  dark:[
+    {id:'white',     name:'White',     tile:'#ffffff'},
+    {id:'parchment', name:'Parchment', tile:'#f0f0f0'},
+    {id:'silver',    name:'Silver',    tile:'#c8c8c8'},
+    {id:'moss',      name:'Moss',      tile:'#b8f0c8'},
+    {id:'sky',       name:'Sky',       tile:'#b8d8f0'},
+    {id:'amber',     name:'Amber',     tile:'#f5d070'},
+  ]
+};
 
 // Theme-aware swatch palettes — each text colour group gets options that pop
 // against the background it actually sits on in that theme.
@@ -381,7 +392,8 @@ function applyAll(){
 // PRESETS
 function buildPresetGrid(){
   const grid=document.getElementById('presetGrid');
-  grid.innerHTML=PRESETS.map(p=>
+  const presets=TILE_PRESETS[S.theme];
+  grid.innerHTML=presets.map(p=>
     '<div class="pc" data-pid="'+p.id+'">' +
     '<div class="pc-swatch" style="background:'+p.tile+'"></div>' +
     '<div class="pc-name">'+p.name+'</div>' +
@@ -401,7 +413,7 @@ function buildPresetGrid(){
       });
       return;
     }
-    const p=PRESETS.find(x=>x.id===pid);
+    const p=presets.find(x=>x.id===pid);
     card.addEventListener('mouseenter',()=>document.documentElement.style.setProperty('--tile-bg',p.tile));
     card.addEventListener('mouseleave',()=>document.documentElement.style.setProperty('--tile-bg',S.tile));
     card.addEventListener('click',()=>applyPreset(p));
@@ -414,7 +426,7 @@ function applyPreset(p){
   hlPreset();
 }
 function hlPreset(){
-  const m=PRESETS.find(p=>p.tile===S.tile);
+  const m=TILE_PRESETS[S.theme].find(p=>p.tile===S.tile);
   const active=m?m.id:'custom';
   document.querySelectorAll('.pc').forEach(c=>c.classList.toggle('on',c.dataset.pid===active));
 }
@@ -558,23 +570,23 @@ setupTg('gMode','mode',renderClock);
 setupTg('gMotion','motion',applyMotion);
 setupTg('gTheme','theme',()=>{
   const prev=S.theme==='dark'?'light':'dark';
-  // Migrate text colours: if current value is at index i of the prev palette,
-  // adopt the new palette's index i. Custom values (not in either palette) stay.
+  // Migrate text colours by palette index; custom values stay unchanged
   ['timeText','dateText'].forEach(k=>{
     const idx=SWATCH_PALETTES[k][prev].findIndex(c=>c.toLowerCase()===String(S[k]).toLowerCase());
     if(idx>=0) S[k]=SWATCH_PALETTES[k][S.theme][idx];
   });
-  // Tile + body bg follow the theme's defaults
-  if(S.theme==='dark'){S.tile='#ffffff';S.bg='#191919';}
-  else{S.tile='#2a2a2a';S.bg='#ffffff';}
-  save();applyAll();renderSwatches();hlAll();hlPreset();
+  // Migrate tile by preset index; custom tile values stay unchanged
+  const tileIdx=TILE_PRESETS[prev].findIndex(p=>p.tile===S.tile);
+  if(tileIdx>=0) S.tile=TILE_PRESETS[S.theme][tileIdx].tile;
+  S.bg=S.theme==='dark'?'#191919':'#ffffff';
+  save();applyAll();buildPresetGrid();renderSwatches();hlAll();hlPreset();
 });
 setupTg('gFmt','format',()=>tick(false));
 setupTg('gDisp','display',()=>tick(false));
 const zSlider=document.getElementById('zSlider'),zLabel=document.getElementById('zLabel');
 zSlider.addEventListener('input',e=>{S.zoom=parseInt(e.target.value);zLabel.textContent=S.zoom+'%';save();applyAll();applyResponsive();});
 document.getElementById('rstBtn').addEventListener('click',()=>{
-  S={...DEF};save();applyAll();applyFont();applyMotion();renderSwatches();hlAll();
+  S={...DEF};save();applyAll();applyFont();applyMotion();buildPresetGrid();renderSwatches();hlAll();
   syncTg('gMode',S.mode);syncTg('gTheme',S.theme);syncTg('gFmt',S.format);syncTg('gDisp',S.display);syncTg('gMotion',S.motion);
   zSlider.value=S.zoom;zLabel.textContent=S.zoom+'%';
   pickerKeys.forEach(k=>pickers[k].cpk.classList.remove('open'));
