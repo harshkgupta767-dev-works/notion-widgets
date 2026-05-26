@@ -33,7 +33,7 @@
   .half.top .num{top:0}.half.bot .num{top:-55px}
   .flap{position:absolute;left:0;right:0;height:50%;overflow:hidden;z-index:5}
   .flap .num{z-index:2}
-  .flap-top{top:0;background:var(--tile-bg,#2a2a2a);border-radius:10px 10px 0 0;border-bottom:1px solid rgba(128,128,128,0.15);box-shadow:var(--flap-shadow-top);transform-origin:bottom center;animation:fd var(--flip-top-dur) var(--flip-top-ease) forwards}.flap-top .num{top:0}
+  .flap-top{top:0;background:var(--tile-bg,#2a2a2a);border-radius:10px 10px 0 0;border-bottom:1px solid rgba(128,128,128,0.15);box-shadow:var(--flap-shadow-top);transform-origin:bottom center;animation:fd var(--flip-top-dur) var(--flip-top-ease) forwards,ftsOut var(--flip-top-dur) var(--flip-top-ease) forwards}.flap-top .num{top:0}
   .flap-top::before{content:'';position:absolute;inset:0;z-index:1;pointer-events:none;background:linear-gradient(to top,rgba(0,0,0,var(--flap-gradient-strength,0.15)) 0%,transparent 60%);animation:fdg var(--flip-top-dur) var(--flip-top-ease) both}
   .flap-top::after{content:'';position:absolute;inset:0;z-index:1;pointer-events:none;animation:fds var(--flip-top-dur) var(--flip-top-ease) both}
   .flap-bot{bottom:0;background:var(--tile-bg,#2a2a2a);filter:brightness(0.9);border-radius:0 0 10px 10px;box-shadow:var(--flap-shadow-bot);transform-origin:top center;transform:rotateX(90deg);animation:fu var(--flip-bot-dur) var(--flip-bot-ease) var(--flip-bot-delay) forwards,fbsOut var(--flip-bot-dur) var(--flip-bot-ease) var(--flip-bot-delay) forwards}.flap-bot .num{top:-55px}
@@ -41,11 +41,12 @@
   .flap-bot::after{content:'';position:absolute;inset:0;z-index:1;pointer-events:none;animation:fus var(--flip-bot-dur) var(--flip-bot-ease) var(--flip-bot-delay) both}
   @keyframes fd{0%{transform:rotateX(0)}100%{transform:rotateX(-90deg)}}
   @keyframes fu{0%{transform:rotateX(90deg)}83%{transform:rotateX(-3deg)}100%{transform:rotateX(0)}}
-  @keyframes fds{0%{background:rgba(0,0,0,0)}100%{background:rgba(0,0,0,0.35)}}
+  @keyframes fds{0%{background:rgba(0,0,0,0)}50%{background:rgba(0,0,0,0.35)}100%{background:rgba(0,0,0,0)}}
   @keyframes fus{0%{background:rgba(0,0,0,0.12)}40%{background:rgba(0,0,0,0.08)}100%{background:rgba(0,0,0,0)}}
-  @keyframes fdg{0%{opacity:0}100%{opacity:1}}
+  @keyframes fdg{0%{opacity:0}45%{opacity:0.7}100%{opacity:0}}
   @keyframes fug{0%{opacity:0}25%{opacity:0.6}100%{opacity:0}}
   @keyframes fbsOut{0%{box-shadow:var(--flap-shadow-bot)}100%{box-shadow:0 -2px 4px rgba(0,0,0,0)}}
+  @keyframes ftsOut{0%{box-shadow:var(--flap-shadow-top)}100%{box-shadow:0 2px 4px rgba(0,0,0,0)}}
   .ampm{font-size:18px;font-weight:700;color:var(--date-color,#2a2a2a);letter-spacing:.08em;margin-left:6px;align-self:flex-end;padding-bottom:8px;transition:color .3s;display:none;font-family:'Roboto Condensed',sans-serif!important}.ampm.show{display:block}
   .date-line{font-size:16px;font-weight:700;color:var(--date-color,#2a2a2a);letter-spacing:.03em;user-select:none;transition:color .3s;text-shadow:1px 2px 4px rgba(0,0,0,0.25);font-family:'Roboto Condensed',sans-serif!important}
 
@@ -304,7 +305,7 @@ function applyMotion(){
   const fuKf=m.bounce===0
     ?'@keyframes fu{0%{transform:rotateX(90deg)}100%{transform:rotateX(0)}}'
     :'@keyframes fu{0%{transform:rotateX(90deg)}'+m.bounceAt+'%{transform:rotateX('+m.bounce+'deg)}100%{transform:rotateX(0)}}';
-  const fdsKf='@keyframes fds{0%{background:rgba(0,0,0,0)}100%{background:rgba(0,0,0,'+m.shadowMax+')}}';
+  const fdsKf='@keyframes fds{0%{background:rgba(0,0,0,0)}50%{background:rgba(0,0,0,'+m.shadowMax+')}100%{background:rgba(0,0,0,0)}}';
   const fusStart=(m.shadowMax*0.34).toFixed(3);
   const fusMid=(m.shadowMax*0.23).toFixed(3);
   const fusKf='@keyframes fus{0%{background:rgba(0,0,0,'+fusStart+')}40%{background:rgba(0,0,0,'+fusMid+')}100%{background:rgba(0,0,0,0)}}';
