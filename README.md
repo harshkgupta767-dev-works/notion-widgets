@@ -33,9 +33,9 @@ Hosted on GitHub Pages — embed using Notion's `/embed` block.
 
 - `widget-flip-clock.html` — Flip clock with Standard (4-tile) and Compact (2-tile) modes. Settings include:
   - **Fonts** — Anton, Bebas Neue, Oswald, JetBrains Mono, Squada One, Chakra Petch
-  - **Tile presets** — 7 built-in colour presets + custom colour picker
+  - **Tile presets** — 7 built-in colour presets (Charcoal, Obsidian, Nord, Coffee, Cyber, Gold, Parchment) + custom colour picker
   - **Colour pickers** — separate controls for tile, number, and date/day colours; the **number** and **date** swatch palettes adapt to the selected theme so the colours always contrast the background they sit on (custom colour stays available in both themes)
-  - **Motion** — Smooth, Mechanical, Minimal, or Instant flip animation
+  - **Motion** — Smooth, Mechanical, Minimal, or Instant flip animation with physics-quality 3D perspective, depth gradient shading, and cast drop shadows on the rotating flap
   - **Theme** — Light or Dark
   - **Format** — 12 HR or 24 HR
   - **Display** — Day & Date, Date only, Day only, or None
