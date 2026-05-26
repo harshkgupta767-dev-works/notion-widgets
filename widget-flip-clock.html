@@ -32,14 +32,19 @@
   .half .num{transition:color 0.3s}
   .half.top .num{top:0}.half.bot .num{top:-55px}
   .flap{position:absolute;left:0;right:0;height:50%;overflow:hidden;z-index:5}
+  .flap .num{z-index:2}
   .flap-top{top:0;background:var(--tile-bg,#2a2a2a);border-radius:10px 10px 0 0;border-bottom:1px solid rgba(128,128,128,0.15);box-shadow:var(--flap-shadow-top);transform-origin:bottom center;animation:fd var(--flip-top-dur) var(--flip-top-ease) forwards}.flap-top .num{top:0}
+  .flap-top::before{content:'';position:absolute;inset:0;z-index:1;pointer-events:none;background:linear-gradient(to top,rgba(0,0,0,var(--flap-gradient-strength,0.15)) 0%,transparent 60%);animation:fdg var(--flip-top-dur) var(--flip-top-ease) both}
   .flap-top::after{content:'';position:absolute;inset:0;z-index:1;pointer-events:none;animation:fds var(--flip-top-dur) var(--flip-top-ease) both}
   .flap-bot{bottom:0;background:var(--tile-bg,#2a2a2a);filter:brightness(0.9);border-radius:0 0 10px 10px;box-shadow:var(--flap-shadow-bot);transform-origin:top center;transform:rotateX(90deg);animation:fu var(--flip-bot-dur) var(--flip-bot-ease) var(--flip-bot-delay) forwards}.flap-bot .num{top:-55px}
+  .flap-bot::before{content:'';position:absolute;inset:0;z-index:1;pointer-events:none;background:linear-gradient(to bottom,rgba(0,0,0,var(--flap-gradient-strength,0.15)) 0%,transparent 60%);animation:fug var(--flip-bot-dur) var(--flip-bot-ease) var(--flip-bot-delay) both}
   .flap-bot::after{content:'';position:absolute;inset:0;z-index:1;pointer-events:none;animation:fus var(--flip-bot-dur) var(--flip-bot-ease) var(--flip-bot-delay) both}
   @keyframes fd{0%{transform:rotateX(0)}100%{transform:rotateX(-90deg)}}
   @keyframes fu{0%{transform:rotateX(90deg)}83%{transform:rotateX(-3deg)}100%{transform:rotateX(0)}}
   @keyframes fds{0%{background:rgba(0,0,0,0)}100%{background:rgba(0,0,0,0.35)}}
   @keyframes fus{0%{background:rgba(0,0,0,0.35)}100%{background:rgba(0,0,0,0)}}
+  @keyframes fdg{0%{opacity:0}100%{opacity:1}}
+  @keyframes fug{0%{opacity:1}100%{opacity:0}}
   .ampm{font-size:18px;font-weight:700;color:var(--date-color,#2a2a2a);letter-spacing:.08em;margin-left:6px;align-self:flex-end;padding-bottom:8px;transition:color .3s;display:none;font-family:'Roboto Condensed',sans-serif!important}.ampm.show{display:block}
   .date-line{font-size:16px;font-weight:700;color:var(--date-color,#2a2a2a);letter-spacing:.03em;user-select:none;transition:color .3s;text-shadow:1px 2px 4px rgba(0,0,0,0.25);font-family:'Roboto Condensed',sans-serif!important}
 
@@ -376,6 +381,7 @@ function applyAll(){
     r.setProperty('--popup-shadow','0 8px 32px rgba(0,0,0,0.4),0 2px 12px rgba(0,0,0,0.3)');
     r.setProperty('--flap-shadow-top','0 2px 4px rgba(0,0,0,0.5)');
     r.setProperty('--flap-shadow-bot','0 -2px 4px rgba(0,0,0,0.5)');
+    r.setProperty('--flap-gradient-strength','0.25');
   }else{
     r.setProperty('--tile-shadow','0 2px 4px rgba(0,0,0,0.08),0 4px 12px rgba(0,0,0,0.12)');
     r.setProperty('--tile-highlight','rgba(255,255,255,0.6)');
@@ -383,6 +389,7 @@ function applyAll(){
     r.setProperty('--popup-shadow','0 8px 24px rgba(0,0,0,0.12),0 2px 8px rgba(0,0,0,0.08)');
     r.setProperty('--flap-shadow-top','0 2px 4px rgba(0,0,0,0.15)');
     r.setProperty('--flap-shadow-bot','0 -2px 4px rgba(0,0,0,0.15)');
+    r.setProperty('--flap-gradient-strength','0.15');
   }
   $cont.style.background=S.bg;
   $wrapper.style.transform='scale('+S.zoom/100+')';
