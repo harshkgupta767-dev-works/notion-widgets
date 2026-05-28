@@ -70,11 +70,11 @@
   .fc-day.expandable{cursor:pointer}
   .fc-day.expandable:hover{background:rgba(128,128,128,.14)}
   body.ambient .fc-day.expandable:hover{background:rgba(255,255,255,.22)}
-  .back-row{margin-top:16px;margin-bottom:-6px}
-  .back-btn{background:rgba(128,128,128,.1);border:none;font-family:'Inter',sans-serif;font-size:11px;font-weight:600;color:inherit;padding:6px 12px;border-radius:8px;cursor:pointer;opacity:.75;transition:opacity .15s,background .15s}
-  .back-btn:hover{opacity:1;background:rgba(128,128,128,.2)}
-  body.ambient .back-btn{background:rgba(255,255,255,.18)}
-  body.ambient .back-btn:hover{background:rgba(255,255,255,.28)}
+  .back-row{margin-top:12px;margin-bottom:-4px}
+  .back-btn{background:rgba(128,128,128,.12);border:none;display:inline-flex;align-items:center;justify-content:center;width:28px;height:26px;font-size:14px;font-weight:700;color:inherit;border-radius:7px;cursor:pointer;opacity:.7;line-height:1;padding:0;transition:opacity .15s,background .15s}
+  .back-btn:hover{opacity:1;background:rgba(128,128,128,.22)}
+  body.ambient .back-btn{background:rgba(255,255,255,.2)}
+  body.ambient .back-btn:hover{background:rgba(255,255,255,.32)}
 
   body.lay-full .wrapper{min-width:var(--day-w,320px)}
   body.lay-compact .fc,body.lay-compact .hr,body.lay-compact .meta-row{display:none}
@@ -464,7 +464,7 @@ function render(){
   if(S.hourly){
     html += hourlyHtml + dailyHtml;
   } else if(S.hourlyExpanded){
-    html += `<div class="back-row"><button class="back-btn" id="backBtn">← Back to forecast</button></div>` + hourlyHtml;
+    html += `<div class="back-row"><button class="back-btn" id="backBtn" title="Back to forecast">←</button></div>` + hourlyHtml;
   } else {
     html += dailyHtml;
   }
