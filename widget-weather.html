@@ -50,9 +50,9 @@
   .compact-hilo{display:none;font-size:13px;font-weight:600;gap:8px;opacity:.78;margin-top:3px}
   .compact-hilo .lo{opacity:.6}
 
-  .hr{display:flex;gap:6px;margin-top:16px;overflow-x:auto;padding-bottom:2px;scrollbar-width:thin}
+  .hr{display:flex;gap:8px;margin-top:16px;overflow-x:auto;padding-bottom:2px;scrollbar-width:thin}
   .hr::-webkit-scrollbar{height:4px}.hr::-webkit-scrollbar-thumb{background:rgba(128,128,128,.35);border-radius:4px}.hr::-webkit-scrollbar-track{background:transparent}
-  .hr-item{flex:0 0 auto;width:52px;display:flex;flex-direction:column;align-items:center;gap:4px;padding:7px 2px;border-radius:9px;background:rgba(128,128,128,.07);transition:background .3s}
+  .hr-item{flex:0 0 var(--hr-w,52px);display:flex;flex-direction:column;align-items:center;gap:4px;padding:7px 2px;border-radius:9px;background:rgba(128,128,128,.07);transition:background .3s}
   .hr-time{font-size:10px;font-weight:700;opacity:.75;letter-spacing:.02em;white-space:nowrap}
   .hr-icon svg{width:26px;height:26px}
   .hr-temp{font-size:12px;font-weight:700}
@@ -424,7 +424,7 @@ function render(){
     let start=DATA.hourly.time.findIndex(t=>new Date(t)>=now);
     if(start<0)start=0;
     hourlyHtml='<div class="hr">';
-    for(let i=start;i<start+9&&i<DATA.hourly.time.length;i++){
+    for(let i=start;i<start+12&&i<DATA.hourly.time.length;i++){
       const d=new Date(DATA.hourly.time[i]);
       const di=codeInfo(DATA.hourly.weather_code[i]);
       const hDay=d.getHours()>=6&&d.getHours()<19;
@@ -500,6 +500,8 @@ function applyAll(){
   r.setProperty('--bg-color',S.bg);
   r.setProperty('--text',S.text);
   document.getElementById('wrapper').style.transform=`scale(${S.zoom/100})`;
+  const n=parseInt(S.days);
+  r.setProperty('--hr-w',`calc((100% - ${(n-1)*8}px) / ${n})`);
   const b=document.body;
   b.classList.toggle('lay-compact',S.layout==='compact');
   b.classList.toggle('lay-full',S.layout!=='compact');
@@ -575,7 +577,7 @@ pickerKeys.forEach(key=>{document.querySelectorAll(`.sr[data-group="${key}"] .sw
 function setupTg(id,key,cb){document.getElementById(id).addEventListener('click',e=>{const b=e.target.closest('.tb');if(!b)return;document.querySelectorAll(`#${id} .tb`).forEach(x=>x.classList.remove('on'));b.classList.add('on');S[key]=b.dataset.v;save();if(cb)cb();});}
 function syncTg(id,val){document.querySelectorAll(`#${id} .tb`).forEach(b=>b.classList.toggle('on',String(b.dataset.v)===String(val)));}
 setupTg('gUnit','unit',()=>{AQ=null;showMsg('<div class="spinner"></div>');fetchWeather();});
-setupTg('gDays','days',render);
+setupTg('gDays','days',()=>{applyAll();render();});
 setupTg('gLayout','layout',()=>{applyAll();render();});
 setupTg('gDayfmt','dayfmt',render);
 setupTg('gTheme','theme',()=>{if(S.theme==='dark'){S.bg='#191919';S.text='#ffffff';}else{S.bg='#ffffff';S.text='#37352f';}save();applyAll();hlAll();render();});
