@@ -76,7 +76,7 @@
   body.ambient .back-btn{background:rgba(255,255,255,.18)}
   body.ambient .back-btn:hover{background:rgba(255,255,255,.28)}
 
-  body.lay-full .wrapper{min-width:320px}
+  body.lay-full .wrapper{min-width:var(--day-w,320px)}
   body.lay-compact .fc,body.lay-compact .hr,body.lay-compact .meta-row{display:none}
   body.lay-compact .now-icon svg{width:96px;height:96px}
   body.lay-compact .temp{font-size:64px}
@@ -504,6 +504,7 @@ function applyAll(){
   document.getElementById('wrapper').style.transform=`scale(${S.zoom/100})`;
   const n=parseInt(S.days);
   r.setProperty('--hr-w',`calc((100% - ${(n-1)*8}px) / ${n})`);
+  r.setProperty('--day-w',`${n*48 + (n-1)*8 + 48}px`);
   const b=document.body;
   b.classList.toggle('lay-compact',S.layout==='compact');
   b.classList.toggle('lay-full',S.layout!=='compact');
