@@ -17,7 +17,7 @@
   .gear svg{width:15px;height:15px;fill:var(--text,#37352f);transition:fill .3s}
 
   /* ---- ICON COLOURS (overridden in greyscale) ---- */
-  :root{--ic-sun:#f6b73c;--ic-moon:#dfe6f2;--ic-cloud:#9aa7b6;--ic-cloud2:#c4ccd6;--ic-rain:#4f93d6;--ic-snow:#7fb8e0;--ic-bolt:#f6c343;--ic-fog:#b6bfca}
+  :root{--ic-sun:#FFBA0A;--ic-moon:#C8D8F0;--ic-cloud:#7B9AB5;--ic-cloud2:#A8BFD0;--ic-rain:#2E8FDF;--ic-snow:#7EC8E3;--ic-bolt:#FFD000;--ic-fog:#98AABB}
   body.mono{--ic-sun:var(--text);--ic-moon:var(--text);--ic-cloud:var(--text);--ic-cloud2:var(--text);--ic-rain:var(--text);--ic-snow:var(--text);--ic-bolt:var(--text);--ic-fog:var(--text)}
   body.mono .wi{opacity:.85}
   .i-sun{fill:var(--ic-sun)}.i-moon{fill:var(--ic-moon)}.i-cloud{fill:var(--ic-cloud)}.i-cloud2{fill:var(--ic-cloud2)}.i-rain{stroke:var(--ic-rain)}.i-snow{fill:var(--ic-snow)}.i-bolt{fill:var(--ic-bolt)}.i-fog{stroke:var(--ic-fog)}
@@ -291,20 +291,20 @@ function codeInfo(c){
 }
 
 /* ---------- SVG ICONS (viewBox 0 0 64 64) ---------- */
-function svgSun(){return`<g class="a-sun"><circle class="i-sun" cx="32" cy="32" r="11"/>${rays()}</g>`;}
-function rays(){let r='';for(let i=0;i<8;i++){const a=i*45*Math.PI/180;const x1=32+Math.cos(a)*16,y1=32+Math.sin(a)*16,x2=32+Math.cos(a)*21,y2=32+Math.sin(a)*21;r+=`<line x1="${x1.toFixed(1)}" y1="${y1.toFixed(1)}" x2="${x2.toFixed(1)}" y2="${y2.toFixed(1)}" stroke="var(--ic-sun)" stroke-width="3" stroke-linecap="round"/>`;}return r;}
+function svgSun(){return`<g class="a-sun"><circle class="i-sun" cx="32" cy="32" r="12"/>${rays()}</g>`;}
+function rays(){let r='';for(let i=0;i<8;i++){const a=i*45*Math.PI/180;const x1=32+Math.cos(a)*17,y1=32+Math.sin(a)*17,x2=32+Math.cos(a)*23,y2=32+Math.sin(a)*23;r+=`<line x1="${x1.toFixed(1)}" y1="${y1.toFixed(1)}" x2="${x2.toFixed(1)}" y2="${y2.toFixed(1)}" stroke="var(--ic-sun)" stroke-width="3" stroke-linecap="round"/>`;}return r;}
 function svgMoon(){return`<path class="i-moon" d="M40 14a18 18 0 1 0 12 30A14 14 0 0 1 40 14z"/>`;}
 function cloudPath(cls,ox,oy,sc){return`<path class="${cls} a-cloud" transform="translate(${ox} ${oy}) scale(${sc})" d="M20 44a11 11 0 0 1 1-22 14 14 0 0 1 26-3 9 9 0 0 1-1 25z"/>`;}
 function svgPartly(day){const lum=day?svgSun():svgMoon();return`<g transform="translate(-6 -8) scale(.62)">${lum}</g>${cloudPath('i-cloud',6,8,.95)}`;}
 function svgMostly(day){const lum=day?`<g class="a-sun"><circle class="i-sun" cx="24" cy="24" r="8"/></g>`:`<path class="i-moon" d="M30 12a13 13 0 1 0 9 22 10 10 0 0 1-9-22z"/>`;return`${lum}${cloudPath('i-cloud',6,10,.92)}`;}
-function svgCloud(){return cloudPath('i-cloud',2,4,1.05)+`<path class="i-cloud2 a-cloud" transform="translate(20 16) scale(.7)" d="M20 44a11 11 0 0 1 1-22 14 14 0 0 1 26-3 9 9 0 0 1-1 25z" opacity=".55"/>`;}
+function svgCloud(){return cloudPath('i-cloud',2,4,1.05)+`<path class="i-cloud2 a-cloud" transform="translate(20 16) scale(.7)" d="M20 44a11 11 0 0 1 1-22 14 14 0 0 1 26-3 9 9 0 0 1-1 25z" opacity=".7"/>`;}
 function svgFog(){let lines='';[40,46,52].forEach((y,i)=>{lines+=`<line class="i-fog" x1="${12+i*2}" y1="${y}" x2="${52-i*2}" y2="${y}" stroke-width="3" stroke-linecap="round" opacity="${.8-i*.18}"/>`;});return cloudPath('i-cloud',2,-2,1)+lines;}
-function drop(x,y,cls){return`<line class="i-rain ${cls}" x1="${x}" y1="${y}" x2="${x-2}" y2="${y+7}" stroke-width="3" stroke-linecap="round"/>`;}
+function drop(x,y,cls){return`<line class="i-rain ${cls}" x1="${x}" y1="${y}" x2="${x-2}" y2="${y+7}" stroke-width="3.5" stroke-linecap="round"/>`;}
 function svgDrizzle(){return cloudPath('i-cloud',2,-4,1)+drop(24,48,'a-rain')+drop(38,48,'a-rain2');}
 function svgRain(){return cloudPath('i-cloud',2,-6,1)+drop(20,48,'a-rain')+drop(30,50,'a-rain2')+drop(40,48,'a-rain')+drop(48,50,'a-rain2');}
 function flake(x,y){return`<circle class="i-snow a-snow" cx="${x}" cy="${y}" r="2.4"/>`;}
 function svgSnow(){return cloudPath('i-cloud',2,-6,1)+flake(22,50)+flake(32,54)+flake(42,50);}
-function svgThunder(){return cloudPath('i-cloud',2,-8,1)+`<path class="i-bolt a-bolt" d="M34 42l-10 14h8l-4 10 14-16h-8l4-8z"/>`;}
+function svgThunder(){return cloudPath('i-cloud',2,-8,1)+`<path class="i-bolt a-bolt" stroke="none" d="M34 42l-10 14h8l-4 10 14-16h-8l4-8z"/>`;}
 
 function iconSVG(type,day){
   let g='';
