@@ -65,6 +65,14 @@
   .fc-temp{font-size:12px;font-weight:600;display:flex;gap:5px;align-items:baseline}
   .fc-hi{opacity:1}.fc-lo{opacity:.5}
   .fc-pop{font-size:9px;font-weight:600;color:var(--ic-rain);opacity:.9}
+  .fc-day.expandable{cursor:pointer}
+  .fc-day.expandable:hover{background:rgba(128,128,128,.14)}
+  body.ambient .fc-day.expandable:hover{background:rgba(255,255,255,.22)}
+  .back-row{margin-top:16px;margin-bottom:-6px}
+  .back-btn{background:rgba(128,128,128,.1);border:none;font-family:'Inter',sans-serif;font-size:11px;font-weight:600;color:inherit;padding:6px 12px;border-radius:8px;cursor:pointer;opacity:.75;transition:opacity .15s,background .15s}
+  .back-btn:hover{opacity:1;background:rgba(128,128,128,.2)}
+  body.ambient .back-btn{background:rgba(255,255,255,.18)}
+  body.ambient .back-btn:hover{background:rgba(255,255,255,.28)}
 
   body.lay-full .wrapper{min-width:320px}
   body.lay-compact .fc,body.lay-compact .hr,body.lay-compact .meta-row{display:none}
@@ -265,7 +273,8 @@ const DEF={
   unit:'c', days:5, layout:'full', dayfmt:'short', theme:'light',
   bg:'#ffffff', text:'#37352f',
   ambient:false, hourly:true, aqi:true, feels:true, rain:true, fcPop:false,
-  hideToday:false, dates:false, cond:true, anim:true, mono:false, zoom:100
+  hideToday:false, dates:false, cond:true, anim:true, mono:false, zoom:100,
+  hourlyExpanded:false
 };
 let S={...DEF};
 let DATA=null, AQ=null, refreshTimer=null;
@@ -408,24 +417,28 @@ function render(){
     </div>
   </div>`;
 
-  if(S.hourly&&DATA.hourly){
+  // Build hourly HTML as a reusable string
+  let hourlyHtml='';
+  if(DATA.hourly){
     const now=new Date();
     let start=DATA.hourly.time.findIndex(t=>new Date(t)>=now);
     if(start<0)start=0;
-    let hr='<div class="hr">';
+    hourlyHtml='<div class="hr">';
     for(let i=start;i<start+9&&i<DATA.hourly.time.length;i++){
       const d=new Date(DATA.hourly.time[i]);
       const di=codeInfo(DATA.hourly.weather_code[i]);
       const hDay=d.getHours()>=6&&d.getHours()<19;
       const label=(i===start)?'Now':hr12(d.getHours());
-      hr+=`<div class="hr-item"><div class="hr-time">${label}</div><div class="hr-icon">${iconSVG(di.t,hDay)}</div><div class="hr-temp">${Math.round(DATA.hourly.temperature_2m[i])}°</div></div>`;
+      hourlyHtml+=`<div class="hr-item"><div class="hr-time">${label}</div><div class="hr-icon">${iconSVG(di.t,hDay)}</div><div class="hr-temp">${Math.round(DATA.hourly.temperature_2m[i])}°</div></div>`;
     }
-    hr+='</div>';html+=hr;
+    hourlyHtml+='</div>';
   }
 
+  // Build daily HTML as a reusable string
+  let dailyHtml='';
   let startD=S.hideToday?1:0;
   const n=parseInt(S.days);
-  let fc='<div class="fc">';
+  dailyHtml='<div class="fc">';
   for(let i=startD;i<startD+n&&i<day.time.length;i++){
     const isToday=(i===0);
     const code=isToday?cur.weather_code:(noonCode(day.time[i])??day.weather_code[i]);
@@ -434,7 +447,8 @@ function render(){
     const name=isToday?'Today':(S.dayfmt==='full'?DAYS_FULL[d.getDay()]:DAYS_SHORT[d.getDay()]);
     const dstr=`${MONTHS[d.getMonth()]} ${d.getDate()}`;
     const pop=day.precipitation_probability_max?day.precipitation_probability_max[i]:null;
-    fc+=`<div class="fc-day">
+    const isExpandable=isToday && !S.hourly;
+    dailyHtml+=`<div class="fc-day${isExpandable?' expandable':''}"${isExpandable?' data-today="1"':''}>
       <div class="fc-name">${name}</div>
       ${S.dates?`<div class="fc-date">${dstr}</div>`:''}
       <div class="fc-icon">${iconSVG(di.t,true)}</div>
@@ -442,9 +456,26 @@ function render(){
       ${S.fcPop&&pop!=null?`<div class="fc-pop">☔${pop}%</div>`:''}
     </div>`;
   }
-  fc+='</div>';html+=fc;
+  dailyHtml+='</div>';
+
+  // Decide what to show based on state
+  if(S.hourly){
+    html += hourlyHtml + dailyHtml;
+  } else if(S.hourlyExpanded){
+    html += `<div class="back-row"><button class="back-btn" id="backBtn">← Back to forecast</button></div>` + hourlyHtml;
+  } else {
+    html += dailyHtml;
+  }
   html+=`<div class="credit"><a href="https://open-meteo.com/" target="_blank" rel="noopener">Weather by Open-Meteo</a></div>`;
   c.innerHTML=html;
+  const todayCard=c.querySelector('.fc-day.expandable[data-today="1"]');
+  if(todayCard)todayCard.addEventListener('click',()=>{
+    S.hourlyExpanded=true;save();render();
+  });
+  const backBtn=c.querySelector('#backBtn');
+  if(backBtn)backBtn.addEventListener('click',()=>{
+    S.hourlyExpanded=false;save();render();
+  });
 }
 
 function applyAmbient(){
@@ -552,7 +583,7 @@ setupTg('gTheme','theme',()=>{if(S.theme==='dark'){S.bg='#191919';S.text='#fffff
 function setupSw(id,key,cb){const el=document.getElementById(id);el.addEventListener('click',()=>{S[key]=!S[key];el.classList.toggle('on',S[key]);save();if(cb)cb();});}
 function syncSw(id,val){document.getElementById(id).classList.toggle('on',!!val);}
 setupSw('swAmbient','ambient',()=>{applyAll();render();});
-setupSw('swHourly','hourly',render);
+setupSw('swHourly','hourly',()=>{S.hourlyExpanded=false;save();render();});
 setupSw('swAqi','aqi',()=>{if(S.aqi&&!AQ)fetchAQI();else render();});
 setupSw('swFeels','feels',render);
 setupSw('swRain','rain',render);
