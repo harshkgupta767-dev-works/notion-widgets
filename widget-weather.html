@@ -11,9 +11,14 @@
   .container{position:relative;width:100%;height:100%;display:flex;align-items:center;justify-content:center;overflow:hidden;background:var(--bg-color,transparent);transition:background .5s}
   .wrapper{position:relative;display:flex;flex-direction:column;padding:20px 24px;transform-origin:center;transition:transform .3s;color:var(--text,#37352f);max-width:100%}
 
-  .gear{position:absolute;top:2px;right:2px;width:24px;height:24px;background:none;border:none;cursor:pointer;display:flex;align-items:center;justify-content:center;z-index:10;opacity:.22;transform:scale(1);transition:opacity .2s,transform .2s;border-radius:5px}
-  .wrapper:hover .gear,.gear.pin{opacity:.7}
+  .gear{position:absolute;top:2px;right:2px;width:24px;height:24px;background:none;border:none;cursor:pointer;display:flex;align-items:center;justify-content:center;z-index:10;opacity:.45;transform:scale(1);transition:opacity .2s,transform .2s;border-radius:5px}
+  .gear.pin{opacity:.7}
   .gear:hover{opacity:1!important;background:rgba(128,128,128,.18)}
+  /* PC / mouse: hide gear until the widget is hovered. Touch devices keep it visible. */
+  @media (hover:hover){
+    .gear{opacity:0}
+    .wrapper:hover .gear,.gear.pin{opacity:.7}
+  }
   .gear svg{width:15px;height:15px;fill:var(--text,#37352f);transition:fill .3s}
 
   :root{--ic-sun:#FFBA0A;--ic-moon:#C8D8F0;--ic-cloud:#7B9AB5;--ic-cloud2:#A8BFD0;--ic-rain:#2E8FDF;--ic-snow:#7EC8E3;--ic-bolt:#FFD000;--ic-fog:#98AABB}
@@ -598,11 +603,8 @@ setupTg('gDays','days',()=>{applyAll();render();});
 setupTg('gLayout','layout',()=>{applyAll();render();});
 setupTg('gDayfmt','dayfmt',render);
 setupTg('gTheme','theme',()=>{
-  const prev=S.theme==='dark'?'light':'dark';
-  pickerKeys.forEach(k=>{
-    const idx=SWATCH_PALETTES[k][prev].findIndex(c=>String(c).toLowerCase()===String(S[k]).toLowerCase());
-    if(idx>=0)S[k]=SWATCH_PALETTES[k][S.theme][idx];
-  });
+  if(S.theme==='dark'){S.bg='#191919';S.text='#ffffff';}
+  else{S.bg='#ffffff';S.text='#37352f';}
   save();applyAll();renderSwatches();hlAll();render();
 });
 
