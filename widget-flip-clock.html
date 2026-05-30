@@ -77,8 +77,9 @@
 
   .pop-hd{display:flex;justify-content:space-between;align-items:center;margin-bottom:16px}.pop-hd span{font-size:14px;font-weight:700}
   .pop-x{width:26px;height:26px;background:none;border:none;cursor:pointer;display:flex;align-items:center;justify-content:center;border-radius:6px;font-size:16px;transition:background .15s}
-  .lbl{font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.12em;margin:14px 0 10px}.lbl:first-of-type{margin-top:0}
-  .sep{height:1px;margin:16px 0}
+  .lbl{font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.12em;margin:12px 0 7px}.lbl:first-of-type{margin-top:0}
+  .sep{height:1px;margin:11px 0}
+  .row2{display:flex;gap:12px}.row2>div{flex:1;min-width:0}
 
   .sr{display:flex;flex-wrap:wrap;gap:9px;align-items:center}
   .sw{width:28px;height:28px;border-radius:50%;border:2.5px solid transparent;cursor:pointer;position:relative;transition:transform .12s,border-color .12s;flex-shrink:0}
@@ -158,12 +159,10 @@
   </div>
   <div class="sep"></div>
 
-  <div class="lbl">Clock Style</div>
-  <div class="tg" id="gMode"><button class="tb on" data-v="standard">Standard</button><button class="tb" data-v="compact">Compact</button></div>
-  <div class="sep"></div>
-
-  <div class="lbl">Theme</div>
-  <div class="tg" id="gTheme"><button class="tb on" data-v="light">Light</button><button class="tb" data-v="dark">Dark</button></div>
+  <div class="row2">
+    <div><div class="lbl">Clock Style</div><div class="tg" id="gMode"><button class="tb on" data-v="standard">Standard</button><button class="tb" data-v="compact">Compact</button></div></div>
+    <div><div class="lbl">Theme</div><div class="tg" id="gTheme"><button class="tb on" data-v="light">Light</button><button class="tb" data-v="dark">Dark</button></div></div>
+  </div>
   <div class="sep"></div>
 
   <div class="lbl">Tile Presets</div>

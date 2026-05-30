@@ -25,9 +25,10 @@ canvas{display:block;width:100%;height:100%}
 .pop-x:hover{background:rgba(255,255,255,.1);color:#fff;border-color:#3a3a3a}
 .pop-x svg{width:12px;height:12px}
 .pop-ttl{font-size:13px;font-weight:700;color:#e0e0e0;letter-spacing:.02em;line-height:30px}
-.pop-body{display:flex;flex-direction:column;gap:10px;overflow-y:auto;flex:1}
+.pop-body{display:flex;flex-direction:column;gap:7px;overflow-y:auto;flex:1}
+.blk-row{display:flex;gap:7px}.blk-row>.blk{flex:1;min-width:0}
 .pop-body::-webkit-scrollbar{width:4px}.pop-body::-webkit-scrollbar-thumb{background:#333;border-radius:4px}
-.blk{background:#1e1e1e;border-radius:10px;padding:12px 14px;display:flex;flex-direction:column;gap:9px}
+.blk{background:#1e1e1e;border-radius:10px;padding:10px 12px;display:flex;flex-direction:column;gap:7px}
 .lb{font-size:9.5px;font-weight:700;text-transform:uppercase;letter-spacing:.15em;color:#666}
 .tg{display:flex;border-radius:10px;overflow:hidden;border:1px solid #272727}
 .tb{flex:1;padding:8px 3px;font-size:10.5px;font-weight:600;text-align:center;background:#1a1a1a;color:#444;border:none;cursor:pointer;transition:all .15s;white-space:nowrap;border-left:1px solid #272727}
@@ -86,19 +87,20 @@ canvas{display:block;width:100%;height:100%}
   </div>
   <div class="pop-body">
 
-    <div class="blk">
-      <div class="lb">Theme</div>
-      <div class="tg" id="gTheme">
-        <button class="tb" data-v="dark">Dark</button>
-        <button class="tb" data-v="light">Light</button>
+    <div class="blk-row">
+      <div class="blk">
+        <div class="lb">Theme</div>
+        <div class="tg" id="gTheme">
+          <button class="tb" data-v="dark">Dark</button>
+          <button class="tb" data-v="light">Light</button>
+        </div>
       </div>
-    </div>
-
-    <div class="blk">
-      <div class="lb">Style</div>
-      <div class="tg" id="gBold">
-        <button class="tb" data-v="true">Bold</button>
-        <button class="tb" data-v="false">Normal</button>
+      <div class="blk">
+        <div class="lb">Style</div>
+        <div class="tg" id="gBold">
+          <button class="tb" data-v="true">Bold</button>
+          <button class="tb" data-v="false">Normal</button>
+        </div>
       </div>
     </div>
 
