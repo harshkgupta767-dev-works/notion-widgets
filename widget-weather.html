@@ -21,6 +21,14 @@
   }
   .gear svg{width:15px;height:15px;fill:var(--text,#37352f);transition:fill .3s}
 
+  /* multi-city tabs (top-right of wrapper, left of the gear) */
+  .city-tabs{position:absolute;top:34px;right:8px;display:grid;grid-template-columns:1fr 1fr;gap:6px;z-index:9;width:max-content;direction:rtl}
+  .city-tab{direction:ltr;font-family:'Inter',sans-serif;font-size:12px;font-weight:700;letter-spacing:.06em;padding:5px 12px;border-radius:20px;border:none;cursor:pointer;background:rgba(128,128,128,.16);color:var(--text,#37352f);opacity:.5;transition:opacity .15s,background .15s}
+  .city-tab:hover{opacity:.85}
+  .city-tab.on{opacity:1;background:rgba(128,128,128,.34)}
+  body.ambient .city-tab{background:rgba(255,255,255,.2);color:#fff}
+  body.ambient .city-tab.on{background:rgba(255,255,255,.42)}
+
   :root{--ic-sun:#FFBA0A;--ic-moon:#C8D8F0;--ic-cloud:#7B9AB5;--ic-cloud2:#A8BFD0;--ic-rain:#2E8FDF;--ic-snow:#7EC8E3;--ic-bolt:#FFD000;--ic-fog:#98AABB}
   body.mono{--ic-sun:var(--text);--ic-moon:var(--text);--ic-cloud:var(--text);--ic-cloud2:var(--text);--ic-rain:var(--text);--ic-snow:var(--text);--ic-bolt:var(--text);--ic-fog:var(--text)}
   body.mono .wi{opacity:.85}
@@ -43,10 +51,12 @@
   .now-icon{flex-shrink:0}
   .now-icon svg{width:84px;height:84px}
   .now-main{display:flex;flex-direction:column;gap:1px;min-width:0}
-  .loc{font-family:'Roboto Condensed',sans-serif;font-weight:700;font-size:14px;letter-spacing:.05em;text-transform:uppercase;opacity:.72;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-  .temp-row{display:flex;align-items:baseline;gap:10px}
-  .temp{font-family:'Anton',sans-serif;font-weight:400;font-size:54px;line-height:.9;letter-spacing:.01em;text-shadow:1px 2px 4px rgba(0,0,0,.12)}
-  .temp .deg{font-size:26px;vertical-align:top;margin-left:1px}
+  .loc{font-family:'Roboto Condensed',sans-serif;font-weight:700;font-size:14px;letter-spacing:.05em;text-transform:uppercase;opacity:.72;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;position:relative;top:-4px}
+  .loc-time{font-weight:500;opacity:.55;letter-spacing:.02em}
+  .temp-row{display:flex;align-items:last baseline;gap:2px}
+  .temp-side{display:flex;flex-direction:column;gap:2px;min-width:0}
+  .temp{font-family:'Anton',sans-serif;font-weight:400;font-size:64px;line-height:.9;letter-spacing:.01em;text-shadow:1px 2px 4px rgba(0,0,0,.12);display:inline-block;transform:scaleX(.84);transform-origin:center bottom}
+  .temp .deg{font-size:31px;vertical-align:top;margin-left:1px}
   .feels{font-size:12px;font-weight:600;opacity:.6;white-space:nowrap}
   .cond{font-size:13px;font-weight:600;opacity:.88;text-transform:capitalize;white-space:nowrap;margin-top:1px}
   .meta-row{display:flex;align-items:center;gap:8px;margin-top:6px;flex-wrap:wrap}
@@ -79,12 +89,13 @@
   body.ambient .back-btn:hover{background:rgba(255,255,255,.34)}
 
   body.lay-full .wrapper{min-width:var(--day-w,320px)}
-  body.lay-compact .fc,body.lay-compact .hr,body.lay-compact .meta-row{display:none}
-  body.lay-compact .now-icon svg{width:96px;height:96px}
+  body.lay-compact .fc,body.lay-compact .hr,body.lay-compact .meta-row,body.lay-compact .city-tabs{display:none}
+  body.lay-compact .now-icon svg{width:86px;height:86px}
   body.lay-compact .temp{font-size:64px}
-  body.lay-compact .compact-meta{display:flex}
-  body.lay-compact .compact-hilo{display:flex}
-  .compact-meta{display:none;align-items:center;gap:8px;margin-top:6px;flex-wrap:wrap}
+  body.lay-compact .compact-bottom{display:flex}
+  body.lay-compact .compact-hilo,body.lay-compact .compact-meta{display:flex;margin-top:0}
+  .compact-bottom{display:none;align-items:center;justify-content:center;gap:10px;flex-wrap:wrap;margin-top:7px}
+  .compact-meta{display:none;align-items:center;gap:8px;flex-wrap:wrap}
 
   body.ambient .chip{background:rgba(255,255,255,.18)}
   body.ambient .hr-item,body.ambient .fc-day{background:rgba(255,255,255,.15);backdrop-filter:blur(6px);-webkit-backdrop-filter:blur(6px);border:1px solid rgba(255,255,255,.16)}
@@ -95,6 +106,9 @@
   .credit{font-size:9px;font-weight:500;opacity:.34;text-align:right;margin-top:10px;letter-spacing:.02em}
   .credit a{color:inherit;text-decoration:none}.credit a:hover{text-decoration:underline}
   .spinner{width:26px;height:26px;border:3px solid rgba(128,128,128,.25);border-top-color:currentColor;border-radius:50%;animation:spin .8s linear infinite;margin:8px auto}
+  /* soft loading state when switching to an uncached city (keeps size, dims content) */
+  .wrapper.loading #content{opacity:.4;transition:opacity .2s}
+  .wrapper.loading::after{content:'';position:absolute;top:50%;left:50%;width:26px;height:26px;margin:-13px;border:3px solid rgba(128,128,128,.3);border-top-color:currentColor;border-radius:50%;animation:spin .8s linear infinite;z-index:5}
   #retryBtn{display:inline-block;margin-top:10px;font-size:11px;font-weight:600;cursor:pointer;padding:5px 12px;border-radius:6px;background:rgba(128,128,128,.14)}
 
   .ov{position:fixed;inset:0;background:rgba(0,0,0,.2);z-index:200;opacity:0;pointer-events:none;transition:opacity .2s}.ov.open{opacity:1;pointer-events:auto}
@@ -123,7 +137,10 @@
   .pop-hd{display:flex;justify-content:space-between;align-items:center;margin-bottom:16px}.pop-hd span{font-size:14px;font-weight:700}
   .pop-x{width:26px;height:26px;background:none;border:none;cursor:pointer;display:flex;align-items:center;justify-content:center;border-radius:6px;font-size:16px;transition:background .15s}
   .lbl{font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.12em;margin:14px 0 8px}.lbl:first-of-type{margin-top:0}
-  .sep{height:1px;margin:14px 0}
+  .sep{height:1px;margin:12px 0}
+  .row2{display:flex;gap:12px}
+  .row2>div{flex:1;min-width:0}
+  .swr-grid{display:grid;grid-template-columns:1fr 1fr;column-gap:16px}
 
   .loc-row{display:flex;gap:6px}
   .loc-input{flex:1;height:34px;border:1px solid;border-radius:8px;padding:0 10px;font-family:'Inter',sans-serif;font-size:13px;font-weight:500;outline:none}
@@ -133,6 +150,18 @@
   .loc-item{padding:9px 11px;font-size:12px;font-weight:500;cursor:pointer;border-bottom:1px solid rgba(128,128,128,.12);transition:background .12s}.loc-item:last-child{border-bottom:none}
   .loc-item .sub{opacity:.55;font-size:11px;margin-left:4px}
   .loc-cur{font-size:11px;font-weight:600;opacity:.6;margin-top:7px;display:flex;align-items:center;gap:5px}
+  .saved-cities{display:flex;flex-direction:column;gap:6px;margin-top:8px}
+  .city-item{display:flex;align-items:center;justify-content:space-between;gap:8px;padding:7px 9px;border-radius:8px;background:rgba(128,128,128,.08)}
+  .city-item.active{background:rgba(128,128,128,.16)}
+  .city-info{display:flex;flex-direction:column;min-width:0}
+  .city-nm{font-size:12px;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  .city-co{font-size:10px;opacity:.55;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  .city-actions{display:flex;align-items:center;gap:6px;flex-shrink:0}
+  .city-badge{font-size:9px;font-weight:700;letter-spacing:.06em;opacity:.6}
+  .city-switch{font-family:'Inter',sans-serif;font-size:10px;font-weight:600;padding:3px 9px;border-radius:6px;border:none;cursor:pointer;background:#337ea9;color:#fff;transition:filter .15s}
+  .city-switch:hover{filter:brightness(1.1)}
+  .city-x{width:20px;height:20px;border:none;border-radius:5px;background:rgba(128,128,128,.16);cursor:pointer;font-size:15px;line-height:1;display:flex;align-items:center;justify-content:center;color:inherit;opacity:.55;transition:opacity .15s,background .15s}
+  .city-x:hover{opacity:1;background:rgba(217,76,71,.2)}
 
   .sr{display:flex;flex-wrap:wrap;gap:8px;align-items:center}
   .sw{width:28px;height:28px;border-radius:50%;border:2.5px solid transparent;cursor:pointer;position:relative;transition:transform .12s,border-color .12s;flex-shrink:0}
@@ -175,6 +204,7 @@
 <body class="lay-full anim">
 <div class="container" id="cont">
   <div class="wrapper" id="wrapper">
+    <div class="city-tabs" id="cityTabs"></div>
     <button class="gear" id="gearBtn" title="Settings"><svg viewBox="0 0 24 24"><path d="M19.14 12.94c.04-.31.06-.63.06-.94 0-.31-.02-.63-.06-.94l2.03-1.58a.49.49 0 00.12-.61l-1.92-3.32a.49.49 0 00-.59-.22l-2.39.96a7.04 7.04 0 00-1.62-.94l-.36-2.54a.48.48 0 00-.48-.41h-3.84a.48.48 0 00-.48.41l-.36 2.54c-.59.24-1.13.57-1.62.94l-2.39-.96a.49.49 0 00-.59.22L2.74 8.87a.49.49 0 00.12.61l2.03 1.58c-.04.31-.06.63-.06.94 0 .31.02.63.06.94l-2.03 1.58a.49.49 0 00-.12.61l1.92 3.32c.12.22.37.29.59.22l2.39-.96c.5.38 1.03.7 1.62.94l.36 2.54c.05.24.26.41.48.41h3.84c.24 0 .44-.17.48-.41l.36-2.54c.59-.24 1.13-.57 1.62-.94l2.39.96c.22.08.47 0 .59-.22l1.92-3.32a.49.49 0 00-.12-.61l-2.03-1.58zM12 15.6A3.6 3.6 0 1112 8.4a3.6 3.6 0 010 7.2z"/></svg></button>
     <div id="content"><div class="spinner"></div></div>
   </div>
@@ -188,22 +218,19 @@
   <div class="loc-row"><input class="loc-input" id="locInput" placeholder="Search your city…" spellcheck="false" autocomplete="off"><button class="loc-go" id="locGo" title="Search">🔍</button></div>
   <div class="loc-res" id="locRes"></div>
   <div class="loc-cur" id="locCur"></div>
+  <div class="saved-cities" id="savedCities"></div>
   <div class="sep"></div>
 
-  <div class="lbl">Units</div>
-  <div class="tg" id="gUnit"><button class="tb on" data-v="c">°C</button><button class="tb" data-v="f">°F</button></div>
+  <div class="row2">
+    <div><div class="lbl">Units</div><div class="tg" id="gUnit"><button class="tb on" data-v="c">°C</button><button class="tb" data-v="f">°F</button></div></div>
+    <div><div class="lbl">Forecast Days</div><div class="tg" id="gDays"><button class="tb" data-v="3">3</button><button class="tb on" data-v="5">5</button><button class="tb" data-v="7">7</button></div></div>
+  </div>
   <div class="sep"></div>
 
-  <div class="lbl">Forecast Days</div>
-  <div class="tg" id="gDays"><button class="tb" data-v="3">3 Days</button><button class="tb on" data-v="5">5 Days</button><button class="tb" data-v="7">7 Days</button></div>
-  <div class="sep"></div>
-
-  <div class="lbl">Layout</div>
-  <div class="tg" id="gLayout"><button class="tb on" data-v="full">Full</button><button class="tb" data-v="compact">Compact</button></div>
-  <div class="sep"></div>
-
-  <div class="lbl">Day Labels</div>
-  <div class="tg" id="gDayfmt"><button class="tb on" data-v="short">Short</button><button class="tb" data-v="full">Full</button></div>
+  <div class="row2">
+    <div><div class="lbl">Layout</div><div class="tg" id="gLayout"><button class="tb on" data-v="full">Full</button><button class="tb" data-v="compact">Compact</button></div></div>
+    <div><div class="lbl">Day Labels</div><div class="tg" id="gDayfmt"><button class="tb on" data-v="short">Short</button><button class="tb" data-v="full">Full</button></div></div>
+  </div>
   <div class="sep"></div>
 
   <div class="lbl">Theme</div>
@@ -225,17 +252,18 @@
   <div class="sep"></div>
 
   <div class="lbl">Display</div>
-  <div class="swr"><span class="swr-l">Ambient background</span><div class="swt" id="swAmbient"></div></div>
-  <div class="swr"><span class="swr-l">Hourly strip</span><div class="swt on" id="swHourly"></div></div>
-  <div class="swr"><span class="swr-l">Air quality (AQI)</span><div class="swt on" id="swAqi"></div></div>
-  <div class="swr"><span class="swr-l">Feels-like temp</span><div class="swt on" id="swFeels"></div></div>
-  <div class="swr"><span class="swr-l">Rain chance</span><div class="swt on" id="swRain"></div></div>
-  <div class="swr"><span class="swr-l">Forecast rain %</span><div class="swt" id="swFcPop"></div></div>
-  <div class="swr"><span class="swr-l">Hide today in forecast</span><div class="swt" id="swHide"></div></div>
-  <div class="swr"><span class="swr-l">Show dates</span><div class="swt" id="swDates"></div></div>
-  <div class="swr"><span class="swr-l">Condition text</span><div class="swt on" id="swCond"></div></div>
-  <div class="swr"><span class="swr-l">Animate icons</span><div class="swt on" id="swAnim"></div></div>
-  <div class="swr"><span class="swr-l">Greyscale icons</span><div class="swt" id="swMono"></div></div>
+  <div class="swr-grid">
+    <div class="swr"><span class="swr-l">Ambient</span><div class="swt" id="swAmbient"></div></div>
+    <div class="swr"><span class="swr-l">Hourly</span><div class="swt on" id="swHourly"></div></div>
+    <div class="swr"><span class="swr-l">AQI</span><div class="swt on" id="swAqi"></div></div>
+    <div class="swr"><span class="swr-l">Feels-like</span><div class="swt on" id="swFeels"></div></div>
+    <div class="swr"><span class="swr-l">Rain chance</span><div class="swt on" id="swRain"></div></div>
+    <div class="swr"><span class="swr-l">Forecast rain</span><div class="swt" id="swFcPop"></div></div>
+    <div class="swr"><span class="swr-l">Dates</span><div class="swt" id="swDates"></div></div>
+    <div class="swr"><span class="swr-l">Condition</span><div class="swt on" id="swCond"></div></div>
+    <div class="swr"><span class="swr-l">Animate</span><div class="swt on" id="swAnim"></div></div>
+    <div class="swr"><span class="swr-l">Greyscale</span><div class="swt" id="swMono"></div></div>
+  </div>
   <div class="sep"></div>
 
   <div class="lbl">Zoom</div>
@@ -256,11 +284,16 @@ const DEF={
   unit:'c', days:5, layout:'full', dayfmt:'short', theme:'light',
   bg:'#ffffff', text:'#37352f',
   ambient:false, hourly:true, aqi:true, feels:true, rain:true, fcPop:false,
-  hideToday:false, dates:false, cond:true, anim:true, mono:false, zoom:100,
-  hourlyExpanded:false
+  dates:false, cond:true, anim:true, mono:false, zoom:100,
+  hourlyExpanded:false,
+  savedLocations:[], activeIdx:0
 };
 let S={...DEF};
 let DATA=null, AQ=null, refreshTimer=null;
+let cache={};                      // per-city in-memory cache: "lat,lon" -> {DATA, AQ, ts}
+const STALE_MS=10*60*1000;         // background-refresh a cached city only if older than this
+function cityKey(c){return c.lat+','+c.lon;}
+function setLoading(on){document.getElementById('wrapper').classList.toggle('loading',on);}
 
 function load(){try{const d=localStorage.getItem('ww2');if(d)S={...DEF,...JSON.parse(d)};}catch(e){}}
 function save(){try{localStorage.setItem('ww2',JSON.stringify(S));}catch(e){}}
@@ -335,20 +368,60 @@ async function geocode(q){
   const r=await fetch(url);if(!r.ok)throw new Error('geo');
   const j=await r.json();return j.results||[];
 }
+
+/* ---------- MULTI-MODEL CONSENSUS ---------- */
+// Blend several forecast models so one outlier (e.g. ECMWF over-predicting a storm) can't drive the display.
+const MODELS=['ecmwf_ifs','gfs_seamless','icon_seamless','gem_seamless','jma_seamless'];
+function median(a){const v=a.filter(x=>x!=null&&!isNaN(x)).sort((x,y)=>x-y);if(!v.length)return null;const m=v.length>>1;return v.length%2?v[m]:(v[m-1]+v[m])/2;}
+function medianCode(a){const v=a.filter(x=>x!=null&&!isNaN(x)).sort((x,y)=>x-y);return v.length?v[(v.length-1)>>1]:0;} // pick an actual code, never a fractional average
+function hourIdxFor(times,off){const now=new Date(Date.now()+(off||0)*1000);now.setUTCMinutes(0,0,0);const i=times.findIndex(t=>new Date(t+'Z')>=now);return i<0?0:i;}
+// Collapse a multi-model response into one consensus object shaped like a single-model response.
+function collapseConsensus(j){
+  const out={utc_offset_seconds:j.utc_offset_seconds, timezone:j.timezone};
+  const med=(obj,field,isCode)=>{const arrs=MODELS.map(m=>obj[field+'_'+m]).filter(Array.isArray);const f=isCode?medianCode:median;return obj.time.map((_,i)=>f(arrs.map(a=>a[i])));};
+  const H=j.hourly;
+  out.hourly={time:H.time,
+    temperature_2m:med(H,'temperature_2m'),
+    apparent_temperature:med(H,'apparent_temperature'),
+    weather_code:med(H,'weather_code',true),
+    precipitation:med(H,'precipitation'),
+    cloud_cover:med(H,'cloud_cover')};
+  const D=j.daily;
+  out.daily={time:D.time,
+    weather_code:med(D,'weather_code',true),
+    temperature_2m_max:med(D,'temperature_2m_max'),
+    temperature_2m_min:med(D,'temperature_2m_min'),
+    precipitation_probability_max:med(D,'precipitation_probability_max'),
+    precipitation_sum:med(D,'precipitation_sum')};
+  // the "current" block isn't per-model, so synthesize it from the consensus hourly at the current hour
+  const ci=hourIdxFor(out.hourly.time, out.utc_offset_seconds);
+  const apt=out.hourly.apparent_temperature[ci];
+  out.current={
+    time:(j.current&&j.current.time)||out.hourly.time[ci],
+    is_day:(j.current&&j.current.is_day!=null)?j.current.is_day:1,
+    temperature_2m:out.hourly.temperature_2m[ci],
+    apparent_temperature:apt!=null?apt:out.hourly.temperature_2m[ci],
+    weather_code:out.hourly.weather_code[ci]
+  };
+  return out;
+}
 async function fetchWeather(){
+  const reqLat=S.lat, reqLon=S.lon, k=reqLat+','+reqLon;     // capture: the active city can change mid-flight
   const unit=S.unit==='f'?'fahrenheit':'celsius';
-  const url=`https://api.open-meteo.com/v1/forecast?latitude=${S.lat}&longitude=${S.lon}`
+  const url=`https://api.open-meteo.com/v1/forecast?latitude=${reqLat}&longitude=${reqLon}`
     +`&current=temperature_2m,apparent_temperature,weather_code,is_day`
-    +`&hourly=temperature_2m,weather_code,precipitation_probability,cloud_cover,precipitation`
+    +`&hourly=temperature_2m,weather_code,cloud_cover,precipitation,apparent_temperature`
     +`&daily=weather_code,temperature_2m_max,temperature_2m_min,precipitation_probability_max,precipitation_sum`
     +`&timezone=auto&temperature_unit=${unit}&forecast_days=7`
-    +`&models=ecmwf_ifs`;
+    +`&models=${MODELS.join(',')}`;
   try{
     const r=await fetch(url);if(!r.ok)throw new Error('fetch');
-    DATA=await r.json();
-    render();
-    if(S.aqi)fetchAQI();
+    const data=collapseConsensus(await r.json());
+    cache[k]={DATA:data, AQ:(cache[k]&&cache[k].AQ)||null, ts:Date.now()};
+    if(reqLat===S.lat&&reqLon===S.lon){ DATA=data; setLoading(false); render(); if(S.aqi)fetchAQI(); }
   }catch(e){
+    if(reqLat!==S.lat||reqLon!==S.lon)return;                // stale failed request — ignore
+    setLoading(false);
     const isFile=location.protocol==='file:';
     const msg=isFile
       ?'🗂️ Open on a web server to load live weather.<br><small style="opacity:.6;font-size:11px">Local files can\'t fetch APIs (CORS). Push to GitHub Pages or run <code>npx serve .</code></small>'
@@ -358,11 +431,14 @@ async function fetchWeather(){
   }
 }
 async function fetchAQI(){
+  const reqLat=S.lat, reqLon=S.lon, k=reqLat+','+reqLon;
   try{
-    const url=`https://air-quality-api.open-meteo.com/v1/air-quality?latitude=${S.lat}&longitude=${S.lon}&current=us_aqi&timezone=auto`;
+    const url=`https://air-quality-api.open-meteo.com/v1/air-quality?latitude=${reqLat}&longitude=${reqLon}&current=us_aqi&timezone=auto`;
     const r=await fetch(url);if(!r.ok)throw new Error('aqi');
-    AQ=await r.json();render();
-  }catch(e){AQ=null;}
+    const j=await r.json();
+    if(cache[k])cache[k].AQ=j;
+    if(reqLat===S.lat&&reqLon===S.lon){AQ=j;render();}
+  }catch(e){if(reqLat===S.lat&&reqLon===S.lon)AQ=null;}
 }
 
 // Downgrade rain/thunder codes when measurable precipitation isn't forecast.
@@ -388,8 +464,35 @@ function noonCode(dateStr){
   if(idx===-1)return null;
   return resolveCode(DATA.hourly.weather_code[idx], DATA.hourly.precipitation[idx], DATA.hourly.cloud_cover?DATA.hourly.cloud_cover[idx]:null);
 }
+// Index of the current entry (floored to the hour) in the hourly arrays, or -1.
+// Open-Meteo returns times in the LOCATION's timezone; compare wall-clocks by
+// reading "now" in that timezone (via utc_offset_seconds) and parsing the naive
+// time strings as UTC, so this stays correct even when viewing another timezone.
+function curHourIdx(){
+  if(!DATA||!DATA.hourly)return -1;
+  const off=(DATA.utc_offset_seconds||0)*1000;
+  const now=new Date(Date.now()+off);now.setUTCMinutes(0,0,0);
+  return DATA.hourly.time.findIndex(t=>new Date(t+'Z')>=now);
+}
+// Current weather code, reconciled against this hour's precipitation + cloud cover.
+function curResolvedCode(){
+  if(!DATA||!DATA.current)return 0;
+  let code=DATA.current.weather_code;
+  const i=curHourIdx();
+  if(i>=0)code=resolveCode(code, DATA.hourly.precipitation[i], DATA.hourly.cloud_cover?DATA.hourly.cloud_cover[i]:null);
+  return code;
+}
 function esc(s){return String(s).replace(/[&<>"]/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[m]));}
 function hr12(h){const ap=h>=12?'PM':'AM';let hh=h%12||12;return hh+' '+ap;}
+function locationTime(){
+  if(!DATA||DATA.utc_offset_seconds==null) return '';
+  const d=new Date(Date.now()+DATA.utc_offset_seconds*1000);
+  const h=d.getUTCHours(), m=d.getUTCMinutes();
+  const ap=h>=12?'PM':'AM';
+  const hh=h%12||12;
+  const mm=String(m).padStart(2,'0');
+  return `${hh}:${mm} ${ap}`;
+}
 
 function showMsg(html){document.getElementById('content').innerHTML=`<div class="msg">${html}</div>`;}
 function render(){
@@ -397,11 +500,7 @@ function render(){
   if(!DATA||!DATA.current){c.innerHTML='<div class="spinner"></div>';return;}
   applyAmbient();
   const cur=DATA.current, day=DATA.daily;
-  let curCode=cur.weather_code;
-  if(DATA.hourly){
-    const ni=DATA.hourly.time.findIndex(t=>new Date(t)>=new Date());
-    if(ni>=0)curCode=resolveCode(cur.weather_code, DATA.hourly.precipitation[ni], DATA.hourly.cloud_cover?DATA.hourly.cloud_cover[ni]:null);
-  }
+  const curCode=curResolvedCode();
   const info=codeInfo(curCode);
   const isDay=cur.is_day===1;
   const temp=Math.round(cur.temperature_2m);
@@ -410,7 +509,7 @@ function render(){
   const rainToday=day.precipitation_sum?day.precipitation_sum[0]:null;
 
   let chips='';
-  if(S.rain&&popToday!=null&&rainToday!=null&&rainToday>=0.5)chips+=`<span class="chip">☔ ${popToday}%</span>`;
+  if(S.rain&&popToday!=null&&rainToday!=null&&rainToday>=2)chips+=`<span class="chip">☔ ${popToday}%</span>`;
   if(S.aqi&&AQ&&AQ.current&&AQ.current.us_aqi!=null){const b=aqiBand(AQ.current.us_aqi);chips+=`<span class="chip"><span class="dot" style="background:${b.c}"></span>AQI ${Math.round(AQ.current.us_aqi)} · ${b.l}</span>`;}
   let toggleBtnHtml='';
   if(!S.hourly){
@@ -419,32 +518,29 @@ function render(){
       :`<button class="back-btn" id="hourlyBtn" title="Show hourly forecast"><svg viewBox="0 0 24 24" width="12" height="12" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M12 7.5V12l3 1.8"/></svg>Hourly</button>`;
   }
   const metaInner=toggleBtnHtml+chips;
+  const locTime=locationTime();
 
   let html=`<div class="now">
     <div class="now-icon">${iconSVG(info.t,isDay)}</div>
     <div class="now-main">
-      <div class="loc">${esc(S.place)}</div>
-      <div class="temp-row"><span class="temp">${temp}<span class="deg">°</span></span>${S.feels?`<span class="feels">Feels like ${feels}°</span>`:''}</div>
-      ${S.cond?`<div class="cond">${info.l}</div>`:''}
+      <div class="loc">${esc(S.place)}${locTime?`<span class="loc-time"> · ${locTime}</span>`:''}</div>
+      <div class="temp-row"><span class="temp">${temp}<span class="deg">°</span></span><div class="temp-side">${S.cond?`<div class="cond">${info.l}</div>`:''}${S.feels?`<div class="feels">Feels like ${feels}°</div>`:''}</div></div>
       ${metaInner?`<div class="meta-row">${metaInner}</div>`:''}
-      <div class="compact-hilo"><span class="hi">H ${Math.round(day.temperature_2m_max[0])}°</span><span class="lo">L ${Math.round(day.temperature_2m_min[0])}°</span></div>
-      ${chips?`<div class="compact-meta">${chips}</div>`:''}
     </div>
-  </div>`;
+  </div>
+  <div class="compact-bottom"><div class="compact-hilo"><span class="hi">H ${Math.round(day.temperature_2m_max[0])}°</span><span class="lo">L ${Math.round(day.temperature_2m_min[0])}°</span></div>${chips?`<div class="compact-meta">${chips}</div>`:''}</div>`;
 
   // Build hourly HTML as a reusable string
   let hourlyHtml='';
   if(DATA.hourly){
-    const now=new Date();
-    now.setMinutes(0,0,0); // floor to the current hour so "Now" = current conditions, not the next hour
-    let start=DATA.hourly.time.findIndex(t=>new Date(t)>=now);
+    let start=curHourIdx(); // floored to the current hour so "Now" = current conditions
     if(start<0)start=0;
     hourlyHtml='<div class="hr">';
     for(let i=start;i<start+12&&i<DATA.hourly.time.length;i++){
-      const d=new Date(DATA.hourly.time[i]);
+      const hh=new Date(DATA.hourly.time[i]+'Z').getUTCHours();
       const di=codeInfo(resolveCode(DATA.hourly.weather_code[i], DATA.hourly.precipitation[i], DATA.hourly.cloud_cover?DATA.hourly.cloud_cover[i]:null));
-      const hDay=d.getHours()>=6&&d.getHours()<19;
-      const label=(i===start)?'Now':hr12(d.getHours());
+      const hDay=hh>=6&&hh<19;
+      const label=(i===start)?'Now':hr12(hh);
       hourlyHtml+=`<div class="hr-item"><div class="hr-time">${label}</div><div class="hr-icon">${iconSVG(di.t,hDay)}</div><div class="hr-temp">${Math.round(DATA.hourly.temperature_2m[i])}°</div></div>`;
     }
     hourlyHtml+='</div>';
@@ -452,7 +548,7 @@ function render(){
 
   // Build daily HTML as a reusable string
   let dailyHtml='';
-  let startD=S.hideToday?1:0;
+  let startD=0;
   const n=parseInt(S.days);
   dailyHtml='<div class="fc">';
   for(let i=startD;i<startD+n&&i<day.time.length;i++){
@@ -469,7 +565,7 @@ function render(){
       ${S.dates?`<div class="fc-date">${dstr}</div>`:''}
       <div class="fc-icon">${iconSVG(di.t,true)}</div>
       <div class="fc-temp"><span class="fc-hi">${Math.round(day.temperature_2m_max[i])}°</span><span class="fc-lo">${Math.round(day.temperature_2m_min[i])}°</span></div>
-      ${S.fcPop&&pop!=null&&rainSum!=null&&rainSum>=0.5?`<div class="fc-pop">☔${pop}%</div>`:''}
+      ${S.fcPop&&pop!=null&&rainSum!=null&&rainSum>=2?`<div class="fc-pop">☔${pop}%</div>`:''}
     </div>`;
   }
   dailyHtml+='</div>';
@@ -484,6 +580,11 @@ function render(){
   }
   html+=`<div class="credit"><a href="https://open-meteo.com/" target="_blank" rel="noopener">Weather by Open-Meteo</a></div>`;
   c.innerHTML=html;
+  clearInterval(window._locTimerID);
+  window._locTimerID=setInterval(()=>{
+    const el=document.querySelector('.loc-time');
+    if(el)el.textContent=` · ${locationTime()}`;
+  },15000);
   const hourlyBtn=c.querySelector('#hourlyBtn');
   if(hourlyBtn)hourlyBtn.addEventListener('click',()=>{
     S.hourlyExpanded=true;save();render();
@@ -498,7 +599,7 @@ function applyAmbient(){
   const cont=document.getElementById('cont');
   const r=document.documentElement.style;
   if(S.ambient&&DATA&&DATA.current){
-    const info=codeInfo(DATA.current.weather_code);
+    const info=codeInfo(curResolvedCode());
     const isDay=DATA.current.is_day===1;
     const g=(AMBIENT[info.t]||AMBIENT.cloud)[isDay?'day':'night'];
     cont.style.background=g;
@@ -513,8 +614,6 @@ function applyAmbient(){
 }
 function applyAll(){
   const r=document.documentElement.style;
-  r.setProperty('--bg-color',S.bg);
-  r.setProperty('--text',S.text);
   document.getElementById('wrapper').style.transform=`scale(${S.zoom/100})`;
   const n=parseInt(S.days);
   r.setProperty('--hr-w',`calc((100% - ${(n-1)*8}px) / ${n})`);
@@ -547,14 +646,81 @@ async function doSearch(){
     locRes.innerHTML=res.map((r,i)=>{const sub=[r.admin1,r.country].filter(Boolean).join(', ');return`<div class="loc-item" data-i="${i}">${esc(r.name)}<span class="sub">${esc(sub)}</span></div>`;}).join('');
     locRes.querySelectorAll('.loc-item').forEach(el=>el.addEventListener('click',()=>{
       const r=res[parseInt(el.dataset.i)];
-      S.lat=r.latitude;S.lon=r.longitude;S.place=r.name;S.country=r.country||'';
-      save();updateLocCur();locRes.classList.remove('show');locInput.value='';
-      AQ=null;showMsg('<div class="spinner"></div>');fetchWeather();
+      locRes.classList.remove('show');locInput.value='';
+      addCity({lat:r.latitude,lon:r.longitude,place:r.name,country:r.country||''});
     }));
   }catch(e){locRes.innerHTML='<div class="loc-item">Search failed — try again.</div>';}
 }
 locGo.addEventListener('click',doSearch);
 locInput.addEventListener('keydown',e=>{if(e.key==='Enter')doSearch();});
+
+/* ---------- MULTI-CITY ---------- */
+function abbr(place){return (String(place||'').replace(/[^a-zA-Z]/g,'').slice(0,3)||'CTY').toUpperCase();}
+// Guarantee at least one saved city and keep the active location fields in sync with the list.
+function ensureCities(){
+  if(!Array.isArray(S.savedLocations))S.savedLocations=[];
+  if(S.savedLocations.length===0){S.savedLocations=[{lat:S.lat,lon:S.lon,place:S.place,country:S.country||''}];S.activeIdx=0;}
+  if(S.activeIdx==null||S.activeIdx<0||S.activeIdx>=S.savedLocations.length)S.activeIdx=0;
+  const a=S.savedLocations[S.activeIdx];
+  S.lat=a.lat;S.lon=a.lon;S.place=a.place;S.country=a.country||'';
+  save();
+}
+function switchCity(idx){
+  if(idx==null||idx<0||idx>=S.savedLocations.length)return;
+  S.activeIdx=idx;
+  const c=S.savedLocations[idx];
+  S.lat=c.lat;S.lon=c.lon;S.place=c.place;S.country=c.country||'';
+  save();renderTabs();renderCitiesList();updateLocCur();
+  const cached=cache[cityKey(c)];
+  if(cached){
+    DATA=cached.DATA; AQ=cached.AQ; setLoading(false); render();   // instant from cache
+    if(S.aqi&&!AQ) fetchAQI();                                     // cached weather but AQI not loaded yet
+    if(Date.now()-cached.ts>STALE_MS) fetchWeather();              // silent background refresh
+  }else{
+    setLoading(true); fetchWeather();                             // keep current view dimmed until it loads
+  }
+}
+function addCity(city){
+  if(!Array.isArray(S.savedLocations))S.savedLocations=[];
+  let idx=S.savedLocations.findIndex(c=>c.lat===city.lat&&c.lon===city.lon);
+  if(idx<0){
+    if(S.savedLocations.length>=5){idx=S.activeIdx;delete cache[cityKey(S.savedLocations[idx])];S.savedLocations[idx]=city;} // list full: overwrite active slot
+    else{S.savedLocations.push(city);idx=S.savedLocations.length-1;}
+  }
+  switchCity(idx);
+}
+function removeCity(idx){
+  if(!S.savedLocations||S.savedLocations.length<=1)return; // never remove the last city
+  const wasActive=(idx===S.activeIdx);
+  delete cache[cityKey(S.savedLocations[idx])];
+  S.savedLocations.splice(idx,1);
+  if(idx<S.activeIdx)S.activeIdx--;
+  if(S.activeIdx>=S.savedLocations.length)S.activeIdx=S.savedLocations.length-1;
+  save();renderTabs();renderCitiesList();
+  if(wasActive)switchCity(S.activeIdx); // active city was removed → load the new active one
+}
+function renderTabs(){
+  const el=document.getElementById('cityTabs');
+  if(!el)return;
+  const list=S.savedLocations||[];
+  if(list.length<2){el.innerHTML='';return;} // tabs only appear with 2+ cities
+  el.innerHTML=list.map((c,i)=>`<button class="city-tab${i===S.activeIdx?' on':''}" data-i="${i}" title="${esc(c.place)}">${esc(abbr(c.place))}</button>`).join('');
+  el.querySelectorAll('.city-tab').forEach(b=>b.addEventListener('click',()=>{const i=parseInt(b.dataset.i);if(i!==S.activeIdx)switchCity(i);}));
+}
+function renderCitiesList(){
+  const el=document.getElementById('savedCities');
+  if(!el)return;
+  const list=S.savedLocations||[];
+  el.innerHTML=list.map((c,i)=>{
+    const active=(i===S.activeIdx),canRemove=list.length>1;
+    return`<div class="city-item${active?' active':''}">
+      <div class="city-info"><span class="city-nm">${esc(c.place)}</span><span class="city-co">${esc(c.country||'')}</span></div>
+      <div class="city-actions">${active?`<span class="city-badge">ACTIVE</span>`:`<button class="city-switch" data-i="${i}">Switch</button>`}${canRemove?`<button class="city-x" data-i="${i}" title="Remove">×</button>`:''}</div>
+    </div>`;
+  }).join('');
+  el.querySelectorAll('.city-switch').forEach(b=>b.addEventListener('click',()=>switchCity(parseInt(b.dataset.i))));
+  el.querySelectorAll('.city-x').forEach(b=>b.addEventListener('click',()=>removeCity(parseInt(b.dataset.i))));
+}
 
 function hexToHsv(hex){const r=parseInt(hex.slice(1,3),16)/255,g=parseInt(hex.slice(3,5),16)/255,b=parseInt(hex.slice(5,7),16)/255;const mx=Math.max(r,g,b),mn=Math.min(r,g,b),d=mx-mn;let h=0;if(d){if(mx===r)h=((g-b)/d+6)%6;else if(mx===g)h=(b-r)/d+2;else h=(r-g)/d+4;h/=6;}return{h,s:mx?d/mx:0,v:mx};}
 function hsvToHex(h,s,v){h*=6;const i=Math.floor(h),f=h-i,p=v*(1-s),q=v*(1-s*f),t=v*(1-s*(1-f));let r,g,b;switch(i%6){case 0:r=v;g=t;b=p;break;case 1:r=q;g=v;b=p;break;case 2:r=p;g=v;b=t;break;case 3:r=p;g=q;b=v;break;case 4:r=t;g=p;b=v;break;case 5:r=v;g=p;b=q;break;}return'#'+[r,g,b].map(x=>Math.round(x*255).toString(16).padStart(2,'0')).join('');}
@@ -627,7 +793,7 @@ pickerKeys.forEach(key=>{
 
 function setupTg(id,key,cb){document.getElementById(id).addEventListener('click',e=>{const b=e.target.closest('.tb');if(!b)return;document.querySelectorAll(`#${id} .tb`).forEach(x=>x.classList.remove('on'));b.classList.add('on');S[key]=b.dataset.v;save();if(cb)cb();});}
 function syncTg(id,val){document.querySelectorAll(`#${id} .tb`).forEach(b=>b.classList.toggle('on',String(b.dataset.v)===String(val)));}
-setupTg('gUnit','unit',()=>{AQ=null;showMsg('<div class="spinner"></div>');fetchWeather();});
+setupTg('gUnit','unit',()=>{cache={};AQ=null;showMsg('<div class="spinner"></div>');fetchWeather();});
 setupTg('gDays','days',()=>{applyAll();render();});
 setupTg('gLayout','layout',()=>{applyAll();render();});
 setupTg('gDayfmt','dayfmt',render);
@@ -645,7 +811,6 @@ setupSw('swAqi','aqi',()=>{if(S.aqi&&!AQ)fetchAQI();else render();});
 setupSw('swFeels','feels',render);
 setupSw('swRain','rain',render);
 setupSw('swFcPop','fcPop',render);
-setupSw('swHide','hideToday',render);
 setupSw('swDates','dates',render);
 setupSw('swCond','cond',render);
 setupSw('swAnim','anim',applyAll);
@@ -654,20 +819,21 @@ setupSw('swMono','mono',applyAll);
 const zSlider=document.getElementById('zSlider'),zLabel=document.getElementById('zLabel');
 zSlider.addEventListener('input',e=>{S.zoom=parseInt(e.target.value);zLabel.textContent=S.zoom+'%';save();applyAll();});
 document.getElementById('rstBtn').addEventListener('click',()=>{
-  const{place,country,lat,lon}=S;
-  S={...DEF,place,country,lat,lon};
+  const{place,country,lat,lon,savedLocations,activeIdx}=S;
+  S={...DEF,place,country,lat,lon,savedLocations,activeIdx};
+  cache={};
   save();applyAll();syncUI();showMsg('<div class="spinner"></div>');AQ=null;fetchWeather();
 });
 
 function syncUI(){
   syncTg('gUnit',S.unit);syncTg('gDays',S.days);syncTg('gLayout',S.layout);syncTg('gDayfmt',S.dayfmt);syncTg('gTheme',S.theme);
-  ['Ambient:ambient','Hourly:hourly','Aqi:aqi','Feels:feels','Rain:rain','FcPop:fcPop','Hide:hideToday','Dates:dates','Cond:cond','Anim:anim','Mono:mono']
+  ['Ambient:ambient','Hourly:hourly','Aqi:aqi','Feels:feels','Rain:rain','FcPop:fcPop','Dates:dates','Cond:cond','Anim:anim','Mono:mono']
     .forEach(p=>{const[id,key]=p.split(':');syncSw('sw'+id,S[key]);});
   zSlider.value=S.zoom;zLabel.textContent=S.zoom+'%';
-  renderSwatches();hlAll();updateLocCur();
+  renderSwatches();hlAll();updateLocCur();renderTabs();renderCitiesList();
 }
 
-load();applyAll();syncUI();fetchWeather();
+load();ensureCities();applyAll();syncUI();fetchWeather();
 refreshTimer=setInterval(fetchWeather,20*60*1000);
 </script>
 </body>
