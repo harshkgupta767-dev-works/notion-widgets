@@ -55,11 +55,11 @@
   .compact-hilo{display:none;font-size:13px;font-weight:600;gap:8px;opacity:.78;margin-top:3px}
   .compact-hilo .lo{opacity:.6}
 
-  .hr{display:flex;gap:8px;margin-top:16px;overflow-x:auto;padding-bottom:2px;scrollbar-width:thin;width:0;min-width:100%;scrollbar-color:color-mix(in srgb,var(--text,#37352f) 35%,transparent) transparent}
+  .hr{display:flex;gap:8px;margin-top:16px;height:92px;overflow-x:auto;padding-bottom:2px;scrollbar-width:thin;width:0;min-width:100%;scrollbar-color:color-mix(in srgb,var(--text,#37352f) 35%,transparent) transparent}
   .hr::-webkit-scrollbar{height:4px}.hr::-webkit-scrollbar-thumb{background:color-mix(in srgb,var(--text,#37352f) 35%,transparent);border-radius:4px}.hr::-webkit-scrollbar-track{background:transparent}
   body.ambient .hr{scrollbar-color:rgba(255,255,255,.5) transparent}
   body.ambient .hr::-webkit-scrollbar-thumb{background:rgba(255,255,255,.5)}
-  .hr-item{flex:0 0 var(--hr-w,52px);display:flex;flex-direction:column;align-items:center;gap:5px;padding:8px 4px;border-radius:10px;background:rgba(128,128,128,.07);transition:background .3s;min-height:86px}
+  .hr-item{flex:0 0 var(--hr-w,52px);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:5px;padding:8px 4px;border-radius:10px;background:rgba(128,128,128,.07);transition:background .3s}
   .hr-time{font-size:11px;font-weight:700;opacity:.75;letter-spacing:.02em;white-space:nowrap}
   .hr-icon svg{width:30px;height:30px}
   .hr-temp{font-size:12px;font-weight:700}
@@ -72,10 +72,8 @@
   .fc-temp{font-size:12px;font-weight:600;display:flex;gap:5px;align-items:baseline}
   .fc-hi{opacity:1}.fc-lo{opacity:.5}
   .fc-pop{font-size:9px;font-weight:600;color:var(--ic-rain);opacity:.9}
-  .fc-day.expandable{cursor:pointer}
-  .fc-day.expandable:hover{background:rgba(128,128,128,.14)}
-  body.ambient .fc-day.expandable:hover{background:rgba(255,255,255,.22)}
-  .back-btn{background:rgba(128,128,128,.14);border:none;display:inline-flex;align-items:center;justify-content:center;width:22px;height:22px;font-size:13px;font-weight:700;color:inherit;border-radius:50%;padding:0;line-height:1;cursor:pointer;opacity:.8;transition:opacity .15s,background .15s}
+  .back-btn{display:inline-flex;align-items:center;gap:4px;font-family:'Inter',sans-serif;font-size:11px;font-weight:600;padding:3px 10px;border-radius:20px;border:none;background:rgba(128,128,128,.14);color:inherit;cursor:pointer;opacity:.85;line-height:1.4;white-space:nowrap;transition:opacity .15s,background .15s}
+  .back-btn svg{flex-shrink:0}
   .back-btn:hover{opacity:1;background:rgba(128,128,128,.24)}
   body.ambient .back-btn{background:rgba(255,255,255,.22)}
   body.ambient .back-btn:hover{background:rgba(255,255,255,.34)}
@@ -341,9 +339,10 @@ async function fetchWeather(){
   const unit=S.unit==='f'?'fahrenheit':'celsius';
   const url=`https://api.open-meteo.com/v1/forecast?latitude=${S.lat}&longitude=${S.lon}`
     +`&current=temperature_2m,apparent_temperature,weather_code,is_day`
-    +`&hourly=temperature_2m,weather_code,precipitation_probability`
-    +`&daily=weather_code,temperature_2m_max,temperature_2m_min,precipitation_probability_max`
-    +`&timezone=auto&temperature_unit=${unit}&forecast_days=7`;
+    +`&hourly=temperature_2m,weather_code,precipitation_probability,cloud_cover,precipitation`
+    +`&daily=weather_code,temperature_2m_max,temperature_2m_min,precipitation_probability_max,precipitation_sum`
+    +`&timezone=auto&temperature_unit=${unit}&forecast_days=7`
+    +`&models=ecmwf_ifs`;
   try{
     const r=await fetch(url);if(!r.ok)throw new Error('fetch');
     DATA=await r.json();
@@ -366,10 +365,28 @@ async function fetchAQI(){
   }catch(e){AQ=null;}
 }
 
+// Downgrade rain/thunder codes when measurable precipitation isn't forecast.
+// Reclassify to clear/partly/overcast based on cloud cover.
+function resolveCode(code, precip, cloud){
+  // Keep rain/thunder codes only when meaningful precipitation is forecast (>=2mm)
+  if(code>=51){
+    if(precip!=null && precip>=2) return code;
+    // light/negligible precip — fall through to cloud reclassification
+  }
+  if(code===45||code===48) return code; // fog
+  if(cloud!=null){
+    const cc=cloud<40?0:cloud<65?1:cloud<85?2:3;
+    if(code>=51) return cc;
+    return Math.min(code,cc);
+  }
+  if(code>=51) return 2;
+  return code;
+}
 function noonCode(dateStr){
   if(!DATA.hourly)return null;
   const idx=DATA.hourly.time.indexOf(dateStr+'T12:00');
-  return idx!==-1?DATA.hourly.weather_code[idx]:null;
+  if(idx===-1)return null;
+  return resolveCode(DATA.hourly.weather_code[idx], DATA.hourly.precipitation[idx], DATA.hourly.cloud_cover?DATA.hourly.cloud_cover[idx]:null);
 }
 function esc(s){return String(s).replace(/[&<>"]/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[m]));}
 function hr12(h){const ap=h>=12?'PM':'AM';let hh=h%12||12;return hh+' '+ap;}
@@ -380,17 +397,28 @@ function render(){
   if(!DATA||!DATA.current){c.innerHTML='<div class="spinner"></div>';return;}
   applyAmbient();
   const cur=DATA.current, day=DATA.daily;
-  const info=codeInfo(cur.weather_code);
+  let curCode=cur.weather_code;
+  if(DATA.hourly){
+    const ni=DATA.hourly.time.findIndex(t=>new Date(t)>=new Date());
+    if(ni>=0)curCode=resolveCode(cur.weather_code, DATA.hourly.precipitation[ni], DATA.hourly.cloud_cover?DATA.hourly.cloud_cover[ni]:null);
+  }
+  const info=codeInfo(curCode);
   const isDay=cur.is_day===1;
   const temp=Math.round(cur.temperature_2m);
   const feels=Math.round(cur.apparent_temperature);
   const popToday=day.precipitation_probability_max?day.precipitation_probability_max[0]:null;
+  const rainToday=day.precipitation_sum?day.precipitation_sum[0]:null;
 
   let chips='';
-  if(S.rain&&popToday!=null)chips+=`<span class="chip">☔ ${popToday}%</span>`;
+  if(S.rain&&popToday!=null&&rainToday!=null&&rainToday>=0.5)chips+=`<span class="chip">☔ ${popToday}%</span>`;
   if(S.aqi&&AQ&&AQ.current&&AQ.current.us_aqi!=null){const b=aqiBand(AQ.current.us_aqi);chips+=`<span class="chip"><span class="dot" style="background:${b.c}"></span>AQI ${Math.round(AQ.current.us_aqi)} · ${b.l}</span>`;}
-  const backBtnHtml=(!S.hourly&&S.hourlyExpanded)?`<button class="back-btn" id="backBtn" title="Back to forecast">←</button>`:'';
-  const metaInner=backBtnHtml+chips;
+  let toggleBtnHtml='';
+  if(!S.hourly){
+    toggleBtnHtml=S.hourlyExpanded
+      ?`<button class="back-btn" id="backBtn" title="Back to daily forecast">← Back</button>`
+      :`<button class="back-btn" id="hourlyBtn" title="Show hourly forecast"><svg viewBox="0 0 24 24" width="12" height="12" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M12 7.5V12l3 1.8"/></svg>Hourly</button>`;
+  }
+  const metaInner=toggleBtnHtml+chips;
 
   let html=`<div class="now">
     <div class="now-icon">${iconSVG(info.t,isDay)}</div>
@@ -408,12 +436,13 @@ function render(){
   let hourlyHtml='';
   if(DATA.hourly){
     const now=new Date();
+    now.setMinutes(0,0,0); // floor to the current hour so "Now" = current conditions, not the next hour
     let start=DATA.hourly.time.findIndex(t=>new Date(t)>=now);
     if(start<0)start=0;
     hourlyHtml='<div class="hr">';
     for(let i=start;i<start+12&&i<DATA.hourly.time.length;i++){
       const d=new Date(DATA.hourly.time[i]);
-      const di=codeInfo(DATA.hourly.weather_code[i]);
+      const di=codeInfo(resolveCode(DATA.hourly.weather_code[i], DATA.hourly.precipitation[i], DATA.hourly.cloud_cover?DATA.hourly.cloud_cover[i]:null));
       const hDay=d.getHours()>=6&&d.getHours()<19;
       const label=(i===start)?'Now':hr12(d.getHours());
       hourlyHtml+=`<div class="hr-item"><div class="hr-time">${label}</div><div class="hr-icon">${iconSVG(di.t,hDay)}</div><div class="hr-temp">${Math.round(DATA.hourly.temperature_2m[i])}°</div></div>`;
@@ -428,19 +457,19 @@ function render(){
   dailyHtml='<div class="fc">';
   for(let i=startD;i<startD+n&&i<day.time.length;i++){
     const isToday=(i===0);
-    const code=isToday?cur.weather_code:(noonCode(day.time[i])??day.weather_code[i]);
+    const code=isToday?curCode:(noonCode(day.time[i])??day.weather_code[i]);
     const di=codeInfo(code);
     const d=new Date(day.time[i]+'T00:00');
     const name=isToday?'Today':(S.dayfmt==='full'?DAYS_FULL[d.getDay()]:DAYS_SHORT[d.getDay()]);
     const dstr=`${MONTHS[d.getMonth()]} ${d.getDate()}`;
     const pop=day.precipitation_probability_max?day.precipitation_probability_max[i]:null;
-    const isExpandable=isToday && !S.hourly;
-    dailyHtml+=`<div class="fc-day${isExpandable?' expandable':''}"${isExpandable?' data-today="1"':''}>
+    const rainSum=day.precipitation_sum?day.precipitation_sum[i]:null;
+    dailyHtml+=`<div class="fc-day">
       <div class="fc-name">${name}</div>
       ${S.dates?`<div class="fc-date">${dstr}</div>`:''}
       <div class="fc-icon">${iconSVG(di.t,true)}</div>
       <div class="fc-temp"><span class="fc-hi">${Math.round(day.temperature_2m_max[i])}°</span><span class="fc-lo">${Math.round(day.temperature_2m_min[i])}°</span></div>
-      ${S.fcPop&&pop!=null?`<div class="fc-pop">☔${pop}%</div>`:''}
+      ${S.fcPop&&pop!=null&&rainSum!=null&&rainSum>=0.5?`<div class="fc-pop">☔${pop}%</div>`:''}
     </div>`;
   }
   dailyHtml+='</div>';
@@ -455,8 +484,8 @@ function render(){
   }
   html+=`<div class="credit"><a href="https://open-meteo.com/" target="_blank" rel="noopener">Weather by Open-Meteo</a></div>`;
   c.innerHTML=html;
-  const todayCard=c.querySelector('.fc-day.expandable[data-today="1"]');
-  if(todayCard)todayCard.addEventListener('click',()=>{
+  const hourlyBtn=c.querySelector('#hourlyBtn');
+  if(hourlyBtn)hourlyBtn.addEventListener('click',()=>{
     S.hourlyExpanded=true;save();render();
   });
   const backBtn=c.querySelector('#backBtn');
