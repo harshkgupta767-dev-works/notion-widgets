@@ -12,6 +12,7 @@ Hosted on GitHub Pages — embed using Notion's `/embed` block.
 | 🌦 Weather | https://harshkgupta767-dev-works.github.io/notion-widgets/widget-weather.html |
 | 🕰 Flip Clock | https://harshkgupta767-dev-works.github.io/notion-widgets/widget-flip-clock.html |
 | ⏱ Pomodoro Timer | https://harshkgupta767-dev-works.github.io/notion-widgets/widget-pomodoro.html |
+| 🌄 Scenic Pomodoro | https://harshkgupta767-dev-works.github.io/notion-widgets/widget-pomodoro-scenic.html |
 | 🎵 Music Player | https://harshkgupta767-dev-works.github.io/notion-widgets/widget-music-player.html |
 | 🌧 Matrix Rain | https://harshkgupta767-dev-works.github.io/notion-widgets/widget-matrix.html |
 
@@ -26,6 +27,7 @@ Hosted on GitHub Pages — embed using Notion's `/embed` block.
 | Flip Clock | Standard (4-tile) | 500px | 220px |
 | Flip Clock | Compact (2-tile) | 320px | 200px |
 | Pomodoro Timer | — | 420px | 620px |
+| Scenic Pomodoro | — | 640px | 360px |
 | Music Player | Full (Spotify / YouTube) | 420px | 460px |
 | Music Player | Compact (Spotify only) | 420px | 140px |
 | Matrix Rain | — | any | any |
@@ -70,6 +72,17 @@ Hosted on GitHub Pages — embed using Notion's `/embed` block.
   - **Sound** — toggle notification sound on/off, with volume slider
   - **Zoom** — 50 – 150 % scale
   - Session history panel with editable past entries; dots indicator shows cycle progress
+
+- `widget-pomodoro-scenic.html` — Scenic Pomodoro inspired by studywithme.io: a full-bleed animated background with minimal white UI floating on top (no card or border). Fonts are Fredoka (timer digits) + Quicksand (UI). Settings include:
+  - **Scene** — 6 self-contained backgrounds with no image files (Sunset, Ocean, Forest, Night, Sakura, Noir), built from inline SVG art and CSS gradients; Night adds a generated star field
+  - **Custom background** — paste any image URL and toggle **Use custom image** to use it instead of a built-in scene
+  - **Motion** — Ken Burns (zoom + drift), Pan left → right, Pan right → left, Slow zoom, or Static
+  - **Overlay darkness** — 0 – 60 % tint over the scene for text legibility
+  - **Zoom** — 70 – 130 % scale of the floating UI
+  - **Durations** — Pomodoro, Short Break, and Long Break lengths (minutes)
+  - **Sequence** — Pomodoros before a long break (2 – 8) and an **Auto-start next** toggle
+  - **Sound** — Bell, Chime, Soft, or None alert (Web Audio, no files), with a play-on-end toggle, volume slider, and Test button
+  - Timestamp-based countdown that stays accurate across tab throttling; session dots under the mode pills fill as focus sessions complete; dark settings modal with General / Timers / Sounds tabs
 
 - `widget-music-player.html` — Embedded Spotify or YouTube player. Settings include:
   - **Theme** — Minimal, Dark, OLED, Mono
