@@ -1,613 +1,958 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Flip Clock</title>
-<link href="https://fonts.googleapis.com/css2?family=Anton&family=Bebas+Neue&family=Oswald:wght@700&family=JetBrains+Mono:wght@700&family=Squada+One&family=Chakra+Petch:wght@700&family=Roboto+Condensed:wght@700&family=Inter:wght@500;600;700&display=swap" rel="stylesheet">
-<style>
-  :root{--tile-shadow:0 2px 4px rgba(0,0,0,0.08),0 4px 12px rgba(0,0,0,0.12);--tile-inner-shadow:inset 0 2px 4px rgba(0,0,0,0.15);--tile-highlight:rgba(255,255,255,0.6);--tile-gradient:linear-gradient(to bottom,rgba(255,255,255,0.08) 0%,transparent 50%);--popup-shadow:0 8px 24px rgba(0,0,0,0.12),0 2px 8px rgba(0,0,0,0.08);--digit-font:'Anton','Roboto Condensed',sans-serif;--digit-size:82px;--digit-ls:0.02em;--flip-top-dur:.3s;--flip-top-ease:cubic-bezier(0.4,0,1,1);--flip-bot-dur:.3s;--flip-bot-ease:cubic-bezier(0,0,0.2,1);--flip-bot-delay:.25s;--gear-color:#ffffff}
-  *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
-  html,body{width:100vw;height:100vh;margin:0;padding:0;background:transparent;overflow:hidden;}
-  .container{width:100vw;height:100vh;display:flex;align-items:center;justify-content:center;overflow:hidden;background:var(--bg-color,#ffffff);transition:background 0.3s}
-  .wrapper{position:relative;display:flex;flex-direction:column;align-items:center;gap:8px;padding:20px 24px;transform-origin:center center;transition:transform 0.3s}
-  .gear{position:absolute;top:4px;left:4px;width:22px;height:22px;background:none;border:none;outline:none;cursor:pointer;display:flex;align-items:center;justify-content:center;z-index:10;opacity:0.6;transform:scale(1);transition:opacity 0.2s,transform 0.2s;pointer-events:auto;border-radius:4px}
-  .gear.pin{opacity:0.6;transform:scale(1);pointer-events:auto}
-  .gear:hover{opacity:1!important;background:rgba(128,128,128,0.2)}
-  /* PC / mouse: hide gear until the widget is hovered. Touch devices keep it visible. */
-  @media (hover:hover){
-    .gear{opacity:0;transform:scale(0.7);pointer-events:none}
-    .wrapper:hover .gear,.gear.pin{opacity:0.6;transform:scale(1);pointer-events:auto}
-  }
-  .gear svg{width:13px;height:13px;fill:var(--gear-color,#ffffff);transition:fill 0.3s}
-  .clock{display:flex;align-items:center}
-  .clock.std{gap:6px}
-  .clock.cmp{gap:0}
-  .colon{font-size:60px;font-weight:700;color:var(--date-color,#2a2a2a);padding-bottom:6px;user-select:none;transition:color 0.3s;text-shadow:2px 3px 5px rgba(0,0,0,0.3);font-family:'Roboto Condensed',sans-serif!important}
-  .clock.std .colon{margin:0 -3px}
-  .clock.cmp .colon{padding:0 3px}
-  .tile{position:relative;height:110px;box-shadow:var(--tile-shadow)}
-  .clock.std .tile{width:60px;perspective:350px}
-  .clock.cmp .tile{width:100px;perspective:420px}
-  .half{position:absolute;left:0;right:0;height:50%;overflow:hidden;background:var(--tile-bg,#2a2a2a);transition:background 0.3s}
-  .half.top{top:0;border-radius:10px 10px 0 0;border-top:1px solid var(--tile-highlight);border-bottom:1px solid rgba(128,128,128,0.15);box-shadow:var(--tile-inner-shadow)}
-  .half.top::before{content:'';position:absolute;inset:0;background:var(--tile-gradient);pointer-events:none;border-radius:10px 10px 0 0}
-  .half.bot{bottom:0;border-radius:0 0 10px 10px;filter:brightness(0.9)}
-  .half .num,.flap .num{position:absolute;left:0;width:100%;height:110px;line-height:110px;text-align:center;font-size:var(--digit-size,82px);font-weight:400;color:var(--time-text,#fff);pointer-events:none;letter-spacing:var(--digit-ls,0.02em);font-family:var(--digit-font,'Anton');text-shadow:2px 4px 6px rgba(0,0,0,0.35)}
-  .half .num{transition:color 0.3s}
-  .half.top .num{top:0}.half.bot .num{top:-55px}
-  .flap{position:absolute;left:0;right:0;height:50%;overflow:hidden;z-index:5}
-  .flap .num{z-index:2}
-  .flap-top{top:0;background:var(--tile-bg,#2a2a2a);border-radius:10px 10px 0 0;border-bottom:1px solid rgba(128,128,128,0.15);box-shadow:var(--flap-shadow-top);transform-origin:bottom center;animation:fd var(--flip-top-dur) var(--flip-top-ease) forwards,ftsOut var(--flip-top-dur) var(--flip-top-ease) forwards}.flap-top .num{top:0}
-  .flap-top::before{content:'';position:absolute;inset:0;z-index:1;pointer-events:none;background:linear-gradient(to top,rgba(0,0,0,var(--flap-gradient-strength,0.15)) 0%,transparent 60%);animation:fdg var(--flip-top-dur) var(--flip-top-ease) both}
-  .flap-top::after{content:'';position:absolute;inset:0;z-index:1;pointer-events:none;animation:fds var(--flip-top-dur) var(--flip-top-ease) both}
-  .flap-bot{bottom:0;background:var(--tile-bg,#2a2a2a);filter:brightness(0.9);border-radius:0 0 10px 10px;box-shadow:var(--flap-shadow-bot);transform-origin:top center;transform:rotateX(90deg);animation:fu var(--flip-bot-dur) var(--flip-bot-ease) var(--flip-bot-delay) forwards,fbsOut var(--flip-bot-dur) var(--flip-bot-ease) var(--flip-bot-delay) forwards}.flap-bot .num{top:-55px}
-  .flap-bot::before{content:'';position:absolute;inset:0;z-index:1;pointer-events:none;background:linear-gradient(to bottom,rgba(0,0,0,var(--flap-gradient-strength,0.15)) 0%,transparent 60%);animation:fug var(--flip-bot-dur) var(--flip-bot-ease) var(--flip-bot-delay) both}
-  .flap-bot::after{content:'';position:absolute;inset:0;z-index:1;pointer-events:none;animation:fus var(--flip-bot-dur) var(--flip-bot-ease) var(--flip-bot-delay) both}
-  @keyframes fd{0%{transform:rotateX(0)}100%{transform:rotateX(-90deg)}}
-  @keyframes fu{0%{transform:rotateX(90deg)}83%{transform:rotateX(-3deg)}100%{transform:rotateX(0)}}
-  @keyframes fds{0%{background:rgba(0,0,0,0)}50%{background:rgba(0,0,0,0.35)}100%{background:rgba(0,0,0,0)}}
-  @keyframes fus{0%{background:rgba(0,0,0,0.12)}40%{background:rgba(0,0,0,0.08)}100%{background:rgba(0,0,0,0)}}
-  @keyframes fdg{0%{opacity:0}45%{opacity:0.7}100%{opacity:0}}
-  @keyframes fug{0%{opacity:0}25%{opacity:0.6}100%{opacity:0}}
-  @keyframes fbsOut{0%{box-shadow:var(--flap-shadow-bot)}100%{box-shadow:0 -2px 4px rgba(0,0,0,0)}}
-  @keyframes ftsOut{0%{box-shadow:var(--flap-shadow-top)}100%{box-shadow:0 2px 4px rgba(0,0,0,0)}}
-  .ampm{font-size:18px;font-weight:700;color:var(--date-color,#2a2a2a);letter-spacing:.08em;margin-left:6px;align-self:flex-end;padding-bottom:8px;transition:color .3s;display:none;font-family:'Roboto Condensed',sans-serif!important}.ampm.show{display:block}
-  .date-line{font-size:16px;font-weight:700;color:var(--date-color,#2a2a2a);letter-spacing:.03em;user-select:none;transition:color .3s;text-shadow:1px 2px 4px rgba(0,0,0,0.25);font-family:'Roboto Condensed',sans-serif!important}
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Flip Clock</title>
 
-  /* POPUP */
-  .ov{position:fixed;inset:0;background:rgba(0,0,0,.2);z-index:200;opacity:0;pointer-events:none;transition:opacity .2s}.ov.open{opacity:1;pointer-events:auto}
-  .pop{position:fixed;top:50%;left:50%;transform:translate(-50%,-50%) scale(.93);width:310px;max-height:88vh;overflow-y:auto;border-radius:14px;z-index:210;padding:22px;opacity:0;pointer-events:none;transition:opacity .2s,transform .2s;font-family:'Inter',sans-serif!important}
-  .pop.open{opacity:1;pointer-events:auto;transform:translate(-50%,-50%) scale(1)}
-  .pop::-webkit-scrollbar{width:4px}.pop::-webkit-scrollbar-track{background:transparent}.pop::-webkit-scrollbar-thumb{border-radius:4px}
+  <!--
+    ============================================================================
+    FLIP CLOCK  —  self-contained flip-clock widget for Notion (/embed)
+    ============================================================================
+    • Standard (4-tile HH:MM) or Compact (2-tile) layout, with a physics-style
+      3D flip animation between digits.
+    • Settings popup (gear) controls font, layout, theme, tile colour (presets +
+      custom), number/date colours, flip motion style, 12/24h, date display, zoom.
+      Settings persist to localStorage ('flipclock-v1').
 
-  .pop-light{background:#fff;color:#222;border:1px solid rgba(0,0,0,0.1);box-shadow:var(--popup-shadow)}
-  .pop-light .lbl{color:#888}.pop-light .sep{background:#eee}.pop-light .pop-x{color:#aaa}.pop-light .pop-x:hover{background:rgba(0,0,0,.05)}
-  .pop-light .tg{border-color:#e0e0e0}.pop-light .tb{background:#f3f3f3;color:#aaa;border-color:#e0e0e0}.pop-light .tb.on{background:#222;color:#fff}.pop-light .tb:hover:not(.on){background:#eee}
-  .pop-light .zs{background:#ddd}.pop-light .zs::-webkit-slider-thumb{background:#222;border-color:#fff}.pop-light .zi,.pop-light .zl{color:#999}
-  .pop-light .rst{color:#bbb}.pop-light .rst:hover{color:#555}.pop-light ::-webkit-scrollbar-thumb{background:#ddd}
-  .pop-light .cpk-hex-input{background:#f5f5f5;border-color:#ddd;color:#222}
+    HOW THE FLIP WORKS (see the .flap CSS + flipTile() in the script)
+      Each tile has two STATIC halves (.half top/bot) showing the current digit.
+      To animate a change we add two temporary .flap halves: a top flap that
+      rotates down (showing the OLD digit) and a bottom flap that rotates up
+      (showing the NEW digit), with shading/shadow keyframes for depth. After the
+      animation the flaps are removed and the static halves show the new digit.
 
-  .pop-dark{background:#1e1e1e;color:#e0e0e0;border:1px solid rgba(255,255,255,0.1);box-shadow:var(--popup-shadow)}
-  .pop-dark .lbl{color:#777}.pop-dark .sep{background:#333}.pop-dark .pop-x{color:#666}.pop-dark .pop-x:hover{background:rgba(255,255,255,.06)}
-  .pop-dark .tg{border-color:#444}.pop-dark .tb{background:#2a2a2a;color:#666;border-color:#444}.pop-dark .tb.on{background:#fff;color:#111}.pop-dark .tb:hover:not(.on){background:#333}
-  .pop-dark .zs{background:#444}.pop-dark .zs::-webkit-slider-thumb{background:#fff;border-color:#1e1e1e}.pop-dark .zi,.pop-dark .zl{color:#666}
-  .pop-dark .rst{color:#555}.pop-dark .rst:hover{color:#ccc}.pop-dark ::-webkit-scrollbar-thumb{background:#444}
-  .pop-dark .cpk-hex-input{background:#2a2a2a;border-color:#444;color:#ddd}
+    SECTIONS
+      <style>   variables, clock tiles + flip animation, popup + all controls.
+      <body>    clock markup + the settings popup.
+      <script>  constants/state · palettes/fonts · responsive · motion · clock
+                rendering · theming · presets · popup · colour pickers · toggles
+                · init.
+    ============================================================================
+  -->
 
-  .pop-hd{display:flex;justify-content:space-between;align-items:center;margin-bottom:16px}.pop-hd span{font-size:14px;font-weight:700}
-  .pop-x{width:26px;height:26px;background:none;border:none;cursor:pointer;display:flex;align-items:center;justify-content:center;border-radius:6px;font-size:16px;transition:background .15s}
-  .lbl{font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.12em;margin:12px 0 7px}.lbl:first-of-type{margin-top:0}
-  .sep{height:1px;margin:11px 0}
-  .row2{display:flex;gap:12px}.row2>div{flex:1;min-width:0}
+  <link href="https://fonts.googleapis.com/css2?family=Anton&family=Bebas+Neue&family=Oswald:wght@700&family=JetBrains+Mono:wght@700&family=Squada+One&family=Chakra+Petch:wght@700&family=Roboto+Condensed:wght@700&family=Inter:wght@500;600;700&display=swap" rel="stylesheet">
 
-  .sr{display:flex;flex-wrap:wrap;gap:9px;align-items:center}
-  .sw{width:28px;height:28px;border-radius:50%;border:2.5px solid transparent;cursor:pointer;position:relative;transition:transform .12s,border-color .12s;flex-shrink:0}
-  .sw:hover{transform:scale(1.15)}
-  .sw.on{border-color:rgba(128,128,128,.7)}
-  .sw.on::after{content:'✓';position:absolute;inset:0;display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:700}
-  .sw.dk.on::after{color:#fff}.sw.lt.on::after{color:#333}
-  .sw-wh{box-shadow:inset 0 0 0 1px rgba(0,0,0,.12)}
+  <style>
+    /* CSS variables — themable tile look + the flip-animation timing knobs
+       (set by applyMotion / applyAll in JS). */
+    :root {
+      --tile-shadow: 0 2px 4px rgba(0,0,0,0.08), 0 4px 12px rgba(0,0,0,0.12);
+      --tile-inner-shadow: inset 0 2px 4px rgba(0,0,0,0.15);
+      --tile-highlight: rgba(255,255,255,0.6);
+      --tile-gradient: linear-gradient(to bottom, rgba(255,255,255,0.08) 0%, transparent 50%);
+      --popup-shadow: 0 8px 24px rgba(0,0,0,0.12), 0 2px 8px rgba(0,0,0,0.08);
+      --digit-font: 'Anton','Roboto Condensed',sans-serif;
+      --digit-size: 82px;
+      --digit-ls: 0.02em;
+      --flip-top-dur: .3s;  --flip-top-ease: cubic-bezier(0.4,0,1,1);
+      --flip-bot-dur: .3s;  --flip-bot-ease: cubic-bezier(0,0,0.2,1);  --flip-bot-delay: .25s;
+      --gear-color: #ffffff;
+    }
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    html, body { width: 100vw; height: 100vh; margin: 0; padding: 0; background: transparent; overflow: hidden; }
 
-  .sw-cu{overflow:hidden;background:conic-gradient(hsl(0,80%,60%),hsl(30,80%,55%),hsl(60,80%,52%),hsl(120,65%,45%),hsl(180,75%,45%),hsl(210,80%,52%),hsl(240,65%,58%),hsl(300,65%,55%),hsl(330,75%,55%),hsl(360,80%,60%))!important;border:none!important;box-shadow:inset 0 0 4px rgba(0,0,0,.15),0 .5px 2px rgba(0,0,0,.2)!important}
-  .sw-cu::before{content:'';position:absolute;inset:0;border-radius:50%;background:radial-gradient(circle,rgba(255,255,255,.5) 0%,rgba(255,255,255,.1) 40%,transparent 70%);pointer-events:none;z-index:1}
-  .sw-cu.on{box-shadow:0 0 0 2.5px rgba(128,128,128,.7),inset 0 0 4px rgba(0,0,0,.15)!important}
+    .container {
+      width: 100vw;
+      height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      overflow: hidden;
+      background: var(--bg-color, #ffffff);
+      transition: background 0.3s;
+    }
+    .wrapper {
+      position: relative;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 8px;
+      padding: 20px 24px;
+      transform-origin: center center;
+      transition: transform 0.3s;       /* zoom */
+    }
 
-  /* CUSTOM COLOUR PICKER */
-  .cpk{display:none;margin-top:8px;padding:10px;border-radius:10px;background:rgba(0,0,0,.06)}
-  .pop-dark .cpk{background:rgba(255,255,255,.06)}
-  .cpk.open{display:block}
-  .cpk-box{position:relative;width:100%;height:130px;border-radius:8px;overflow:hidden;cursor:crosshair;touch-action:none}
-  .cpk-box-hue{position:absolute;inset:0}
-  .cpk-box-white{position:absolute;inset:0;background:linear-gradient(to right,#fff,transparent)}
-  .cpk-box-black{position:absolute;inset:0;background:linear-gradient(to bottom,transparent,#000)}
-  .cpk-dot{position:absolute;width:14px;height:14px;border-radius:50%;border:2.5px solid #fff;box-shadow:0 0 0 1px rgba(0,0,0,.3),0 2px 4px rgba(0,0,0,.3);transform:translate(-50%,-50%);pointer-events:none;z-index:2}
-  .cpk-hue{position:relative;width:100%;height:14px;margin-top:10px;border-radius:7px;background:linear-gradient(to right,#f00,#ff0,#0f0,#0ff,#00f,#f0f,#f00);cursor:pointer;touch-action:none}
-  .cpk-hue-thumb{position:absolute;top:50%;width:18px;height:18px;border-radius:50%;border:3px solid #fff;box-shadow:0 0 0 1px rgba(0,0,0,.15),0 2px 4px rgba(0,0,0,.25);transform:translate(-50%,-50%);pointer-events:none}
-  .cpk-bottom{display:flex;align-items:center;gap:8px;margin-top:10px}
-  .cpk-preview{width:28px;height:28px;border-radius:6px;border:1px solid rgba(128,128,128,.2);flex-shrink:0}
-  .cpk-hex-input{flex:1;height:30px;border:1px solid;border-radius:6px;padding:0 8px;font-family:'Inter',sans-serif;font-size:12px;font-weight:600;outline:none;text-transform:uppercase;letter-spacing:.04em}
+    /* Gear button (top-left of the clock). */
+    .gear {
+      position: absolute;
+      top: 4px;
+      left: 4px;
+      width: 22px;
+      height: 22px;
+      background: none;
+      border: none;
+      outline: none;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      z-index: 10;
+      opacity: 0.6;
+      transform: scale(1);
+      transition: opacity 0.2s, transform 0.2s;
+      pointer-events: auto;
+      border-radius: 4px;
+    }
+    .gear.pin { opacity: 0.6; transform: scale(1); pointer-events: auto; }   /* kept visible while popup open */
+    .gear:hover { opacity: 1 !important; background: rgba(128,128,128,0.2); }
+    /* Mouse devices: hide the gear until hover. Touch devices keep it visible. */
+    @media (hover: hover) {
+      .gear { opacity: 0; transform: scale(0.7); pointer-events: none; }
+      .wrapper:hover .gear, .gear.pin { opacity: 0.6; transform: scale(1); pointer-events: auto; }
+    }
+    .gear svg { width: 13px; height: 13px; fill: var(--gear-color, #ffffff); transition: fill 0.3s; }
 
-  .tg{display:flex;border-radius:8px;overflow:hidden}
-  .tb{flex:1;padding:9px 6px;font-family:'Inter',sans-serif;font-size:11px;font-weight:600;text-align:center;border:none;cursor:pointer;transition:all .15s;white-space:nowrap}
-  .tb+.tb{border-left:1px solid}
-  .zr{display:flex;align-items:center;gap:8px}
-  .zi{font-size:16px;user-select:none;cursor:default;line-height:1}
-  .zs{flex:1;-webkit-appearance:none;appearance:none;height:4px;border-radius:4px;outline:none}
-  .zs::-webkit-slider-thumb{-webkit-appearance:none;width:16px;height:16px;border-radius:50%;cursor:pointer;border:2px solid;box-shadow:0 1px 4px rgba(0,0,0,.3)}
-  .zl{font-size:11px;font-weight:600;min-width:34px;text-align:center}
-  .rst{display:block;margin-top:14px;font-size:11px;text-align:center;cursor:pointer;transition:color .15s}
+    /* ===== Clock + tiles ===== */
+    .clock { display: flex; align-items: center; }
+    .clock.std { gap: 6px; }
+    .clock.cmp { gap: 0; }
+    .colon {
+      font-size: 60px;
+      font-weight: 700;
+      color: var(--date-color, #2a2a2a);
+      padding-bottom: 6px;
+      user-select: none;
+      transition: color 0.3s;
+      text-shadow: 2px 3px 5px rgba(0,0,0,0.3);
+      font-family: 'Roboto Condensed', sans-serif !important;
+    }
+    .clock.std .colon { margin: 0 -3px; }
+    .clock.cmp .colon { padding: 0 3px; }
 
-  /* PRESET CARDS */
-  .preset-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:8px}
-  .pc{cursor:pointer;border-radius:8px;overflow:hidden;box-shadow:0 0 0 2px transparent;transition:box-shadow .15s,transform .12s}
-  .pc:hover{transform:scale(1.05)}
-  .pop-light .pc.on{box-shadow:0 0 0 2px rgba(0,0,0,0.7)}
-  .pop-dark .pc.on{box-shadow:0 0 0 2px rgba(255,255,255,0.85)}
-  .pc-swatch{height:44px}
-  .pc-swatch-cu{background:conic-gradient(hsl(0,80%,60%),hsl(30,80%,55%),hsl(60,80%,52%),hsl(120,65%,45%),hsl(180,75%,45%),hsl(210,80%,52%),hsl(240,65%,58%),hsl(300,65%,55%),hsl(330,75%,55%),hsl(360,80%,60%))}
-  .pc-name{font-size:9px;font-weight:600;text-align:center;padding:4px 3px;letter-spacing:.02em;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-  .pop-light .pc-name{background:#f3f3f3;color:#666}
-  .pop-dark .pc-name{background:#1e1e1e;color:#888}
+    .tile { position: relative; height: 110px; box-shadow: var(--tile-shadow); }
+    .clock.std .tile { width: 60px; perspective: 350px; }
+    .clock.cmp .tile { width: 100px; perspective: 420px; }
 
-  /* FONT SELECTOR */
-  .font-row{display:flex;flex-wrap:wrap;gap:7px}
-  .fb{padding:6px 10px;border-radius:7px;font-size:11px;font-weight:600;cursor:pointer;border:1.5px solid transparent;transition:border-color .15s,background .15s;background:none}
-  .pop-light .fb{color:#444;border-color:#e0e0e0}.pop-light .fb:hover{background:#f3f3f3}.pop-light .fb.on{border-color:#222;background:#f5f5f5;color:#111}
-  .pop-dark .fb{color:#888;border-color:#333}.pop-dark .fb:hover{background:#2a2a2a}.pop-dark .fb.on{border-color:#aaa;background:#2a2a2a;color:#eee}
-</style>
+    /* The two static halves that show the current digit. */
+    .half {
+      position: absolute;
+      left: 0;
+      right: 0;
+      height: 50%;
+      overflow: hidden;
+      background: var(--tile-bg, #2a2a2a);
+      transition: background 0.3s;
+    }
+    .half.top {
+      top: 0;
+      border-radius: 10px 10px 0 0;
+      border-top: 1px solid var(--tile-highlight);
+      border-bottom: 1px solid rgba(128,128,128,0.15);
+      box-shadow: var(--tile-inner-shadow);
+    }
+    .half.top::before { content: ''; position: absolute; inset: 0; background: var(--tile-gradient); pointer-events: none; border-radius: 10px 10px 0 0; }
+    .half.bot { bottom: 0; border-radius: 0 0 10px 10px; filter: brightness(0.9); }
+
+    /* The digit glyph inside a half/flap (the half clips it to its 50%). */
+    .half .num, .flap .num {
+      position: absolute;
+      left: 0;
+      width: 100%;
+      height: 110px;
+      line-height: 110px;
+      text-align: center;
+      font-size: var(--digit-size, 82px);
+      font-weight: 400;
+      color: var(--time-text, #fff);
+      pointer-events: none;
+      letter-spacing: var(--digit-ls, 0.02em);
+      font-family: var(--digit-font, 'Anton');
+      text-shadow: 2px 4px 6px rgba(0,0,0,0.35);
+    }
+    .half .num { transition: color 0.3s; }
+    .half.top .num { top: 0; }
+    .half.bot .num { top: -55px; }      /* shift up so the bottom half shows the digit's lower half */
+
+    /* ===== The animated flip flaps (added/removed per flip in JS) ===== */
+    .flap { position: absolute; left: 0; right: 0; height: 50%; overflow: hidden; z-index: 5; }
+    .flap .num { z-index: 2; }
+    .flap-top {
+      top: 0;
+      background: var(--tile-bg, #2a2a2a);
+      border-radius: 10px 10px 0 0;
+      border-bottom: 1px solid rgba(128,128,128,0.15);
+      box-shadow: var(--flap-shadow-top);
+      transform-origin: bottom center;
+      animation: fd var(--flip-top-dur) var(--flip-top-ease) forwards,
+                 ftsOut var(--flip-top-dur) var(--flip-top-ease) forwards;
+    }
+    .flap-top .num { top: 0; }
+    .flap-top::before { content: ''; position: absolute; inset: 0; z-index: 1; pointer-events: none; background: linear-gradient(to top, rgba(0,0,0,var(--flap-gradient-strength,0.15)) 0%, transparent 60%); animation: fdg var(--flip-top-dur) var(--flip-top-ease) both; }
+    .flap-top::after  { content: ''; position: absolute; inset: 0; z-index: 1; pointer-events: none; animation: fds var(--flip-top-dur) var(--flip-top-ease) both; }
+    .flap-bot {
+      bottom: 0;
+      background: var(--tile-bg, #2a2a2a);
+      filter: brightness(0.9);
+      border-radius: 0 0 10px 10px;
+      box-shadow: var(--flap-shadow-bot);
+      transform-origin: top center;
+      transform: rotateX(90deg);
+      animation: fu var(--flip-bot-dur) var(--flip-bot-ease) var(--flip-bot-delay) forwards,
+                 fbsOut var(--flip-bot-dur) var(--flip-bot-ease) var(--flip-bot-delay) forwards;
+    }
+    .flap-bot .num { top: -55px; }
+    .flap-bot::before { content: ''; position: absolute; inset: 0; z-index: 1; pointer-events: none; background: linear-gradient(to bottom, rgba(0,0,0,var(--flap-gradient-strength,0.15)) 0%, transparent 60%); animation: fug var(--flip-bot-dur) var(--flip-bot-ease) var(--flip-bot-delay) both; }
+    .flap-bot::after  { content: ''; position: absolute; inset: 0; z-index: 1; pointer-events: none; animation: fus var(--flip-bot-dur) var(--flip-bot-ease) var(--flip-bot-delay) both; }
+
+    /* Flip keyframes: fd = top flap falls, fu = bottom flap rises (with bounce);
+       fds/fus = moving shadow, fdg/fug = depth gradient, *Out = settle shadow.
+       Note: fu/fds/fus are also rebuilt in JS per motion style (see applyMotion). */
+    @keyframes fd  { 0% { transform: rotateX(0); }     100% { transform: rotateX(-90deg); } }
+    @keyframes fu  { 0% { transform: rotateX(90deg); } 83%  { transform: rotateX(-3deg); } 100% { transform: rotateX(0); } }
+    @keyframes fds { 0% { background: rgba(0,0,0,0); } 50%  { background: rgba(0,0,0,0.35); } 100% { background: rgba(0,0,0,0); } }
+    @keyframes fus { 0% { background: rgba(0,0,0,0.12); } 40% { background: rgba(0,0,0,0.08); } 100% { background: rgba(0,0,0,0); } }
+    @keyframes fdg { 0% { opacity: 0; } 45% { opacity: 0.7; } 100% { opacity: 0; } }
+    @keyframes fug { 0% { opacity: 0; } 25% { opacity: 0.6; } 100% { opacity: 0; } }
+    @keyframes fbsOut { 0% { box-shadow: var(--flap-shadow-bot); } 100% { box-shadow: 0 -2px 4px rgba(0,0,0,0); } }
+    @keyframes ftsOut { 0% { box-shadow: var(--flap-shadow-top); } 100% { box-shadow: 0 2px 4px rgba(0,0,0,0); } }
+
+    .ampm {
+      font-size: 18px;
+      font-weight: 700;
+      color: var(--date-color, #2a2a2a);
+      letter-spacing: .08em;
+      margin-left: 6px;
+      align-self: flex-end;
+      padding-bottom: 8px;
+      transition: color .3s;
+      display: none;
+      font-family: 'Roboto Condensed', sans-serif !important;
+    }
+    .ampm.show { display: block; }
+    .date-line {
+      font-size: 16px;
+      font-weight: 700;
+      color: var(--date-color, #2a2a2a);
+      letter-spacing: .03em;
+      user-select: none;
+      transition: color .3s;
+      text-shadow: 1px 2px 4px rgba(0,0,0,0.25);
+      font-family: 'Roboto Condensed', sans-serif !important;
+    }
+
+    /* ===== Settings popup ===== */
+    .ov { position: fixed; inset: 0; background: rgba(0,0,0,.2); z-index: 200; opacity: 0; pointer-events: none; transition: opacity .2s; }
+    .ov.open { opacity: 1; pointer-events: auto; }
+    .pop {
+      position: fixed;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%) scale(.93);
+      width: 310px;
+      max-height: 88vh;
+      overflow-y: auto;
+      border-radius: 14px;
+      z-index: 210;
+      padding: 22px;
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity .2s, transform .2s;
+      font-family: 'Inter', sans-serif !important;
+    }
+    .pop.open { opacity: 1; pointer-events: auto; transform: translate(-50%, -50%) scale(1); }
+    .pop::-webkit-scrollbar { width: 4px; }
+    .pop::-webkit-scrollbar-track { background: transparent; }
+    .pop::-webkit-scrollbar-thumb { border-radius: 4px; }
+
+    /* Popup — light theme skin. */
+    .pop-light { background: #fff; color: #222; border: 1px solid rgba(0,0,0,0.1); box-shadow: var(--popup-shadow); }
+    .pop-light .lbl { color: #888; } .pop-light .sep { background: #eee; } .pop-light .pop-x { color: #aaa; } .pop-light .pop-x:hover { background: rgba(0,0,0,.05); }
+    .pop-light .tg { border-color: #e0e0e0; } .pop-light .tb { background: #f3f3f3; color: #aaa; border-color: #e0e0e0; } .pop-light .tb.on { background: #222; color: #fff; } .pop-light .tb:hover:not(.on) { background: #eee; }
+    .pop-light .zs { background: #ddd; } .pop-light .zs::-webkit-slider-thumb { background: #222; border-color: #fff; } .pop-light .zi, .pop-light .zl { color: #999; }
+    .pop-light .rst { color: #bbb; } .pop-light .rst:hover { color: #555; } .pop-light ::-webkit-scrollbar-thumb { background: #ddd; }
+    .pop-light .cpk-hex-input { background: #f5f5f5; border-color: #ddd; color: #222; }
+
+    /* Popup — dark theme skin. */
+    .pop-dark { background: #1e1e1e; color: #e0e0e0; border: 1px solid rgba(255,255,255,0.1); box-shadow: var(--popup-shadow); }
+    .pop-dark .lbl { color: #777; } .pop-dark .sep { background: #333; } .pop-dark .pop-x { color: #666; } .pop-dark .pop-x:hover { background: rgba(255,255,255,.06); }
+    .pop-dark .tg { border-color: #444; } .pop-dark .tb { background: #2a2a2a; color: #666; border-color: #444; } .pop-dark .tb.on { background: #fff; color: #111; } .pop-dark .tb:hover:not(.on) { background: #333; }
+    .pop-dark .zs { background: #444; } .pop-dark .zs::-webkit-slider-thumb { background: #fff; border-color: #1e1e1e; } .pop-dark .zi, .pop-dark .zl { color: #666; }
+    .pop-dark .rst { color: #555; } .pop-dark .rst:hover { color: #ccc; } .pop-dark ::-webkit-scrollbar-thumb { background: #444; }
+    .pop-dark .cpk-hex-input { background: #2a2a2a; border-color: #444; color: #ddd; }
+
+    .pop-hd { display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px; }
+    .pop-hd span { font-size: 14px; font-weight: 700; }
+    .pop-x { width: 26px; height: 26px; background: none; border: none; cursor: pointer; display: flex; align-items: center; justify-content: center; border-radius: 6px; font-size: 16px; transition: background .15s; }
+    .lbl { font-size: 10px; font-weight: 700; text-transform: uppercase; letter-spacing: .12em; margin: 12px 0 7px; }
+    .lbl:first-of-type { margin-top: 0; }
+    .sep { height: 1px; margin: 11px 0; }
+    .row2 { display: flex; gap: 12px; }
+    .row2 > div { flex: 1; min-width: 0; }
+
+    /* Colour swatches + custom-colour wheel. */
+    .sr { display: flex; flex-wrap: wrap; gap: 9px; align-items: center; }
+    .sw { width: 28px; height: 28px; border-radius: 50%; border: 2.5px solid transparent; cursor: pointer; position: relative; transition: transform .12s, border-color .12s; flex-shrink: 0; }
+    .sw:hover { transform: scale(1.15); }
+    .sw.on { border-color: rgba(128,128,128,.7); }
+    .sw.on::after { content: '✓'; position: absolute; inset: 0; display: flex; align-items: center; justify-content: center; font-size: 12px; font-weight: 700; }
+    .sw.dk.on::after { color: #fff; } .sw.lt.on::after { color: #333; }
+    .sw-wh { box-shadow: inset 0 0 0 1px rgba(0,0,0,.12); }
+    .sw-cu {
+      overflow: hidden;
+      background: conic-gradient(hsl(0,80%,60%), hsl(30,80%,55%), hsl(60,80%,52%), hsl(120,65%,45%), hsl(180,75%,45%), hsl(210,80%,52%), hsl(240,65%,58%), hsl(300,65%,55%), hsl(330,75%,55%), hsl(360,80%,60%)) !important;
+      border: none !important;
+      box-shadow: inset 0 0 4px rgba(0,0,0,.15), 0 .5px 2px rgba(0,0,0,.2) !important;
+    }
+    .sw-cu::before { content: ''; position: absolute; inset: 0; border-radius: 50%; background: radial-gradient(circle, rgba(255,255,255,.5) 0%, rgba(255,255,255,.1) 40%, transparent 70%); pointer-events: none; z-index: 1; }
+    .sw-cu.on { box-shadow: 0 0 0 2.5px rgba(128,128,128,.7), inset 0 0 4px rgba(0,0,0,.15) !important; }
+
+    /* HSV colour picker (shared markup, one per colour group). */
+    .cpk { display: none; margin-top: 8px; padding: 10px; border-radius: 10px; background: rgba(0,0,0,.06); }
+    .pop-dark .cpk { background: rgba(255,255,255,.06); }
+    .cpk.open { display: block; }
+    .cpk-box { position: relative; width: 100%; height: 130px; border-radius: 8px; overflow: hidden; cursor: crosshair; touch-action: none; }
+    .cpk-box-hue { position: absolute; inset: 0; }
+    .cpk-box-white { position: absolute; inset: 0; background: linear-gradient(to right, #fff, transparent); }
+    .cpk-box-black { position: absolute; inset: 0; background: linear-gradient(to bottom, transparent, #000); }
+    .cpk-dot { position: absolute; width: 14px; height: 14px; border-radius: 50%; border: 2.5px solid #fff; box-shadow: 0 0 0 1px rgba(0,0,0,.3), 0 2px 4px rgba(0,0,0,.3); transform: translate(-50%, -50%); pointer-events: none; z-index: 2; }
+    .cpk-hue { position: relative; width: 100%; height: 14px; margin-top: 10px; border-radius: 7px; background: linear-gradient(to right, #f00, #ff0, #0f0, #0ff, #00f, #f0f, #f00); cursor: pointer; touch-action: none; }
+    .cpk-hue-thumb { position: absolute; top: 50%; width: 18px; height: 18px; border-radius: 50%; border: 3px solid #fff; box-shadow: 0 0 0 1px rgba(0,0,0,.15), 0 2px 4px rgba(0,0,0,.25); transform: translate(-50%, -50%); pointer-events: none; }
+    .cpk-bottom { display: flex; align-items: center; gap: 8px; margin-top: 10px; }
+    .cpk-preview { width: 28px; height: 28px; border-radius: 6px; border: 1px solid rgba(128,128,128,.2); flex-shrink: 0; }
+    .cpk-hex-input { flex: 1; height: 30px; border: 1px solid; border-radius: 6px; padding: 0 8px; font-family: 'Inter', sans-serif; font-size: 12px; font-weight: 600; outline: none; text-transform: uppercase; letter-spacing: .04em; }
+
+    /* Segmented toggles + sliders. */
+    .tg { display: flex; border-radius: 8px; overflow: hidden; }
+    .tb { flex: 1; padding: 9px 6px; font-family: 'Inter', sans-serif; font-size: 11px; font-weight: 600; text-align: center; border: none; cursor: pointer; transition: all .15s; white-space: nowrap; }
+    .tb + .tb { border-left: 1px solid; }
+    .zr { display: flex; align-items: center; gap: 8px; }
+    .zi { font-size: 16px; user-select: none; cursor: default; line-height: 1; }
+    .zs { flex: 1; -webkit-appearance: none; appearance: none; height: 4px; border-radius: 4px; outline: none; }
+    .zs::-webkit-slider-thumb { -webkit-appearance: none; width: 16px; height: 16px; border-radius: 50%; cursor: pointer; border: 2px solid; box-shadow: 0 1px 4px rgba(0,0,0,.3); }
+    .zl { font-size: 11px; font-weight: 600; min-width: 34px; text-align: center; }
+    .rst { display: block; margin-top: 14px; font-size: 11px; text-align: center; cursor: pointer; transition: color .15s; }
+
+    /* Tile preset cards. */
+    .preset-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 8px; }
+    .pc { cursor: pointer; border-radius: 8px; overflow: hidden; box-shadow: 0 0 0 2px transparent; transition: box-shadow .15s, transform .12s; }
+    .pc:hover { transform: scale(1.05); }
+    .pop-light .pc.on { box-shadow: 0 0 0 2px rgba(0,0,0,0.7); }
+    .pop-dark .pc.on { box-shadow: 0 0 0 2px rgba(255,255,255,0.85); }
+    .pc-swatch { height: 44px; }
+    .pc-swatch-cu { background: conic-gradient(hsl(0,80%,60%), hsl(30,80%,55%), hsl(60,80%,52%), hsl(120,65%,45%), hsl(180,75%,45%), hsl(210,80%,52%), hsl(240,65%,58%), hsl(300,65%,55%), hsl(330,75%,55%), hsl(360,80%,60%)); }
+    .pc-name { font-size: 9px; font-weight: 600; text-align: center; padding: 4px 3px; letter-spacing: .02em; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .pop-light .pc-name { background: #f3f3f3; color: #666; }
+    .pop-dark .pc-name { background: #1e1e1e; color: #888; }
+
+    /* Font selector. */
+    .font-row { display: flex; flex-wrap: wrap; gap: 7px; }
+    .fb { padding: 6px 10px; border-radius: 7px; font-size: 11px; font-weight: 600; cursor: pointer; border: 1.5px solid transparent; transition: border-color .15s, background .15s; background: none; }
+    .pop-light .fb { color: #444; border-color: #e0e0e0; } .pop-light .fb:hover { background: #f3f3f3; } .pop-light .fb.on { border-color: #222; background: #f5f5f5; color: #111; }
+    .pop-dark .fb { color: #888; border-color: #333; } .pop-dark .fb:hover { background: #2a2a2a; } .pop-dark .fb.on { border-color: #aaa; background: #2a2a2a; color: #eee; }
+  </style>
 </head>
+
 <body>
-<div class="container" id="cont">
-  <div class="wrapper" id="wrapper">
-    <div class="clock" id="clock"></div>
-    <div class="date-line" id="dateline"></div>
+  <!-- Clock (tiles + gear are injected by renderClock) and the date line. -->
+  <div class="container" id="cont">
+    <div class="wrapper" id="wrapper">
+      <div class="clock" id="clock"></div>
+      <div class="date-line" id="dateline"></div>
+    </div>
   </div>
-</div>
-<div class="ov" id="ov"></div>
-<div class="pop pop-light" id="pop">
-  <div class="pop-hd"><span>Settings</span><button class="pop-x" id="popX">✕</button></div>
 
-  <div class="lbl">Font</div>
-  <div class="font-row" id="fontRow">
-    <button class="fb on" data-f="Anton" style="font-family:'Anton'">Anton</button>
-    <button class="fb" data-f="Bebas Neue" style="font-family:'Bebas Neue'">Bebas Neue</button>
-    <button class="fb" data-f="Oswald" style="font-family:'Oswald'">Oswald</button>
-    <button class="fb" data-f="JetBrains Mono" style="font-family:'JetBrains Mono'">Mono</button>
-    <button class="fb" data-f="Squada One" style="font-family:'Squada One'">Squada One</button>
-    <button class="fb" data-f="Chakra Petch" style="font-family:'Chakra Petch'">Chakra Petch</button>
+  <!-- Settings popup -->
+  <div class="ov" id="ov"></div>
+  <div class="pop pop-light" id="pop">
+    <div class="pop-hd"><span>Settings</span><button class="pop-x" id="popX">✕</button></div>
+
+    <div class="lbl">Font</div>
+    <div class="font-row" id="fontRow">
+      <button class="fb on" data-f="Anton" style="font-family:'Anton'">Anton</button>
+      <button class="fb" data-f="Bebas Neue" style="font-family:'Bebas Neue'">Bebas Neue</button>
+      <button class="fb" data-f="Oswald" style="font-family:'Oswald'">Oswald</button>
+      <button class="fb" data-f="JetBrains Mono" style="font-family:'JetBrains Mono'">Mono</button>
+      <button class="fb" data-f="Squada One" style="font-family:'Squada One'">Squada One</button>
+      <button class="fb" data-f="Chakra Petch" style="font-family:'Chakra Petch'">Chakra Petch</button>
+    </div>
+    <div class="sep"></div>
+
+    <div class="row2">
+      <div><div class="lbl">Clock Style</div><div class="tg" id="gMode"><button class="tb on" data-v="standard">Standard</button><button class="tb" data-v="compact">Compact</button></div></div>
+      <div><div class="lbl">Theme</div><div class="tg" id="gTheme"><button class="tb on" data-v="light">Light</button><button class="tb" data-v="dark">Dark</button></div></div>
+    </div>
+    <div class="sep"></div>
+
+    <div class="lbl">Tile Presets</div>
+    <div class="preset-grid" id="presetGrid"></div>
+    <div class="cpk" id="cpk-tile"><div class="cpk-box"><div class="cpk-box-hue"></div><div class="cpk-box-white"></div><div class="cpk-box-black"></div><div class="cpk-dot"></div></div><div class="cpk-hue"><div class="cpk-hue-thumb"></div></div><div class="cpk-bottom"><div class="cpk-preview"></div><input class="cpk-hex-input" maxlength="7" value="#2a2a2a" spellcheck="false"></div></div>
+    <div class="sep"></div>
+
+    <div class="lbl">Number Colour</div>
+    <div class="sr" data-group="timeText">
+      <div class="sw sw-cu" data-target="timeText"></div>
+    </div>
+    <div class="cpk" id="cpk-timeText"><div class="cpk-box"><div class="cpk-box-hue"></div><div class="cpk-box-white"></div><div class="cpk-box-black"></div><div class="cpk-dot"></div></div><div class="cpk-hue"><div class="cpk-hue-thumb"></div></div><div class="cpk-bottom"><div class="cpk-preview"></div><input class="cpk-hex-input" maxlength="7" value="#ffffff" spellcheck="false"></div></div>
+    <div class="sep"></div>
+
+    <div class="lbl">Date & Day Colour</div>
+    <div class="sr" data-group="dateText">
+      <div class="sw sw-cu" data-target="dateText"></div>
+    </div>
+    <div class="cpk" id="cpk-dateText"><div class="cpk-box"><div class="cpk-box-hue"></div><div class="cpk-box-white"></div><div class="cpk-box-black"></div><div class="cpk-dot"></div></div><div class="cpk-hue"><div class="cpk-hue-thumb"></div></div><div class="cpk-bottom"><div class="cpk-preview"></div><input class="cpk-hex-input" maxlength="7" value="#2a2a2a" spellcheck="false"></div></div>
+    <div class="sep"></div>
+
+    <div class="lbl">Motion</div>
+    <div class="tg" id="gMotion"><button class="tb on" data-v="smooth">Smooth</button><button class="tb" data-v="mechanical">Mechanical</button><button class="tb" data-v="minimal">Minimal</button><button class="tb" data-v="instant">Instant</button></div>
+    <div class="sep"></div>
+
+    <div class="lbl">Time Format</div>
+    <div class="tg" id="gFmt"><button class="tb on" data-v="24">24 HR</button><button class="tb" data-v="12">12 HR</button></div>
+    <div class="sep"></div>
+
+    <div class="lbl">Display</div>
+    <div class="tg" id="gDisp"><button class="tb on" data-v="both">Day & Date</button><button class="tb" data-v="date">Date</button><button class="tb" data-v="day">Day</button><button class="tb" data-v="none">None</button></div>
+    <div class="sep"></div>
+
+    <div class="lbl">Zoom</div>
+    <div class="zr"><span class="zi">−</span><input type="range" class="zs" id="zSlider" min="50" max="150" value="100" step="5"><span class="zi">+</span><span class="zl" id="zLabel">100%</span></div>
+    <div class="rst" id="rstBtn">Reset to defaults</div>
   </div>
-  <div class="sep"></div>
 
-  <div class="row2">
-    <div><div class="lbl">Clock Style</div><div class="tg" id="gMode"><button class="tb on" data-v="standard">Standard</button><button class="tb" data-v="compact">Compact</button></div></div>
-    <div><div class="lbl">Theme</div><div class="tg" id="gTheme"><button class="tb on" data-v="light">Light</button><button class="tb" data-v="dark">Dark</button></div></div>
-  </div>
-  <div class="sep"></div>
+  <script>
+  /* ==========================================================================
+     1. CONSTANTS & STATE
+     ========================================================================== */
+  const DAYS=['Sunday','Monday','Tuesday','Wednesday','Thursday','Friday','Saturday'];
+  const MONTHS=['January','February','March','April','May','June','July','August','September','October','November','December'];
 
-  <div class="lbl">Tile Presets</div>
-  <div class="preset-grid" id="presetGrid"></div>
-  <div class="cpk" id="cpk-tile"><div class="cpk-box"><div class="cpk-box-hue"></div><div class="cpk-box-white"></div><div class="cpk-box-black"></div><div class="cpk-dot"></div></div><div class="cpk-hue"><div class="cpk-hue-thumb"></div></div><div class="cpk-bottom"><div class="cpk-preview"></div><input class="cpk-hex-input" maxlength="7" value="#2a2a2a" spellcheck="false"></div></div>
-  <div class="sep"></div>
+  const DEF={mode:'standard',theme:'light',tile:'#2a2a2a',timeText:'#ffffff',dateText:'#111111',bg:'#ffffff',format:'24',display:'both',zoom:100,preset:null,font:'Anton',motion:'smooth'};
+  let S={...DEF};
+  let currentBreak='large';                 // 'large' | 'medium' (narrow embeds)
 
-  <div class="lbl">Number Colour</div>
-  <div class="sr" data-group="timeText">
-    <div class="sw sw-cu" data-target="timeText"></div>
-  </div>
-  <div class="cpk" id="cpk-timeText"><div class="cpk-box"><div class="cpk-box-hue"></div><div class="cpk-box-white"></div><div class="cpk-box-black"></div><div class="cpk-dot"></div></div><div class="cpk-hue"><div class="cpk-hue-thumb"></div></div><div class="cpk-bottom"><div class="cpk-preview"></div><input class="cpk-hex-input" maxlength="7" value="#ffffff" spellcheck="false"></div></div>
-  <div class="sep"></div>
+  const $cont=document.getElementById('cont');
+  const $wrapper=document.getElementById('wrapper');
 
-  <div class="lbl">Date & Day Colour</div>
-  <div class="sr" data-group="dateText">
-    <div class="sw sw-cu" data-target="dateText"></div>
-  </div>
-  <div class="cpk" id="cpk-dateText"><div class="cpk-box"><div class="cpk-box-hue"></div><div class="cpk-box-white"></div><div class="cpk-box-black"></div><div class="cpk-dot"></div></div><div class="cpk-hue"><div class="cpk-hue-thumb"></div></div><div class="cpk-bottom"><div class="cpk-preview"></div><input class="cpk-hex-input" maxlength="7" value="#2a2a2a" spellcheck="false"></div></div>
-  <div class="sep"></div>
-  <div class="lbl">Motion</div>
-  <div class="tg" id="gMotion"><button class="tb on" data-v="smooth">Smooth</button><button class="tb" data-v="mechanical">Mechanical</button><button class="tb" data-v="minimal">Minimal</button><button class="tb" data-v="instant">Instant</button></div>
-  <div class="sep"></div>
-
-  <div class="lbl">Time Format</div>
-  <div class="tg" id="gFmt"><button class="tb on" data-v="24">24 HR</button><button class="tb" data-v="12">12 HR</button></div>
-  <div class="sep"></div>
-  <div class="lbl">Display</div>
-  <div class="tg" id="gDisp"><button class="tb on" data-v="both">Day & Date</button><button class="tb" data-v="date">Date</button><button class="tb" data-v="day">Day</button><button class="tb" data-v="none">None</button></div>
-  <div class="sep"></div>
-  <div class="lbl">Zoom</div>
-  <div class="zr"><span class="zi">−</span><input type="range" class="zs" id="zSlider" min="50" max="150" value="100" step="5"><span class="zi">+</span><span class="zl" id="zLabel">100%</span></div>
-  <div class="rst" id="rstBtn">Reset to defaults</div>
-</div>
-
-<script>
-const DAYS=['Sunday','Monday','Tuesday','Wednesday','Thursday','Friday','Saturday'];
-const MONTHS=['January','February','March','April','May','June','July','August','September','October','November','December'];
-const DEF={mode:'standard',theme:'light',tile:'#2a2a2a',timeText:'#ffffff',dateText:'#111111',bg:'#ffffff',format:'24',display:'both',zoom:100,preset:null,font:'Anton',motion:'smooth'};
-let S={...DEF};
-let currentBreak='large';
-const $cont=document.getElementById('cont');const $wrapper=document.getElementById('wrapper');
-function load(){try{const d=localStorage.getItem('flipclock-v1');if(d){const p=JSON.parse(d);S={...DEF,...p};if(!p.bg)S.bg=S.theme==='dark'?'#191919':'#ffffff';if(S.font==='Orbitron')S.font='Anton';}}catch(e){}}
-function save(){const m=PRESETS.find(p=>p.tile===S.tile);S.preset=m?m.id:'custom';try{localStorage.setItem('flipclock-v1',JSON.stringify(S));}catch(e){}}
-
-const PRESETS=[
-  {id:'charcoal',  name:'Charcoal',  tile:'#2a2a2a'},
-  {id:'obsidian',  name:'Obsidian',  tile:'#111111'},
-  {id:'nord',      name:'Nord',      tile:'#3b4252'},
-  {id:'coffee',    name:'Coffee',    tile:'#3d2b1f'},
-  {id:'cyber',     name:'Cyber',     tile:'#0a1628'},
-  {id:'gold',      name:'Gold',      tile:'#1a1508'},
-  {id:'parchment', name:'Parchment', tile:'#f0f0f0'},
-];
-
-// Theme-aware swatch palettes — each text colour group gets options that pop
-// against the background it actually sits on in that theme.
-// In dark theme: tiles default to white (so number text needs dark colours) and
-// the body bg is dark (so date text needs light colours). Light theme is the inverse.
-const SWATCH_PALETTES={
-  timeText:{
-    dark: ['#111111','#0a8a2e','#0066cc','#c41414','#7733bb','#cc6600'],
-    light:['#ffffff','#00ff41','#00cfff','#ffaa44','#cc99ff','#ffd700']
-  },
-  dateText:{
-    dark: ['#ffffff','#aaaaaa','#00ff41','#00cfff','#ffaa44','#cc99ff'],
-    light:['#111111','#666666','#0a8a2e','#0066cc','#c41414','#7733bb']
+  function load(){
+    try{
+      const d=localStorage.getItem('flipclock-v1');
+      if(d){
+        const p=JSON.parse(d);
+        S={...DEF,...p};
+        if(!p.bg) S.bg=S.theme==='dark'?'#191919':'#ffffff';   // back-fill bg for old saves
+        if(S.font==='Orbitron') S.font='Anton';                // retired font → default
+      }
+    }catch(e){}
   }
-};
+  function save(){
+    const m=PRESETS.find(p=>p.tile===S.tile);
+    S.preset=m?m.id:'custom';
+    try{ localStorage.setItem('flipclock-v1',JSON.stringify(S)); }catch(e){}
+  }
 
-const FONT_MAP={
-  'Anton':          {family:"'Anton','Roboto Condensed',sans-serif",      size:'82px', ls:'0.02em'},
-  'Bebas Neue':     {family:"'Bebas Neue','Roboto Condensed',sans-serif", size:'96px', ls:'0.02em'},
-  'Oswald':         {family:"'Oswald','Roboto Condensed',sans-serif",     size:'86px', ls:'0.02em'},
-  'JetBrains Mono': {family:"'JetBrains Mono',monospace",                 size:'76px', ls:'-0.01em'},
-  'Squada One':     {family:"'Squada One','Roboto Condensed',sans-serif", size:'88px', ls:'0.02em'},
-  'Chakra Petch':   {family:"'Chakra Petch',sans-serif",                  size:'78px', ls:'-0.01em'},
-};
-function applyFont(){const f=FONT_MAP[S.font]||FONT_MAP['Anton'];const r=document.documentElement.style;r.setProperty('--digit-font',f.family);r.setProperty('--digit-size',f.size);r.setProperty('--digit-ls',f.ls);applyResponsive();}
-function syncFont(){document.querySelectorAll('#fontRow .fb').forEach(b=>b.classList.toggle('on',b.dataset.f===S.font));}
-function applyResponsive(){
-  const w=$cont.offsetWidth;
-  const med=w<320;
-  currentBreak=med?'medium':'large';
-  const colons=document.querySelectorAll('.colon');
-  const tiles=document.querySelectorAll('.tile');
-  const nums=document.querySelectorAll('.half .num,.flap .num');
-  const botNums=document.querySelectorAll('.half.bot .num,.flap-bot .num');
-  if(med){
-    $wrapper.style.gap='5px';
-    $wrapper.style.padding='12px 16px';
-    colons.forEach(c=>c.style.fontSize='46px');
-    const tileW=S.mode==='compact'?'84px':'50px';
-    tiles.forEach(t=>{t.style.width=tileW;t.style.height='92px';});
+  /* ==========================================================================
+     2. PALETTES & FONTS
+     ========================================================================== */
+  const PRESETS=[
+    {id:'charcoal',  name:'Charcoal',  tile:'#2a2a2a'},
+    {id:'obsidian',  name:'Obsidian',  tile:'#111111'},
+    {id:'nord',      name:'Nord',      tile:'#3b4252'},
+    {id:'coffee',    name:'Coffee',    tile:'#3d2b1f'},
+    {id:'cyber',     name:'Cyber',     tile:'#0a1628'},
+    {id:'gold',      name:'Gold',      tile:'#1a1508'},
+    {id:'parchment', name:'Parchment', tile:'#f0f0f0'},
+  ];
+
+  /* Theme-aware swatch palettes — each text-colour group gets options that pop
+     against the surface it sits on. In dark theme tiles default to white (so the
+     number text needs dark colours) and the body bg is dark (so date text needs
+     light colours); light theme is the inverse. */
+  const SWATCH_PALETTES={
+    timeText:{
+      dark: ['#111111','#0a8a2e','#0066cc','#c41414','#7733bb','#cc6600'],
+      light:['#ffffff','#00ff41','#00cfff','#ffaa44','#cc99ff','#ffd700']
+    },
+    dateText:{
+      dark: ['#ffffff','#aaaaaa','#00ff41','#00cfff','#ffaa44','#cc99ff'],
+      light:['#111111','#666666','#0a8a2e','#0066cc','#c41414','#7733bb']
+    }
+  };
+
+  /* Each font needs its own size/letter-spacing to look balanced in the tiles. */
+  const FONT_MAP={
+    'Anton':          {family:"'Anton','Roboto Condensed',sans-serif",      size:'82px', ls:'0.02em'},
+    'Bebas Neue':     {family:"'Bebas Neue','Roboto Condensed',sans-serif", size:'96px', ls:'0.02em'},
+    'Oswald':         {family:"'Oswald','Roboto Condensed',sans-serif",     size:'86px', ls:'0.02em'},
+    'JetBrains Mono': {family:"'JetBrains Mono',monospace",                 size:'76px', ls:'-0.01em'},
+    'Squada One':     {family:"'Squada One','Roboto Condensed',sans-serif", size:'88px', ls:'0.02em'},
+    'Chakra Petch':   {family:"'Chakra Petch',sans-serif",                  size:'78px', ls:'-0.01em'},
+  };
+  function applyFont(){
     const f=FONT_MAP[S.font]||FONT_MAP['Anton'];
-    const medSize=Math.round(parseFloat(f.size)*0.88)+'px';
-    nums.forEach(n=>{
-      n.style.fontSize=medSize;
-      n.style.height='92px';
-      n.style.lineHeight='92px';
-    });
-
-    botNums.forEach(n=>{
-      n.style.top='-46px';
-    });
-  }else{
-    $wrapper.style.gap='';
-    $wrapper.style.padding='';
-    colons.forEach(c=>c.style.fontSize='');
-    tiles.forEach(t=>{t.style.width='';t.style.height='';});
-    nums.forEach(n=>{
-      n.style.fontSize='';
-      n.style.height='';
-      n.style.lineHeight='';
-    });
-
-    botNums.forEach(n=>{
-      n.style.top='';
-    });
+    const r=document.documentElement.style;
+    r.setProperty('--digit-font',f.family);
+    r.setProperty('--digit-size',f.size);
+    r.setProperty('--digit-ls',f.ls);
+    applyResponsive();
   }
-  updateDate(new Date());
-}
+  function syncFont(){ document.querySelectorAll('#fontRow .fb').forEach(b=>b.classList.toggle('on',b.dataset.f===S.font)); }
 
-const MOTION_MAP={
-  smooth:     {topDur:0.3,  topEase:'cubic-bezier(0.4,0,1,1)',   botDur:0.3,  botEase:'cubic-bezier(0,0,0.2,1)',   botDelay:0.25, bounce:-3, bounceAt:83, shadowMax:0.35},
-  mechanical: {topDur:0.2,  topEase:'cubic-bezier(0.55,0,1,1)',  botDur:0.25, botEase:'cubic-bezier(0,0,0.15,1)',  botDelay:0.18, bounce:-6, bounceAt:80, shadowMax:0.5},
-  minimal:    {topDur:0.15, topEase:'ease-in',                    botDur:0.15, botEase:'ease-out',                  botDelay:0.13, bounce:0,  bounceAt:0,  shadowMax:0},
-  instant:    null
-};
-function applyMotion(){
-  if(S.motion==='instant'){
-    document.querySelectorAll('.flap').forEach(f=>f.remove());
-    return;
+  /* ==========================================================================
+     3. RESPONSIVE  (shrink everything for narrow embeds)
+     ========================================================================== */
+  function applyResponsive(){
+    const w=$cont.offsetWidth;
+    const med=w<320;
+    currentBreak=med?'medium':'large';
+    const colons=document.querySelectorAll('.colon');
+    const tiles=document.querySelectorAll('.tile');
+    const nums=document.querySelectorAll('.half .num,.flap .num');
+    const botNums=document.querySelectorAll('.half.bot .num,.flap-bot .num');
+    if(med){
+      $wrapper.style.gap='5px';
+      $wrapper.style.padding='12px 16px';
+      colons.forEach(c=>c.style.fontSize='46px');
+      const tileW=S.mode==='compact'?'84px':'50px';
+      tiles.forEach(t=>{ t.style.width=tileW; t.style.height='92px'; });
+      const f=FONT_MAP[S.font]||FONT_MAP['Anton'];
+      const medSize=Math.round(parseFloat(f.size)*0.88)+'px';
+      nums.forEach(n=>{ n.style.fontSize=medSize; n.style.height='92px'; n.style.lineHeight='92px'; });
+      botNums.forEach(n=>{ n.style.top='-46px'; });
+    }else{
+      // Clear the inline overrides so the stylesheet values apply.
+      $wrapper.style.gap='';
+      $wrapper.style.padding='';
+      colons.forEach(c=>c.style.fontSize='');
+      tiles.forEach(t=>{ t.style.width=''; t.style.height=''; });
+      nums.forEach(n=>{ n.style.fontSize=''; n.style.height=''; n.style.lineHeight=''; });
+      botNums.forEach(n=>{ n.style.top=''; });
+    }
+    updateDate(new Date());
   }
-  const m=MOTION_MAP[S.motion]||MOTION_MAP.smooth;
-  const r=document.documentElement.style;
-  r.setProperty('--flip-top-dur',m.topDur+'s');
-  r.setProperty('--flip-top-ease',m.topEase);
-  r.setProperty('--flip-bot-dur',m.botDur+'s');
-  r.setProperty('--flip-bot-ease',m.botEase);
-  r.setProperty('--flip-bot-delay',m.botDelay+'s');
-  let kf=document.getElementById('motion-kf');
-  if(!kf){kf=document.createElement('style');kf.id='motion-kf';document.head.appendChild(kf);}
-  const fuKf=m.bounce===0
-    ?'@keyframes fu{0%{transform:rotateX(90deg)}100%{transform:rotateX(0)}}'
-    :'@keyframes fu{0%{transform:rotateX(90deg)}'+m.bounceAt+'%{transform:rotateX('+m.bounce+'deg)}100%{transform:rotateX(0)}}';
-  const fdsKf='@keyframes fds{0%{background:rgba(0,0,0,0)}50%{background:rgba(0,0,0,'+m.shadowMax+')}100%{background:rgba(0,0,0,0)}}';
-  const fusStart=(m.shadowMax*0.34).toFixed(3);
-  const fusMid=(m.shadowMax*0.23).toFixed(3);
-  const fusKf='@keyframes fus{0%{background:rgba(0,0,0,'+fusStart+')}40%{background:rgba(0,0,0,'+fusMid+')}100%{background:rgba(0,0,0,0)}}';
-  kf.textContent=fuKf+fdsKf+fusKf;
-}
 
-const GEAR_SVG='<svg viewBox="0 0 24 24"><path d="M19.14 12.94c.04-.31.06-.63.06-.94 0-.31-.02-.63-.06-.94l2.03-1.58a.49.49 0 00.12-.61l-1.92-3.32a.49.49 0 00-.59-.22l-2.39.96a7.04 7.04 0 00-1.62-.94l-.36-2.54a.48.48 0 00-.48-.41h-3.84a.48.48 0 00-.48.41l-.36 2.54c-.59.24-1.13.57-1.62.94l-2.39-.96a.49.49 0 00-.59.22L2.74 8.87a.49.49 0 00.12.61l2.03 1.58c-.04.31-.06.63-.06.94 0 .31.02.63.06.94l-2.03 1.58a.49.49 0 00-.12.61l1.92 3.32c.12.22.37.29.59.22l2.39-.96c.5.38 1.03.7 1.62.94l.36 2.54c.05.24.26.41.48.41h3.84c.24 0 .44-.17.48-.41l.36-2.54c.59-.24 1.13-.57 1.62-.94l2.39.96c.22.08.47 0 .59-.22l1.92-3.32a.49.49 0 00-.12-.61l-2.03-1.58zM12 15.6A3.6 3.6 0 1112 8.4a3.6 3.6 0 010 7.2z"/></svg>';
-const TILE='<div class="half top"><div class="num"></div></div><div class="half bot"><div class="num"></div></div>';
-
-// CLOCK
-const cur={};
-function setVal(id,v){const t=document.getElementById(id);if(t){t.querySelector('.half.top .num').textContent=v;t.querySelector('.half.bot .num').textContent=v;}}
-function flipTile(id,nv){
-  if(cur[id]===nv)return;
-  const ov=cur[id]||'';cur[id]=nv;
-  const t=document.getElementById(id);if(!t)return;
-  if(S.motion==='instant'){t.querySelectorAll('.flap').forEach(f=>f.remove());t.querySelector('.half.top .num').textContent=nv;t.querySelector('.half.bot .num').textContent=nv;return;}
-  t.querySelector('.half.top .num').textContent=nv;
-  t.querySelector('.half.bot .num').textContent=ov;
-  t.querySelectorAll('.flap').forEach(f=>f.remove());
-  const ft=document.createElement('div');ft.className='flap flap-top';
-  ft.innerHTML='<div class="num">'+ov+'</div>';t.appendChild(ft);
-  const fb=document.createElement('div');fb.className='flap flap-bot';
-  fb.innerHTML='<div class="num">'+nv+'</div>';t.appendChild(fb);
-  setTimeout(()=>{const tb=document.getElementById(id);if(tb)tb.querySelector('.half.bot .num').textContent=nv;ft.remove();fb.remove();},580);
-}
-function getTime(now){
-  let h=now.getHours(),m=now.getMinutes();
-  const ap=document.getElementById('ampm');
-  if(S.format==='12'){const pm=h>=12;h=h%12||12;ap.textContent=pm?'PM':'AM';ap.classList.add('show');}
-  else{ap.classList.remove('show');}
-  const hs=String(h).padStart(2,'0'),ms=String(m).padStart(2,'0');
-  return{h:hs,m:ms,digits:[...hs,...ms]};
-}
-function updateDate(now){
-  const el=document.getElementById('dateline');
-  const day=DAYS[now.getDay()];const date=MONTHS[now.getMonth()]+' '+now.getDate()+', '+now.getFullYear();
-  const dayS=day.slice(0,3);const dateS=MONTHS[now.getMonth()].slice(0,3)+' '+now.getDate();
-  const med=currentBreak==='medium';
-  if(S.display==='both'){el.textContent=med?dayS+' | '+dateS:day+'  |  '+date;el.style.display='';}
-  else if(S.display==='date'){el.textContent=med?dateS:date;el.style.display='';}
-  else if(S.display==='day'){el.textContent=med?dayS:day;el.style.display='';}
-  else{el.style.display='none';}
-}
-function tick(a=true){
-  const now=new Date();const{h,m,digits}=getTime(now);
-  if(S.mode==='standard'){
-    if(a)digits.forEach((v,i)=>flipTile('t'+i,v));
-    else digits.forEach((v,i)=>{cur['t'+i]=v;setVal('t'+i,v);});
-  }else{
-    if(a){flipTile('tH',h);flipTile('tM',m);}
-    else{cur.tH=h;cur.tM=m;setVal('tH',h);setVal('tM',m);}
-  }
-  updateDate(now);
-}
-
-function getTileTextColor(hex){const r=parseInt(hex.slice(1,3),16),g=parseInt(hex.slice(3,5),16),b=parseInt(hex.slice(5,7),16);return(0.299*r+0.587*g+0.114*b)/255>0.5?'#1a1a1a':'#ffffff';}
-function applyAll(){
-  const r=document.documentElement.style;
-  r.setProperty('--tile-bg',S.tile);r.setProperty('--time-text',S.timeText);r.setProperty('--date-color',S.dateText);
-  r.setProperty('--gear-color',getTileTextColor(S.tile));
-  if(S.theme==='dark'){
-    r.setProperty('--tile-shadow','0 2px 8px rgba(0,0,0,0.3),0 4px 20px rgba(0,0,0,0.25)');
-    r.setProperty('--tile-highlight','rgba(255,255,255,0.08)');
-    r.setProperty('--tile-gradient','linear-gradient(to bottom,rgba(255,255,255,0.05) 0%,transparent 50%)');
-    r.setProperty('--popup-shadow','0 8px 32px rgba(0,0,0,0.4),0 2px 12px rgba(0,0,0,0.3)');
-    r.setProperty('--flap-shadow-top','0 2px 4px rgba(0,0,0,0.5)');
-    r.setProperty('--flap-shadow-bot','0 -2px 4px rgba(0,0,0,0.5)');
-    r.setProperty('--flap-gradient-strength','0.25');
-  }else{
-    r.setProperty('--tile-shadow','0 2px 4px rgba(0,0,0,0.08),0 4px 12px rgba(0,0,0,0.12)');
-    r.setProperty('--tile-highlight','rgba(255,255,255,0.6)');
-    r.setProperty('--tile-gradient','linear-gradient(to bottom,rgba(255,255,255,0.08) 0%,transparent 50%)');
-    r.setProperty('--popup-shadow','0 8px 24px rgba(0,0,0,0.12),0 2px 8px rgba(0,0,0,0.08)');
-    r.setProperty('--flap-shadow-top','0 2px 4px rgba(0,0,0,0.15)');
-    r.setProperty('--flap-shadow-bot','0 -2px 4px rgba(0,0,0,0.15)');
-    r.setProperty('--flap-gradient-strength','0.15');
-  }
-  $cont.style.background=S.bg;
-  $wrapper.style.transform='scale('+S.zoom/100+')';
-  pop.classList.remove('pop-light','pop-dark');pop.classList.add(S.theme==='dark'?'pop-dark':'pop-light');
-}
-
-// PRESETS
-function buildPresetGrid(){
-  const grid=document.getElementById('presetGrid');
-  grid.innerHTML=PRESETS.map(p=>
-    '<div class="pc" data-pid="'+p.id+'">' +
-    '<div class="pc-swatch" style="background:'+p.tile+'"></div>' +
-    '<div class="pc-name">'+p.name+'</div>' +
-    '</div>'
-  ).join('')+
-  '<div class="pc" data-pid="custom">'+
-  '<div class="pc-swatch pc-swatch-cu"></div>'+
-  '<div class="pc-name">Custom</div>'+
-  '</div>';
-  grid.querySelectorAll('.pc').forEach(card=>{
-    const pid=card.dataset.pid;
-    if(pid==='custom'){
-      card.addEventListener('click',()=>{
-        pickerKeys.forEach(k=>pickers[k].cpk.classList.remove('open'));
-        if(isValidHex(S.tile))pickers.tile.setFromHex(S.tile);
-        pickers.tile.updateUI();pickers.tile.cpk.classList.add('open');
-      });
+  /* ==========================================================================
+     4. FLIP MOTION STYLES
+     ========================================================================== */
+  const MOTION_MAP={
+    smooth:     {topDur:0.3,  topEase:'cubic-bezier(0.4,0,1,1)',   botDur:0.3,  botEase:'cubic-bezier(0,0,0.2,1)',   botDelay:0.25, bounce:-3, bounceAt:83, shadowMax:0.35},
+    mechanical: {topDur:0.2,  topEase:'cubic-bezier(0.55,0,1,1)',  botDur:0.25, botEase:'cubic-bezier(0,0,0.15,1)',  botDelay:0.18, bounce:-6, bounceAt:80, shadowMax:0.5},
+    minimal:    {topDur:0.15, topEase:'ease-in',                    botDur:0.15, botEase:'ease-out',                  botDelay:0.13, bounce:0,  bounceAt:0,  shadowMax:0},
+    instant:    null
+  };
+  /* Apply a motion style by setting the timing variables and rebuilding the
+     bounce/shadow keyframes (fu/fds/fus) into an injected <style>. */
+  function applyMotion(){
+    if(S.motion==='instant'){
+      document.querySelectorAll('.flap').forEach(f=>f.remove());
       return;
     }
-    const p=PRESETS.find(x=>x.id===pid);
-    card.addEventListener('mouseenter',()=>document.documentElement.style.setProperty('--tile-bg',p.tile));
-    card.addEventListener('mouseleave',()=>document.documentElement.style.setProperty('--tile-bg',S.tile));
-    card.addEventListener('click',()=>applyPreset(p));
-  });
-}
-function applyPreset(p){
-  S.tile=p.tile;save();
-  const r=document.documentElement.style;
-  r.setProperty('--tile-bg',S.tile);r.setProperty('--gear-color',getTileTextColor(S.tile));
-  hlPreset();
-}
-function hlPreset(){
-  const m=PRESETS.find(p=>p.tile===S.tile);
-  const active=m?m.id:'custom';
-  document.querySelectorAll('.pc').forEach(c=>c.classList.toggle('on',c.dataset.pid===active));
-}
-document.getElementById('fontRow').addEventListener('click',e=>{
-  const b=e.target.closest('.fb');if(!b)return;
-  S.font=b.dataset.f;save();applyFont();syncFont();hlPreset();
-});
-
-// POPUP
-const pop=document.getElementById('pop'),ov=document.getElementById('ov');
-function openPop(){pop.classList.add('open');ov.classList.add('open');const g=document.getElementById('gearBtn');if(g)g.classList.add('pin');}
-function closePop(){pop.classList.remove('open');ov.classList.remove('open');const g=document.getElementById('gearBtn');if(g)g.classList.remove('pin');}
-ov.addEventListener('click',closePop);
-document.getElementById('popX').addEventListener('click',closePop);
-
-function renderClock(){
-  const clock=document.getElementById('clock');
-  const wasOpen=pop.classList.contains('open');
-  Object.keys(cur).forEach(k=>delete cur[k]);
-  const gear='<button class="gear" id="gearBtn" title="Settings">'+GEAR_SVG+'</button>';
-  if(S.mode==='standard'){
-    clock.className='clock std';
-    clock.innerHTML=
-      '<div class="tile" id="t0">'+gear+TILE+'</div>'+
-      '<div class="tile" id="t1">'+TILE+'</div>'+
-      '<div class="colon">:</div>'+
-      '<div class="tile" id="t2">'+TILE+'</div>'+
-      '<div class="tile" id="t3">'+TILE+'</div>'+
-      '<div class="ampm" id="ampm">AM</div>';
-  }else{
-    clock.className='clock cmp';
-    clock.innerHTML=
-      '<div class="tile" id="tH">'+gear+TILE+'</div>'+
-      '<div class="colon">:</div>'+
-      '<div class="tile" id="tM">'+TILE+'</div>'+
-      '<div class="ampm" id="ampm">AM</div>';
+    const m=MOTION_MAP[S.motion]||MOTION_MAP.smooth;
+    const r=document.documentElement.style;
+    r.setProperty('--flip-top-dur',m.topDur+'s');
+    r.setProperty('--flip-top-ease',m.topEase);
+    r.setProperty('--flip-bot-dur',m.botDur+'s');
+    r.setProperty('--flip-bot-ease',m.botEase);
+    r.setProperty('--flip-bot-delay',m.botDelay+'s');
+    let kf=document.getElementById('motion-kf');
+    if(!kf){ kf=document.createElement('style'); kf.id='motion-kf'; document.head.appendChild(kf); }
+    const fuKf=m.bounce===0
+      ?'@keyframes fu{0%{transform:rotateX(90deg)}100%{transform:rotateX(0)}}'
+      :'@keyframes fu{0%{transform:rotateX(90deg)}'+m.bounceAt+'%{transform:rotateX('+m.bounce+'deg)}100%{transform:rotateX(0)}}';
+    const fdsKf='@keyframes fds{0%{background:rgba(0,0,0,0)}50%{background:rgba(0,0,0,'+m.shadowMax+')}100%{background:rgba(0,0,0,0)}}';
+    const fusStart=(m.shadowMax*0.34).toFixed(3);
+    const fusMid=(m.shadowMax*0.23).toFixed(3);
+    const fusKf='@keyframes fus{0%{background:rgba(0,0,0,'+fusStart+')}40%{background:rgba(0,0,0,'+fusMid+')}100%{background:rgba(0,0,0,0)}}';
+    kf.textContent=fuKf+fdsKf+fusKf;
   }
-  const gb=document.getElementById('gearBtn');
-  gb.addEventListener('click',()=>pop.classList.contains('open')?closePop():openPop());
-  if(wasOpen)gb.classList.add('pin');
-  tick(false);
-  applyResponsive();
-}
 
-// COLOUR CONVERSION
-function hexToHsv(hex){const r=parseInt(hex.slice(1,3),16)/255,g=parseInt(hex.slice(3,5),16)/255,b=parseInt(hex.slice(5,7),16)/255;const mx=Math.max(r,g,b),mn=Math.min(r,g,b),d=mx-mn;let h=0;if(d){if(mx===r)h=((g-b)/d+6)%6;else if(mx===g)h=(b-r)/d+2;else h=(r-g)/d+4;h/=6;}return{h,s:mx?d/mx:0,v:mx};}
-function hsvToHex(h,s,v){h*=6;const i=Math.floor(h),f=h-i,p=v*(1-s),q=v*(1-s*f),t=v*(1-s*(1-f));let r,g,b;switch(i%6){case 0:r=v;g=t;b=p;break;case 1:r=q;g=v;b=p;break;case 2:r=p;g=v;b=t;break;case 3:r=p;g=q;b=v;break;case 4:r=t;g=p;b=v;break;case 5:r=v;g=p;b=q;break;}return'#'+[r,g,b].map(x=>Math.round(x*255).toString(16).padStart(2,'0')).join('');}
-function isValidHex(h){return/^#[0-9a-fA-F]{6}$/.test(h);}
+  /* ==========================================================================
+     5. CLOCK RENDERING
+     ========================================================================== */
+  const GEAR_SVG='<svg viewBox="0 0 24 24"><path d="M19.14 12.94c.04-.31.06-.63.06-.94 0-.31-.02-.63-.06-.94l2.03-1.58a.49.49 0 00.12-.61l-1.92-3.32a.49.49 0 00-.59-.22l-2.39.96a7.04 7.04 0 00-1.62-.94l-.36-2.54a.48.48 0 00-.48-.41h-3.84a.48.48 0 00-.48.41l-.36 2.54c-.59.24-1.13.57-1.62.94l-2.39-.96a.49.49 0 00-.59.22L2.74 8.87a.49.49 0 00.12.61l2.03 1.58c-.04.31-.06.63-.06.94 0 .31.02.63.06.94l-2.03 1.58a.49.49 0 00-.12.61l1.92 3.32c.12.22.37.29.59.22l2.39-.96c.5.38 1.03.7 1.62.94l.36 2.54c.05.24.26.41.48.41h3.84c.24 0 .44-.17.48-.41l.36-2.54c.59-.24 1.13-.57 1.62-.94l2.39.96c.22.08.47 0 .59-.22l1.92-3.32a.49.49 0 00-.12-.61l-2.03-1.58zM12 15.6A3.6 3.6 0 1112 8.4a3.6 3.6 0 010 7.2z"/></svg>';
+  const TILE='<div class="half top"><div class="num"></div></div><div class="half bot"><div class="num"></div></div>';
 
-// COLOUR PICKERS
-const pickerKeys=['tile','timeText','dateText'];
-const pickers={};
+  const cur={};   // current value shown per tile id (so we only flip on change)
 
-pickerKeys.forEach(key=>{
-  const cpk=document.getElementById('cpk-'+key);
-  const box=cpk.querySelector('.cpk-box');
-  const boxHue=cpk.querySelector('.cpk-box-hue');
-  const dot=cpk.querySelector('.cpk-dot');
-  const hueBar=cpk.querySelector('.cpk-hue');
-  const hueThumb=cpk.querySelector('.cpk-hue-thumb');
-  const preview=cpk.querySelector('.cpk-preview');
-  const hexInput=cpk.querySelector('.cpk-hex-input');
-  const pk={h:0,s:0,v:0,cpk,box,boxHue,dot,hueBar,hueThumb,preview,hexInput};
-  pickers[key]=pk;
-
-  function updateUI(){
-    const hex=hsvToHex(pk.h,pk.s,pk.v);
-    boxHue.style.background='hsl('+(pk.h*360)+',100%,50%)';
-    dot.style.left=pk.s*100+'%';dot.style.top=(1-pk.v)*100+'%';
-    hueThumb.style.left=pk.h*100+'%';
-    preview.style.background=hex;hexInput.value=hex;
+  function setVal(id,v){
+    const t=document.getElementById(id);
+    if(t){ t.querySelector('.half.top .num').textContent=v; t.querySelector('.half.bot .num').textContent=v; }
   }
-  function setFromHex(hex){if(!isValidHex(hex))return;const hsv=hexToHsv(hex);pk.h=hsv.h;pk.s=hsv.s;pk.v=hsv.v;updateUI();}
-  function emitColour(){const hex=hsvToHex(pk.h,pk.s,pk.v);S[key]=hex;save();applyAll();hlGroup(key);hlPreset();}
+  /* Animate one tile from its current value to a new value. */
+  function flipTile(id,nv){
+    if(cur[id]===nv) return;
+    const ov=cur[id]||'';
+    cur[id]=nv;
+    const t=document.getElementById(id);
+    if(!t) return;
 
-  function boxMove(e){const rect=box.getBoundingClientRect();const x=Math.max(0,Math.min(1,(e.clientX-rect.left)/rect.width));const y=Math.max(0,Math.min(1,(e.clientY-rect.top)/rect.height));pk.s=x;pk.v=1-y;updateUI();emitColour();}
-  box.addEventListener('pointerdown',e=>{e.preventDefault();box.setPointerCapture(e.pointerId);boxMove(e);});
-  box.addEventListener('pointermove',e=>{if(e.buttons)boxMove(e);});
+    if(S.motion==='instant'){
+      t.querySelectorAll('.flap').forEach(f=>f.remove());
+      t.querySelector('.half.top .num').textContent=nv;
+      t.querySelector('.half.bot .num').textContent=nv;
+      return;
+    }
 
-  function hueMove(e){const rect=hueBar.getBoundingClientRect();pk.h=Math.max(0,Math.min(1,(e.clientX-rect.left)/rect.width));updateUI();emitColour();}
-  hueBar.addEventListener('pointerdown',e=>{e.preventDefault();hueBar.setPointerCapture(e.pointerId);hueMove(e);});
-  hueBar.addEventListener('pointermove',e=>{if(e.buttons)hueMove(e);});
+    // Static halves: top already shows the new digit; bottom keeps the old one
+    // until the rising flap finishes covering it.
+    t.querySelector('.half.top .num').textContent=nv;
+    t.querySelector('.half.bot .num').textContent=ov;
+    t.querySelectorAll('.flap').forEach(f=>f.remove());
 
-  hexInput.addEventListener('input',()=>{let v=hexInput.value;if(v[0]!=='#')v='#'+v;if(isValidHex(v)){setFromHex(v);emitColour();}});
-  hexInput.addEventListener('blur',()=>{hexInput.value=hsvToHex(pk.h,pk.s,pk.v);});
+    const ft=document.createElement('div'); ft.className='flap flap-top';
+    ft.innerHTML='<div class="num">'+ov+'</div>'; t.appendChild(ft);   // falling top shows old
+    const fb=document.createElement('div'); fb.className='flap flap-bot';
+    fb.innerHTML='<div class="num">'+nv+'</div>'; t.appendChild(fb);   // rising bottom shows new
 
-  pk.setFromHex=setFromHex;pk.updateUI=updateUI;
-});
+    setTimeout(()=>{
+      const tb=document.getElementById(id);
+      if(tb) tb.querySelector('.half.bot .num').textContent=nv;
+      ft.remove(); fb.remove();
+    },580);
+  }
 
-document.querySelectorAll('.sw-cu').forEach(sw=>{
-  sw.addEventListener('click',()=>{
-    const key=sw.dataset.target;const cpk=pickers[key].cpk;const wasOpen=cpk.classList.contains('open');
-    pickerKeys.forEach(k=>pickers[k].cpk.classList.remove('open'));
-    if(!wasOpen){cpk.classList.add('open');const hex=S[key];if(isValidHex(hex))pickers[key].setFromHex(hex);else pickers[key].setFromHex('#888888');pickers[key].updateUI();}
+  /* Read the clock into padded HH / MM strings (+ AM/PM in 12h mode). */
+  function getTime(now){
+    let h=now.getHours(), m=now.getMinutes();
+    const ap=document.getElementById('ampm');
+    if(S.format==='12'){ const pm=h>=12; h=h%12||12; ap.textContent=pm?'PM':'AM'; ap.classList.add('show'); }
+    else { ap.classList.remove('show'); }
+    const hs=String(h).padStart(2,'0'), ms=String(m).padStart(2,'0');
+    return {h:hs,m:ms,digits:[...hs,...ms]};
+  }
+
+  function updateDate(now){
+    const el=document.getElementById('dateline');
+    const day=DAYS[now.getDay()];
+    const date=MONTHS[now.getMonth()]+' '+now.getDate()+', '+now.getFullYear();
+    const dayS=day.slice(0,3);
+    const dateS=MONTHS[now.getMonth()].slice(0,3)+' '+now.getDate();
+    const med=currentBreak==='medium';
+    if(S.display==='both'){ el.textContent=med?dayS+' | '+dateS:day+'  |  '+date; el.style.display=''; }
+    else if(S.display==='date'){ el.textContent=med?dateS:date; el.style.display=''; }
+    else if(S.display==='day'){ el.textContent=med?dayS:day; el.style.display=''; }
+    else { el.style.display='none'; }
+  }
+
+  /* Update all tiles to the current time. `a`=true animates the change. */
+  function tick(a=true){
+    const now=new Date();
+    const {h,m,digits}=getTime(now);
+    if(S.mode==='standard'){
+      if(a) digits.forEach((v,i)=>flipTile('t'+i,v));
+      else  digits.forEach((v,i)=>{ cur['t'+i]=v; setVal('t'+i,v); });
+    }else{
+      if(a){ flipTile('tH',h); flipTile('tM',m); }
+      else { cur.tH=h; cur.tM=m; setVal('tH',h); setVal('tM',m); }
+    }
+    updateDate(now);
+  }
+
+  /* ==========================================================================
+     6. THEMING
+     ========================================================================== */
+  /* Pick a readable gear colour for a given tile colour (luminance test). */
+  function getTileTextColor(hex){
+    const r=parseInt(hex.slice(1,3),16), g=parseInt(hex.slice(3,5),16), b=parseInt(hex.slice(5,7),16);
+    return (0.299*r+0.587*g+0.114*b)/255>0.5?'#1a1a1a':'#ffffff';
+  }
+  /* Push all colour/theme state into CSS variables + the popup skin. */
+  function applyAll(){
+    const r=document.documentElement.style;
+    r.setProperty('--tile-bg',S.tile);
+    r.setProperty('--time-text',S.timeText);
+    r.setProperty('--date-color',S.dateText);
+    r.setProperty('--gear-color',getTileTextColor(S.tile));
+    if(S.theme==='dark'){
+      r.setProperty('--tile-shadow','0 2px 8px rgba(0,0,0,0.3),0 4px 20px rgba(0,0,0,0.25)');
+      r.setProperty('--tile-highlight','rgba(255,255,255,0.08)');
+      r.setProperty('--tile-gradient','linear-gradient(to bottom,rgba(255,255,255,0.05) 0%,transparent 50%)');
+      r.setProperty('--popup-shadow','0 8px 32px rgba(0,0,0,0.4),0 2px 12px rgba(0,0,0,0.3)');
+      r.setProperty('--flap-shadow-top','0 2px 4px rgba(0,0,0,0.5)');
+      r.setProperty('--flap-shadow-bot','0 -2px 4px rgba(0,0,0,0.5)');
+      r.setProperty('--flap-gradient-strength','0.25');
+    }else{
+      r.setProperty('--tile-shadow','0 2px 4px rgba(0,0,0,0.08),0 4px 12px rgba(0,0,0,0.12)');
+      r.setProperty('--tile-highlight','rgba(255,255,255,0.6)');
+      r.setProperty('--tile-gradient','linear-gradient(to bottom,rgba(255,255,255,0.08) 0%,transparent 50%)');
+      r.setProperty('--popup-shadow','0 8px 24px rgba(0,0,0,0.12),0 2px 8px rgba(0,0,0,0.08)');
+      r.setProperty('--flap-shadow-top','0 2px 4px rgba(0,0,0,0.15)');
+      r.setProperty('--flap-shadow-bot','0 -2px 4px rgba(0,0,0,0.15)');
+      r.setProperty('--flap-gradient-strength','0.15');
+    }
+    $cont.style.background=S.bg;
+    $wrapper.style.transform='scale('+S.zoom/100+')';
+    pop.classList.remove('pop-light','pop-dark');
+    pop.classList.add(S.theme==='dark'?'pop-dark':'pop-light');
+  }
+
+  /* ==========================================================================
+     7. TILE PRESETS
+     ========================================================================== */
+  function buildPresetGrid(){
+    const grid=document.getElementById('presetGrid');
+    grid.innerHTML=PRESETS.map(p=>
+      '<div class="pc" data-pid="'+p.id+'">' +
+      '<div class="pc-swatch" style="background:'+p.tile+'"></div>' +
+      '<div class="pc-name">'+p.name+'</div>' +
+      '</div>'
+    ).join('')+
+    '<div class="pc" data-pid="custom">'+
+    '<div class="pc-swatch pc-swatch-cu"></div>'+
+    '<div class="pc-name">Custom</div>'+
+    '</div>';
+    grid.querySelectorAll('.pc').forEach(card=>{
+      const pid=card.dataset.pid;
+      if(pid==='custom'){
+        // Custom card opens the tile colour picker.
+        card.addEventListener('click',()=>{
+          pickerKeys.forEach(k=>pickers[k].cpk.classList.remove('open'));
+          if(isValidHex(S.tile)) pickers.tile.setFromHex(S.tile);
+          pickers.tile.updateUI();
+          pickers.tile.cpk.classList.add('open');
+        });
+        return;
+      }
+      const p=PRESETS.find(x=>x.id===pid);
+      // Hover previews the tile colour; click commits it.
+      card.addEventListener('mouseenter',()=>document.documentElement.style.setProperty('--tile-bg',p.tile));
+      card.addEventListener('mouseleave',()=>document.documentElement.style.setProperty('--tile-bg',S.tile));
+      card.addEventListener('click',()=>applyPreset(p));
+    });
+  }
+  function applyPreset(p){
+    S.tile=p.tile; save();
+    const r=document.documentElement.style;
+    r.setProperty('--tile-bg',S.tile);
+    r.setProperty('--gear-color',getTileTextColor(S.tile));
+    hlPreset();
+  }
+  function hlPreset(){
+    const m=PRESETS.find(p=>p.tile===S.tile);
+    const active=m?m.id:'custom';
+    document.querySelectorAll('.pc').forEach(c=>c.classList.toggle('on',c.dataset.pid===active));
+  }
+  document.getElementById('fontRow').addEventListener('click',e=>{
+    const b=e.target.closest('.fb'); if(!b) return;
+    S.font=b.dataset.f; save(); applyFont(); syncFont(); hlPreset();
   });
-});
 
-// SWATCH SYSTEM
-function renderSwatches(){
-  ['timeText','dateText'].forEach(key=>{
-    const container=document.querySelector('.sr[data-group="'+key+'"]');
-    if(!container)return;
-    container.querySelectorAll('.sw:not(.sw-cu)').forEach(s=>s.remove());
-    const cuSw=container.querySelector('.sw-cu');
-    SWATCH_PALETTES[key][S.theme].forEach(c=>{
-      const sw=document.createElement('div');
-      const light=getTileTextColor(c)==='#1a1a1a';
-      sw.className='sw '+(light?'lt':'dk')+(c.toLowerCase()==='#ffffff'?' sw-wh':'');
-      sw.dataset.c=c;
-      sw.style.background=c;
-      container.insertBefore(sw,cuSw);
+  /* ==========================================================================
+     8. POPUP open / close
+     ========================================================================== */
+  const pop=document.getElementById('pop'), ov=document.getElementById('ov');
+  function openPop(){ pop.classList.add('open'); ov.classList.add('open'); const g=document.getElementById('gearBtn'); if(g) g.classList.add('pin'); }
+  function closePop(){ pop.classList.remove('open'); ov.classList.remove('open'); const g=document.getElementById('gearBtn'); if(g) g.classList.remove('pin'); }
+  ov.addEventListener('click',closePop);
+  document.getElementById('popX').addEventListener('click',closePop);
+
+  /* Rebuild the clock markup for the current layout (standard vs compact).
+     The gear lives inside the first tile so it sits over the clock. */
+  function renderClock(){
+    const clock=document.getElementById('clock');
+    const wasOpen=pop.classList.contains('open');
+    Object.keys(cur).forEach(k=>delete cur[k]);
+    const gear='<button class="gear" id="gearBtn" title="Settings">'+GEAR_SVG+'</button>';
+    if(S.mode==='standard'){
+      clock.className='clock std';
+      clock.innerHTML=
+        '<div class="tile" id="t0">'+gear+TILE+'</div>'+
+        '<div class="tile" id="t1">'+TILE+'</div>'+
+        '<div class="colon">:</div>'+
+        '<div class="tile" id="t2">'+TILE+'</div>'+
+        '<div class="tile" id="t3">'+TILE+'</div>'+
+        '<div class="ampm" id="ampm">AM</div>';
+    }else{
+      clock.className='clock cmp';
+      clock.innerHTML=
+        '<div class="tile" id="tH">'+gear+TILE+'</div>'+
+        '<div class="colon">:</div>'+
+        '<div class="tile" id="tM">'+TILE+'</div>'+
+        '<div class="ampm" id="ampm">AM</div>';
+    }
+    const gb=document.getElementById('gearBtn');
+    gb.addEventListener('click',()=>pop.classList.contains('open')?closePop():openPop());
+    if(wasOpen) gb.classList.add('pin');
+    tick(false);          // paint current time without animating
+    applyResponsive();
+  }
+
+  /* ==========================================================================
+     9. COLOUR PICKERS  (one per colour group: tile / timeText / dateText)
+     ========================================================================== */
+  function hexToHsv(hex){
+    const r=parseInt(hex.slice(1,3),16)/255, g=parseInt(hex.slice(3,5),16)/255, b=parseInt(hex.slice(5,7),16)/255;
+    const mx=Math.max(r,g,b), mn=Math.min(r,g,b), d=mx-mn;
+    let h=0;
+    if(d){ if(mx===r) h=((g-b)/d+6)%6; else if(mx===g) h=(b-r)/d+2; else h=(r-g)/d+4; h/=6; }
+    return {h,s:mx?d/mx:0,v:mx};
+  }
+  function hsvToHex(h,s,v){
+    h*=6;
+    const i=Math.floor(h), f=h-i, p=v*(1-s), q=v*(1-s*f), t=v*(1-s*(1-f));
+    let r,g,b;
+    switch(i%6){
+      case 0: r=v; g=t; b=p; break;
+      case 1: r=q; g=v; b=p; break;
+      case 2: r=p; g=v; b=t; break;
+      case 3: r=p; g=q; b=v; break;
+      case 4: r=t; g=p; b=v; break;
+      case 5: r=v; g=p; b=q; break;
+    }
+    return '#'+[r,g,b].map(x=>Math.round(x*255).toString(16).padStart(2,'0')).join('');
+  }
+  function isValidHex(h){ return /^#[0-9a-fA-F]{6}$/.test(h); }
+
+  const pickerKeys=['tile','timeText','dateText'];
+  const pickers={};
+
+  pickerKeys.forEach(key=>{
+    const cpk=document.getElementById('cpk-'+key);
+    const box=cpk.querySelector('.cpk-box');
+    const boxHue=cpk.querySelector('.cpk-box-hue');
+    const dot=cpk.querySelector('.cpk-dot');
+    const hueBar=cpk.querySelector('.cpk-hue');
+    const hueThumb=cpk.querySelector('.cpk-hue-thumb');
+    const preview=cpk.querySelector('.cpk-preview');
+    const hexInput=cpk.querySelector('.cpk-hex-input');
+    const pk={h:0,s:0,v:0,cpk,box,boxHue,dot,hueBar,hueThumb,preview,hexInput};
+    pickers[key]=pk;
+
+    function updateUI(){
+      const hex=hsvToHex(pk.h,pk.s,pk.v);
+      boxHue.style.background='hsl('+(pk.h*360)+',100%,50%)';
+      dot.style.left=pk.s*100+'%';
+      dot.style.top=(1-pk.v)*100+'%';
+      hueThumb.style.left=pk.h*100+'%';
+      preview.style.background=hex;
+      hexInput.value=hex;
+    }
+    function setFromHex(hex){ if(!isValidHex(hex)) return; const hsv=hexToHsv(hex); pk.h=hsv.h; pk.s=hsv.s; pk.v=hsv.v; updateUI(); }
+    function emitColour(){ const hex=hsvToHex(pk.h,pk.s,pk.v); S[key]=hex; save(); applyAll(); hlGroup(key); hlPreset(); }
+
+    function boxMove(e){ const rect=box.getBoundingClientRect(); const x=Math.max(0,Math.min(1,(e.clientX-rect.left)/rect.width)); const y=Math.max(0,Math.min(1,(e.clientY-rect.top)/rect.height)); pk.s=x; pk.v=1-y; updateUI(); emitColour(); }
+    box.addEventListener('pointerdown',e=>{ e.preventDefault(); box.setPointerCapture(e.pointerId); boxMove(e); });
+    box.addEventListener('pointermove',e=>{ if(e.buttons) boxMove(e); });
+
+    function hueMove(e){ const rect=hueBar.getBoundingClientRect(); pk.h=Math.max(0,Math.min(1,(e.clientX-rect.left)/rect.width)); updateUI(); emitColour(); }
+    hueBar.addEventListener('pointerdown',e=>{ e.preventDefault(); hueBar.setPointerCapture(e.pointerId); hueMove(e); });
+    hueBar.addEventListener('pointermove',e=>{ if(e.buttons) hueMove(e); });
+
+    hexInput.addEventListener('input',()=>{ let v=hexInput.value; if(v[0]!=='#') v='#'+v; if(isValidHex(v)){ setFromHex(v); emitColour(); } });
+    hexInput.addEventListener('blur',()=>{ hexInput.value=hsvToHex(pk.h,pk.s,pk.v); });
+
+    pk.setFromHex=setFromHex;
+    pk.updateUI=updateUI;
+  });
+
+  // Custom-colour wheels (number/date) toggle their picker open.
+  document.querySelectorAll('.sw-cu').forEach(sw=>{
+    sw.addEventListener('click',()=>{
+      const key=sw.dataset.target;
+      const cpk=pickers[key].cpk;
+      const wasOpen=cpk.classList.contains('open');
+      pickerKeys.forEach(k=>pickers[k].cpk.classList.remove('open'));
+      if(!wasOpen){
+        cpk.classList.add('open');
+        const hex=S[key];
+        if(isValidHex(hex)) pickers[key].setFromHex(hex); else pickers[key].setFromHex('#888888');
+        pickers[key].updateUI();
+      }
     });
   });
-}
-function hlGroup(key){
-  const container=document.querySelector('.sr[data-group="'+key+'"]');
-  if(!container)return;
-  const allSw=container.querySelectorAll('.sw:not(.sw-cu)');
-  const cuSw=container.querySelector('.sw-cu');
-  allSw.forEach(s=>s.classList.toggle('on',s.dataset.c===S[key]));
-  const isPreset=[...allSw].some(s=>s.dataset.c===S[key]);
-  cuSw.classList.toggle('on',!isPreset);
-}
-function hlAll(){pickerKeys.forEach(hlGroup);}
 
-// Event delegation so dynamically-inserted swatches still respond
-['timeText','dateText'].forEach(key=>{
-  const container=document.querySelector('.sr[data-group="'+key+'"]');
-  if(!container)return;
-  container.addEventListener('click',e=>{
-    const s=e.target.closest('.sw:not(.sw-cu)');
-    if(!s||!container.contains(s))return;
-    S[key]=s.dataset.c;save();applyAll();hlGroup(key);pickers[key].cpk.classList.remove('open');hlPreset();
+  /* ==========================================================================
+     10. SWATCH SYSTEM  (preset colour dots for number/date text)
+     ========================================================================== */
+  function renderSwatches(){
+    ['timeText','dateText'].forEach(key=>{
+      const container=document.querySelector('.sr[data-group="'+key+'"]');
+      if(!container) return;
+      container.querySelectorAll('.sw:not(.sw-cu)').forEach(s=>s.remove());
+      const cuSw=container.querySelector('.sw-cu');
+      SWATCH_PALETTES[key][S.theme].forEach(c=>{
+        const sw=document.createElement('div');
+        const light=getTileTextColor(c)==='#1a1a1a';        // light swatch → dark check mark
+        sw.className='sw '+(light?'lt':'dk')+(c.toLowerCase()==='#ffffff'?' sw-wh':'');
+        sw.dataset.c=c;
+        sw.style.background=c;
+        container.insertBefore(sw,cuSw);
+      });
+    });
+  }
+  function hlGroup(key){
+    const container=document.querySelector('.sr[data-group="'+key+'"]');
+    if(!container) return;
+    const allSw=container.querySelectorAll('.sw:not(.sw-cu)');
+    const cuSw=container.querySelector('.sw-cu');
+    allSw.forEach(s=>s.classList.toggle('on',s.dataset.c===S[key]));
+    const isPreset=[...allSw].some(s=>s.dataset.c===S[key]);
+    cuSw.classList.toggle('on',!isPreset);
+  }
+  function hlAll(){ pickerKeys.forEach(hlGroup); }
+
+  // Event delegation so dynamically-inserted swatches still respond.
+  ['timeText','dateText'].forEach(key=>{
+    const container=document.querySelector('.sr[data-group="'+key+'"]');
+    if(!container) return;
+    container.addEventListener('click',e=>{
+      const s=e.target.closest('.sw:not(.sw-cu)');
+      if(!s||!container.contains(s)) return;
+      S[key]=s.dataset.c; save(); applyAll(); hlGroup(key); pickers[key].cpk.classList.remove('open'); hlPreset();
+    });
   });
-});
 
-// TOGGLES
-function setupTg(id,key,cb){document.getElementById(id).addEventListener('click',e=>{const b=e.target.closest('.tb');if(!b)return;document.querySelectorAll('#'+id+' .tb').forEach(x=>x.classList.remove('on'));b.classList.add('on');S[key]=b.dataset.v;save();if(cb)cb();});}
-function syncTg(id,val){document.querySelectorAll('#'+id+' .tb').forEach(b=>b.classList.toggle('on',b.dataset.v===val));}
-setupTg('gMode','mode',renderClock);
-setupTg('gMotion','motion',applyMotion);
-setupTg('gTheme','theme',()=>{
-  const prev=S.theme==='dark'?'light':'dark';
-  // Migrate text colours by palette index; custom values stay unchanged
-  ['timeText','dateText'].forEach(k=>{
-    const idx=SWATCH_PALETTES[k][prev].findIndex(c=>c.toLowerCase()===String(S[k]).toLowerCase());
-    if(idx>=0) S[k]=SWATCH_PALETTES[k][S.theme][idx];
+  /* ==========================================================================
+     11. TOGGLES, ZOOM, RESET
+     ========================================================================== */
+  // Wire a segmented toggle to a state key (+ optional side effect).
+  function setupTg(id,key,cb){
+    document.getElementById(id).addEventListener('click',e=>{
+      const b=e.target.closest('.tb'); if(!b) return;
+      document.querySelectorAll('#'+id+' .tb').forEach(x=>x.classList.remove('on'));
+      b.classList.add('on');
+      S[key]=b.dataset.v; save(); if(cb) cb();
+    });
+  }
+  function syncTg(id,val){ document.querySelectorAll('#'+id+' .tb').forEach(b=>b.classList.toggle('on',b.dataset.v===val)); }
+
+  setupTg('gMode','mode',renderClock);
+  setupTg('gMotion','motion',applyMotion);
+  setupTg('gTheme','theme',()=>{
+    const prev=S.theme==='dark'?'light':'dark';
+    // Migrate text colours by palette index; custom values stay unchanged.
+    ['timeText','dateText'].forEach(k=>{
+      const idx=SWATCH_PALETTES[k][prev].findIndex(c=>c.toLowerCase()===String(S[k]).toLowerCase());
+      if(idx>=0) S[k]=SWATCH_PALETTES[k][S.theme][idx];
+    });
+    // Tile + body bg follow the theme's defaults.
+    if(S.theme==='dark'){ S.tile='#ffffff'; S.bg='#191919'; }
+    else { S.tile='#2a2a2a'; S.bg='#ffffff'; }
+    save(); applyAll(); renderSwatches(); hlAll(); hlPreset();
   });
-  // Tile + body bg follow the theme's defaults
-  if(S.theme==='dark'){S.tile='#ffffff';S.bg='#191919';}
-  else{S.tile='#2a2a2a';S.bg='#ffffff';}
-  save();applyAll();renderSwatches();hlAll();hlPreset();
-});
-setupTg('gFmt','format',()=>tick(false));
-setupTg('gDisp','display',()=>tick(false));
-const zSlider=document.getElementById('zSlider'),zLabel=document.getElementById('zLabel');
-zSlider.addEventListener('input',e=>{S.zoom=parseInt(e.target.value);zLabel.textContent=S.zoom+'%';save();applyAll();applyResponsive();});
-document.getElementById('rstBtn').addEventListener('click',()=>{
-  S={...DEF};save();applyAll();applyFont();applyMotion();renderSwatches();hlAll();
-  syncTg('gMode',S.mode);syncTg('gTheme',S.theme);syncTg('gFmt',S.format);syncTg('gDisp',S.display);syncTg('gMotion',S.motion);
-  zSlider.value=S.zoom;zLabel.textContent=S.zoom+'%';
-  pickerKeys.forEach(k=>pickers[k].cpk.classList.remove('open'));
-  hlPreset();syncFont();renderClock();
-});
+  setupTg('gFmt','format',()=>tick(false));
+  setupTg('gDisp','display',()=>tick(false));
 
-// INIT
-load();applyAll();applyFont();applyMotion();renderSwatches();hlAll();
-buildPresetGrid();hlPreset();syncFont();
-renderClock();
-syncTg('gMode',S.mode);syncTg('gTheme',S.theme);syncTg('gFmt',S.format);syncTg('gDisp',S.display);syncTg('gMotion',S.motion);
-zSlider.value=S.zoom;zLabel.textContent=S.zoom+'%';
-const ro=new ResizeObserver(()=>applyResponsive());
-ro.observe($cont);
-function fillViewport(){$cont.style.width=window.innerWidth+'px';$cont.style.height=window.innerHeight+'px';}
-window.addEventListener('resize',fillViewport);
-fillViewport();
-const ms=(60-new Date().getSeconds())*1000-new Date().getMilliseconds();
-setTimeout(()=>{tick();setInterval(tick,60000);},ms);
-</script>
+  const zSlider=document.getElementById('zSlider'), zLabel=document.getElementById('zLabel');
+  zSlider.addEventListener('input',e=>{ S.zoom=parseInt(e.target.value); zLabel.textContent=S.zoom+'%'; save(); applyAll(); applyResponsive(); });
+
+  document.getElementById('rstBtn').addEventListener('click',()=>{
+    S={...DEF}; save(); applyAll(); applyFont(); applyMotion(); renderSwatches(); hlAll();
+    syncTg('gMode',S.mode); syncTg('gTheme',S.theme); syncTg('gFmt',S.format); syncTg('gDisp',S.display); syncTg('gMotion',S.motion);
+    zSlider.value=S.zoom; zLabel.textContent=S.zoom+'%';
+    pickerKeys.forEach(k=>pickers[k].cpk.classList.remove('open'));
+    hlPreset(); syncFont(); renderClock();
+  });
+
+  /* ==========================================================================
+     12. INIT
+     ========================================================================== */
+  load(); applyAll(); applyFont(); applyMotion(); renderSwatches(); hlAll();
+  buildPresetGrid(); hlPreset(); syncFont();
+  renderClock();
+  syncTg('gMode',S.mode); syncTg('gTheme',S.theme); syncTg('gFmt',S.format); syncTg('gDisp',S.display); syncTg('gMotion',S.motion);
+  zSlider.value=S.zoom; zLabel.textContent=S.zoom+'%';
+
+  // Keep the container exactly viewport-sized and responsive.
+  const ro=new ResizeObserver(()=>applyResponsive());
+  ro.observe($cont);
+  function fillViewport(){ $cont.style.width=window.innerWidth+'px'; $cont.style.height=window.innerHeight+'px'; }
+  window.addEventListener('resize',fillViewport);
+  fillViewport();
+
+  // Tick exactly on the next minute boundary, then every minute.
+  const ms=(60-new Date().getSeconds())*1000-new Date().getMilliseconds();
+  setTimeout(()=>{ tick(); setInterval(tick,60000); },ms);
+  </script>
 </body>
 </html>

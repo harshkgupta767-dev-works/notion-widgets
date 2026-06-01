@@ -1,443 +1,781 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Matrix Rain</title>
-<link href="https://fonts.googleapis.com/css2?family=Inter:wght@500;600;700&display=swap" rel="stylesheet">
-<style>
-*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
-html,body{width:100%;height:100%;margin:0;padding:0;overflow:hidden;background:transparent}
-canvas{display:block;width:100%;height:100%}
-.gear{position:fixed;top:8px;left:8px;width:30px;height:30px;background:rgba(0,0,0,.55);border:1px solid rgba(255,255,255,.1);border-radius:8px;cursor:pointer;display:flex;align-items:center;justify-content:center;z-index:220;opacity:0;transform:scale(.85);transition:opacity .2s,transform .2s,background .2s;pointer-events:none}
-body:hover .gear{opacity:.7;transform:scale(1);pointer-events:auto}
-.gear:hover{opacity:1!important;background:rgba(0,0,0,.85)!important}
-.gear svg{width:14px;height:14px;fill:#bbb}
-.gear.hide{display:none}
-.pop{position:fixed;top:8px;left:8px;width:300px;max-height:calc(100vh - 16px);border-radius:14px;z-index:210;padding:14px;opacity:0;pointer-events:none;transform:scale(.92);transform-origin:top left;transition:opacity .22s ease,transform .22s ease;font-family:'Inter',sans-serif;background:#181818;color:#ddd;border:1px solid #2a2a2a;box-shadow:0 16px 60px rgba(0,0,0,.85);display:flex;flex-direction:column}
-.pop.open{opacity:1;pointer-events:auto;transform:scale(1)}
-.pop-hdr{position:relative;display:flex;align-items:center;justify-content:center;padding-bottom:12px;margin-bottom:12px;border-bottom:1px solid #232323;flex-shrink:0;min-height:30px}
-.pop-x{position:absolute;left:0;top:0;width:30px;height:30px;background:rgba(255,255,255,.04);border:1px solid #2a2a2a;border-radius:8px;cursor:pointer;display:flex;align-items:center;justify-content:center;color:#aaa;transition:background .15s,color .15s,border-color .15s}
-.pop-x:hover{background:rgba(255,255,255,.1);color:#fff;border-color:#3a3a3a}
-.pop-x svg{width:12px;height:12px}
-.pop-ttl{font-size:13px;font-weight:700;color:#e0e0e0;letter-spacing:.02em;line-height:30px}
-.pop-body{display:flex;flex-direction:column;gap:7px;overflow-y:auto;flex:1}
-.blk-row{display:flex;gap:7px}.blk-row>.blk{flex:1;min-width:0}
-.pop-body::-webkit-scrollbar{width:4px}.pop-body::-webkit-scrollbar-thumb{background:#333;border-radius:4px}
-.blk{background:#1e1e1e;border-radius:10px;padding:10px 12px;display:flex;flex-direction:column;gap:7px}
-.lb{font-size:9.5px;font-weight:700;text-transform:uppercase;letter-spacing:.15em;color:#666}
-.tg{display:flex;border-radius:10px;overflow:hidden;border:1px solid #272727}
-.tb{flex:1;padding:8px 3px;font-size:10.5px;font-weight:600;text-align:center;background:#1a1a1a;color:#444;border:none;cursor:pointer;transition:all .15s;white-space:nowrap;border-left:1px solid #272727}
-.tb:first-child{border-left:none}
-.tb.on{background:#e0e0e0;color:#111}
-.tb:hover:not(.on){background:#232323;color:#888}
-.cgrid{display:grid;grid-template-columns:repeat(3,1fr);gap:6px}
-.cbtn{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:3px;padding:9px 4px;background:#1a1a1a;border:1px solid #272727;border-radius:8px;cursor:pointer;transition:all .15s;color:#666}
-.cbtn:hover{background:#232323;color:#aaa;border-color:#333}
-.cbtn.on{background:#e0e0e0;color:#111;border-color:#e0e0e0}
-.cbtn .csm{font-family:monospace;font-size:14px;font-weight:700;line-height:1;opacity:.7}
-.cbtn.on .csm{opacity:1}
-.cbtn .cnm{font-size:10px;font-weight:600;letter-spacing:.02em;line-height:1}
-.sr{display:flex;flex-wrap:wrap;gap:8px;align-items:center}
-.sw{position:relative;width:26px;height:26px;border-radius:50%;border:2.5px solid transparent;cursor:pointer;transition:transform .12s,border-color .12s,box-shadow .12s;flex-shrink:0}
-.sw:hover{transform:scale(1.13)}
-.sw.on{border-color:rgba(255,255,255,.85)}
-.sl-hd{display:flex;justify-content:space-between;align-items:center}
-.sl-lbl{font-size:9.5px;font-weight:700;text-transform:uppercase;letter-spacing:.15em;color:#666}
-.sl-val{font-size:12px;font-weight:700;color:#bbb}
-.sl-row{display:flex;align-items:center;gap:8px}
-.sl-cap{font-size:10px;color:#444;font-weight:600;min-width:28px}
-.sl-cap.r{text-align:right}
-.sw-cu{overflow:hidden;border:none!important;background:conic-gradient(hsl(0,80%,60%),hsl(30,80%,55%),hsl(60,80%,52%),hsl(120,65%,45%),hsl(180,75%,45%),hsl(210,80%,52%),hsl(240,65%,58%),hsl(300,65%,55%),hsl(330,75%,55%),hsl(360,80%,60%));box-shadow:inset 0 0 4px rgba(0,0,0,.25),0 1px 2px rgba(0,0,0,.4)}
-.sw-cu::before{content:'';position:absolute;inset:0;border-radius:50%;background:radial-gradient(circle at 35% 30%,rgba(255,255,255,.55) 0%,rgba(255,255,255,.1) 40%,transparent 70%);pointer-events:none}
-.sw-cu.on{border:none!important;box-shadow:0 0 0 2.5px rgba(255,255,255,.85),inset 0 0 4px rgba(0,0,0,.25)}
-.cpk{display:none;margin-top:8px;padding:10px;border-radius:10px;background:#1e1e1e}
-.cpk.open{display:block}
-.cpk-box{position:relative;width:100%;height:120px;border-radius:8px;overflow:hidden;cursor:crosshair;touch-action:none}
-.cpk-box-hue{position:absolute;inset:0}
-.cpk-box-white{position:absolute;inset:0;background:linear-gradient(to right,#fff,transparent)}
-.cpk-box-black{position:absolute;inset:0;background:linear-gradient(to bottom,transparent,#000)}
-.cpk-dot{position:absolute;width:12px;height:12px;border-radius:50%;border:2px solid #fff;box-shadow:0 0 0 1px rgba(0,0,0,.3),0 2px 4px rgba(0,0,0,.3);transform:translate(-50%,-50%);pointer-events:none;z-index:2}
-.cpk-hue{position:relative;width:100%;height:12px;margin-top:8px;border-radius:6px;background:linear-gradient(to right,#f00,#ff0,#0f0,#0ff,#00f,#f0f,#f00);cursor:pointer;touch-action:none}
-.cpk-hue-thumb{position:absolute;top:50%;width:16px;height:16px;border-radius:50%;border:3px solid #fff;box-shadow:0 0 0 1px rgba(0,0,0,.15),0 2px 4px rgba(0,0,0,.25);transform:translate(-50%,-50%);pointer-events:none}
-.cpk-bottom{display:flex;align-items:center;gap:8px;margin-top:8px}
-.cpk-preview{width:26px;height:26px;border-radius:6px;border:1px solid #333;flex-shrink:0}
-.cpk-hex{flex:1;height:28px;border:1px solid #333;border-radius:6px;padding:0 8px;font-family:'Inter',sans-serif;font-size:12px;font-weight:600;outline:none;text-transform:uppercase;letter-spacing:.04em;background:#2a2a2a;color:#ccc}
-.zs{flex:1;appearance:none;-webkit-appearance:none;height:4px;border-radius:4px;background:#2a2a2a;outline:none;cursor:pointer}
-.zs::-webkit-slider-thumb{appearance:none;-webkit-appearance:none;width:15px;height:15px;border-radius:50%;background:#ccc;border:2px solid #1e1e1e;cursor:pointer}
-.rst{display:block;font-size:11px;font-weight:600;text-align:center;cursor:pointer;color:#333;border:1px solid #272727;border-radius:8px;padding:8px;background:none;transition:color .15s,border-color .15s;width:100%}
-.rst:hover{color:#888;border-color:#444}
-</style>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Matrix Rain</title>
+
+  <!--
+    ============================================================================
+    MATRIX RAIN  —  self-contained "digital rain" widget for Notion (/embed)
+    ============================================================================
+    • One <canvas> filling the embed, animated with a per-column rain simulation.
+    • A settings popup (gear, top-left) controls theme, character set, colour,
+      speed, font size and trail length. Settings persist to localStorage ('wmx3')
+      and can also be preset via URL query params (?charset=&theme=&color=&...).
+
+    HOW THE ANIMATION WORKS (see section 4)
+      The screen is a grid of cells. Each COLUMN has its own falling "stream":
+        phase[col]      — the stream head row (float, wraps around)
+        colSpeed[col]   — how fast that column falls (each column differs so they
+                          never re-sync)
+        colSLen[col]    — stream length (brightness gradient behind the head)
+        colCooldown[col]— ticks the column rests before the next stream
+      Every cell keeps a target/displayed alpha; tick() eases alphas toward their
+      targets each frame and draw() paints them. Cells a stream has passed stay at
+      a dim ambient brightness (BASE) instead of going fully dark.
+
+    SECTIONS
+      <style>   reset/canvas, gear, popup panel, controls, colour picker.
+      <body>    canvas + gear + settings popup markup.
+      <script>  1 charsets · 2 state/url · 3 canvas+grid · 4 simulation ·
+                5 draw loop · 6 popup+controls · 7 colour picker · 8 init.
+    ============================================================================
+  -->
+
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@500;600;700&display=swap" rel="stylesheet">
+
+  <style>
+    /* ===== Reset & canvas ===== */
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    html, body { width: 100%; height: 100%; margin: 0; padding: 0; overflow: hidden; background: transparent; }
+    canvas { display: block; width: 100%; height: 100%; }
+
+    /* ===== Gear button (fades in on hover, top-left) ===== */
+    .gear {
+      position: fixed;
+      top: 8px;
+      left: 8px;
+      width: 30px;
+      height: 30px;
+      background: rgba(0, 0, 0, .55);
+      border: 1px solid rgba(255, 255, 255, .1);
+      border-radius: 8px;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      z-index: 220;
+      opacity: 0;
+      transform: scale(.85);
+      transition: opacity .2s, transform .2s, background .2s;
+      pointer-events: none;
+    }
+    body:hover .gear { opacity: .7; transform: scale(1); pointer-events: auto; }
+    .gear:hover { opacity: 1 !important; background: rgba(0, 0, 0, .85) !important; }
+    .gear svg { width: 14px; height: 14px; fill: #bbb; }
+    .gear.hide { display: none; }              /* hidden while the popup is open */
+
+    /* ===== Settings popup panel ===== */
+    .pop {
+      position: fixed;
+      top: 8px;
+      left: 8px;
+      width: 300px;
+      max-height: calc(100vh - 16px);
+      border-radius: 14px;
+      z-index: 210;
+      padding: 14px;
+      opacity: 0;
+      pointer-events: none;
+      transform: scale(.92);
+      transform-origin: top left;
+      transition: opacity .22s ease, transform .22s ease;
+      font-family: 'Inter', sans-serif;
+      background: #181818;
+      color: #ddd;
+      border: 1px solid #2a2a2a;
+      box-shadow: 0 16px 60px rgba(0, 0, 0, .85);
+      display: flex;
+      flex-direction: column;
+    }
+    .pop.open { opacity: 1; pointer-events: auto; transform: scale(1); }
+
+    .pop-hdr {
+      position: relative;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding-bottom: 12px;
+      margin-bottom: 12px;
+      border-bottom: 1px solid #232323;
+      flex-shrink: 0;
+      min-height: 30px;
+    }
+    .pop-x {
+      position: absolute;
+      left: 0;
+      top: 0;
+      width: 30px;
+      height: 30px;
+      background: rgba(255, 255, 255, .04);
+      border: 1px solid #2a2a2a;
+      border-radius: 8px;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: #aaa;
+      transition: background .15s, color .15s, border-color .15s;
+    }
+    .pop-x:hover { background: rgba(255, 255, 255, .1); color: #fff; border-color: #3a3a3a; }
+    .pop-x svg { width: 12px; height: 12px; }
+    .pop-ttl { font-size: 13px; font-weight: 700; color: #e0e0e0; letter-spacing: .02em; line-height: 30px; }
+
+    .pop-body { display: flex; flex-direction: column; gap: 7px; overflow-y: auto; flex: 1; }
+    .pop-body::-webkit-scrollbar { width: 4px; }
+    .pop-body::-webkit-scrollbar-thumb { background: #333; border-radius: 4px; }
+
+    /* A settings "card" + a row that splits two cards side by side. */
+    .blk-row { display: flex; gap: 7px; }
+    .blk-row > .blk { flex: 1; min-width: 0; }
+    .blk { background: #1e1e1e; border-radius: 10px; padding: 10px 12px; display: flex; flex-direction: column; gap: 7px; }
+    .lb { font-size: 9.5px; font-weight: 700; text-transform: uppercase; letter-spacing: .15em; color: #666; }
+
+    /* ===== Segmented toggle (Dark/Light, Bold/Normal) ===== */
+    .tg { display: flex; border-radius: 10px; overflow: hidden; border: 1px solid #272727; }
+    .tb {
+      flex: 1;
+      padding: 8px 3px;
+      font-size: 10.5px;
+      font-weight: 600;
+      text-align: center;
+      background: #1a1a1a;
+      color: #444;
+      border: none;
+      cursor: pointer;
+      transition: all .15s;
+      white-space: nowrap;
+      border-left: 1px solid #272727;
+    }
+    .tb:first-child { border-left: none; }
+    .tb.on { background: #e0e0e0; color: #111; }
+    .tb:hover:not(.on) { background: #232323; color: #888; }
+
+    /* ===== Character-set grid ===== */
+    .cgrid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 6px; }
+    .cbtn {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 3px;
+      padding: 9px 4px;
+      background: #1a1a1a;
+      border: 1px solid #272727;
+      border-radius: 8px;
+      cursor: pointer;
+      transition: all .15s;
+      color: #666;
+    }
+    .cbtn:hover { background: #232323; color: #aaa; border-color: #333; }
+    .cbtn.on { background: #e0e0e0; color: #111; border-color: #e0e0e0; }
+    .cbtn .csm { font-family: monospace; font-size: 14px; font-weight: 700; line-height: 1; opacity: .7; }
+    .cbtn.on .csm { opacity: 1; }
+    .cbtn .cnm { font-size: 10px; font-weight: 600; letter-spacing: .02em; line-height: 1; }
+
+    /* ===== Colour swatches ===== */
+    .sr { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; }
+    .sw {
+      position: relative;
+      width: 26px;
+      height: 26px;
+      border-radius: 50%;
+      border: 2.5px solid transparent;
+      cursor: pointer;
+      transition: transform .12s, border-color .12s, box-shadow .12s;
+      flex-shrink: 0;
+    }
+    .sw:hover { transform: scale(1.13); }
+    .sw.on { border-color: rgba(255, 255, 255, .85); }
+    /* The custom-colour swatch: a rainbow wheel that opens the picker. */
+    .sw-cu {
+      overflow: hidden;
+      border: none !important;
+      background: conic-gradient(hsl(0,80%,60%), hsl(30,80%,55%), hsl(60,80%,52%), hsl(120,65%,45%), hsl(180,75%,45%), hsl(210,80%,52%), hsl(240,65%,58%), hsl(300,65%,55%), hsl(330,75%,55%), hsl(360,80%,60%));
+      box-shadow: inset 0 0 4px rgba(0,0,0,.25), 0 1px 2px rgba(0,0,0,.4);
+    }
+    .sw-cu::before {
+      content: '';
+      position: absolute;
+      inset: 0;
+      border-radius: 50%;
+      background: radial-gradient(circle at 35% 30%, rgba(255,255,255,.55) 0%, rgba(255,255,255,.1) 40%, transparent 70%);
+      pointer-events: none;
+    }
+    .sw-cu.on { border: none !important; box-shadow: 0 0 0 2.5px rgba(255,255,255,.85), inset 0 0 4px rgba(0,0,0,.25); }
+
+    /* ===== HSV colour picker (saturation/value box + hue bar + hex) ===== */
+    .cpk { display: none; margin-top: 8px; padding: 10px; border-radius: 10px; background: #1e1e1e; }
+    .cpk.open { display: block; }
+    .cpk-box { position: relative; width: 100%; height: 120px; border-radius: 8px; overflow: hidden; cursor: crosshair; touch-action: none; }
+    .cpk-box-hue { position: absolute; inset: 0; }
+    .cpk-box-white { position: absolute; inset: 0; background: linear-gradient(to right, #fff, transparent); }
+    .cpk-box-black { position: absolute; inset: 0; background: linear-gradient(to bottom, transparent, #000); }
+    .cpk-dot {
+      position: absolute;
+      width: 12px;
+      height: 12px;
+      border-radius: 50%;
+      border: 2px solid #fff;
+      box-shadow: 0 0 0 1px rgba(0,0,0,.3), 0 2px 4px rgba(0,0,0,.3);
+      transform: translate(-50%, -50%);
+      pointer-events: none;
+      z-index: 2;
+    }
+    .cpk-hue {
+      position: relative;
+      width: 100%;
+      height: 12px;
+      margin-top: 8px;
+      border-radius: 6px;
+      background: linear-gradient(to right, #f00, #ff0, #0f0, #0ff, #00f, #f0f, #f00);
+      cursor: pointer;
+      touch-action: none;
+    }
+    .cpk-hue-thumb {
+      position: absolute;
+      top: 50%;
+      width: 16px;
+      height: 16px;
+      border-radius: 50%;
+      border: 3px solid #fff;
+      box-shadow: 0 0 0 1px rgba(0,0,0,.15), 0 2px 4px rgba(0,0,0,.25);
+      transform: translate(-50%, -50%);
+      pointer-events: none;
+    }
+    .cpk-bottom { display: flex; align-items: center; gap: 8px; margin-top: 8px; }
+    .cpk-preview { width: 26px; height: 26px; border-radius: 6px; border: 1px solid #333; flex-shrink: 0; }
+    .cpk-hex {
+      flex: 1;
+      height: 28px;
+      border: 1px solid #333;
+      border-radius: 6px;
+      padding: 0 8px;
+      font-family: 'Inter', sans-serif;
+      font-size: 12px;
+      font-weight: 600;
+      outline: none;
+      text-transform: uppercase;
+      letter-spacing: .04em;
+      background: #2a2a2a;
+      color: #ccc;
+    }
+
+    /* ===== Sliders (speed / size / trail) ===== */
+    .sl-hd { display: flex; justify-content: space-between; align-items: center; }
+    .sl-lbl { font-size: 9.5px; font-weight: 700; text-transform: uppercase; letter-spacing: .15em; color: #666; }
+    .sl-val { font-size: 12px; font-weight: 700; color: #bbb; }
+    .sl-row { display: flex; align-items: center; gap: 8px; }
+    .sl-cap { font-size: 10px; color: #444; font-weight: 600; min-width: 28px; }
+    .sl-cap.r { text-align: right; }
+    .zs {
+      flex: 1;
+      appearance: none;
+      -webkit-appearance: none;
+      height: 4px;
+      border-radius: 4px;
+      background: #2a2a2a;
+      outline: none;
+      cursor: pointer;
+    }
+    .zs::-webkit-slider-thumb {
+      appearance: none;
+      -webkit-appearance: none;
+      width: 15px;
+      height: 15px;
+      border-radius: 50%;
+      background: #ccc;
+      border: 2px solid #1e1e1e;
+      cursor: pointer;
+    }
+
+    /* ===== Reset button ===== */
+    .rst {
+      display: block;
+      font-size: 11px;
+      font-weight: 600;
+      text-align: center;
+      cursor: pointer;
+      color: #333;
+      border: 1px solid #272727;
+      border-radius: 8px;
+      padding: 8px;
+      background: none;
+      transition: color .15s, border-color .15s;
+      width: 100%;
+    }
+    .rst:hover { color: #888; border-color: #444; }
+  </style>
 </head>
+
 <body>
-<canvas id="c"></canvas>
-<button class="gear" id="gearBtn" title="Settings">
-  <svg viewBox="0 0 24 24"><path d="M19.14 12.94c.04-.31.06-.63.06-.94 0-.31-.02-.63-.06-.94l2.03-1.58a.49.49 0 00.12-.61l-1.92-3.32a.49.49 0 00-.59-.22l-2.39.96a7.04 7.04 0 00-1.62-.94l-.36-2.54a.48.48 0 00-.48-.41h-3.84a.48.48 0 00-.48.41l-.36 2.54c-.59.24-1.13.57-1.62.94l-2.39-.96a.49.49 0 00-.59.22L2.74 8.87a.49.49 0 00.12.61l2.03 1.58c-.04.31-.06.63-.06.94 0 .31.02.63.06.94l-2.03 1.58a.49.49 0 00-.12.61l1.92 3.32c.12.22.37.29.59.22l2.39-.96c.5.38 1.03.7 1.62.94l.36 2.54c.05.24.26.41.48.41h3.84c.24 0 .44-.17.48-.41l.36-2.54c.59-.24 1.13-.57 1.62-.94l2.39.96c.22.08.47 0 .59-.22l1.92-3.32a.49.49 0 00-.12-.61l-2.03-1.58zM12 15.6A3.6 3.6 0 1112 8.4a3.6 3.6 0 010 7.2z"/></svg>
-</button>
-<div class="pop" id="pop">
-  <div class="pop-hdr">
-    <button class="pop-x" id="popX" title="Close">
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><path d="M18 6L6 18M6 6l12 12"/></svg>
-    </button>
-    <div class="pop-ttl">Settings</div>
-  </div>
-  <div class="pop-body">
+  <!-- The rain is drawn here, filling the whole embed. -->
+  <canvas id="c"></canvas>
 
-    <div class="blk-row">
-      <div class="blk">
-        <div class="lb">Theme</div>
-        <div class="tg" id="gTheme">
-          <button class="tb" data-v="dark">Dark</button>
-          <button class="tb" data-v="light">Light</button>
+  <!-- Gear button (top-left, appears on hover) -->
+  <button class="gear" id="gearBtn" title="Settings">
+    <svg viewBox="0 0 24 24"><path d="M19.14 12.94c.04-.31.06-.63.06-.94 0-.31-.02-.63-.06-.94l2.03-1.58a.49.49 0 00.12-.61l-1.92-3.32a.49.49 0 00-.59-.22l-2.39.96a7.04 7.04 0 00-1.62-.94l-.36-2.54a.48.48 0 00-.48-.41h-3.84a.48.48 0 00-.48.41l-.36 2.54c-.59.24-1.13.57-1.62.94l-2.39-.96a.49.49 0 00-.59.22L2.74 8.87a.49.49 0 00.12.61l2.03 1.58c-.04.31-.06.63-.06.94 0 .31.02.63.06.94l-2.03 1.58a.49.49 0 00-.12.61l1.92 3.32c.12.22.37.29.59.22l2.39-.96c.5.38 1.03.7 1.62.94l.36 2.54c.05.24.26.41.48.41h3.84c.24 0 .44-.17.48-.41l.36-2.54c.59-.24 1.13-.57 1.62-.94l2.39.96c.22.08.47 0 .59-.22l1.92-3.32a.49.49 0 00-.12-.61l-2.03-1.58zM12 15.6A3.6 3.6 0 1112 8.4a3.6 3.6 0 010 7.2z"/></svg>
+  </button>
+
+  <!-- Settings popup -->
+  <div class="pop" id="pop">
+    <div class="pop-hdr">
+      <button class="pop-x" id="popX" title="Close">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><path d="M18 6L6 18M6 6l12 12"/></svg>
+      </button>
+      <div class="pop-ttl">Settings</div>
+    </div>
+
+    <div class="pop-body">
+
+      <!-- Theme + Style (two cards side by side) -->
+      <div class="blk-row">
+        <div class="blk">
+          <div class="lb">Theme</div>
+          <div class="tg" id="gTheme">
+            <button class="tb" data-v="dark">Dark</button>
+            <button class="tb" data-v="light">Light</button>
+          </div>
+        </div>
+        <div class="blk">
+          <div class="lb">Style</div>
+          <div class="tg" id="gBold">
+            <button class="tb" data-v="true">Bold</button>
+            <button class="tb" data-v="false">Normal</button>
+          </div>
         </div>
       </div>
+
+      <!-- Character set -->
       <div class="blk">
-        <div class="lb">Style</div>
-        <div class="tg" id="gBold">
-          <button class="tb" data-v="true">Bold</button>
-          <button class="tb" data-v="false">Normal</button>
+        <div class="lb">Characters</div>
+        <div class="cgrid" id="gCharset">
+          <button class="cbtn" data-v="katakana"><span class="csm">カ</span><span class="cnm">Matrix</span></button>
+          <button class="cbtn" data-v="latin"><span class="csm">A</span><span class="cnm">Alpha</span></button>
+          <button class="cbtn" data-v="binary"><span class="csm">01</span><span class="cnm">Binary</span></button>
+          <button class="cbtn" data-v="numbers"><span class="csm">7</span><span class="cnm">Digits</span></button>
+          <button class="cbtn" data-v="symbols"><span class="csm">#</span><span class="cnm">Glitch</span></button>
+          <button class="cbtn" data-v="mixed"><span class="csm">∆</span><span class="cnm">Chaos</span></button>
         </div>
       </div>
-    </div>
 
-    <div class="blk">
-      <div class="lb">Characters</div>
-      <div class="cgrid" id="gCharset">
-        <button class="cbtn" data-v="katakana"><span class="csm">カ</span><span class="cnm">Matrix</span></button>
-        <button class="cbtn" data-v="latin"><span class="csm">A</span><span class="cnm">Alpha</span></button>
-        <button class="cbtn" data-v="binary"><span class="csm">01</span><span class="cnm">Binary</span></button>
-        <button class="cbtn" data-v="numbers"><span class="csm">7</span><span class="cnm">Digits</span></button>
-        <button class="cbtn" data-v="symbols"><span class="csm">#</span><span class="cnm">Glitch</span></button>
-        <button class="cbtn" data-v="mixed"><span class="csm">∆</span><span class="cnm">Chaos</span></button>
+      <!-- Colour: preset swatches + custom-colour wheel + HSV picker -->
+      <div class="blk">
+        <div class="lb">Colour</div>
+        <div class="sr" id="gColor">
+          <div class="sw sw-cu" id="cuSw"></div>
+        </div>
+        <div class="cpk" id="cpk-color"><div class="cpk-box"><div class="cpk-box-hue"></div><div class="cpk-box-white"></div><div class="cpk-box-black"></div><div class="cpk-dot"></div></div><div class="cpk-hue"><div class="cpk-hue-thumb"></div></div><div class="cpk-bottom"><div class="cpk-preview"></div><input class="cpk-hex" maxlength="7" spellcheck="false"></div></div>
       </div>
-    </div>
 
-    <div class="blk">
-      <div class="lb">Colour</div>
-      <div class="sr" id="gColor">
-        <div class="sw sw-cu" id="cuSw"></div>
+      <!-- Sliders -->
+      <div class="blk">
+        <div class="sl-hd"><span class="sl-lbl">Speed</span><span class="sl-val" id="speedLb"></span></div>
+        <div class="sl-row"><span class="sl-cap">Slow</span><input type="range" class="zs" id="speedSl" min="1" max="4" step="0.25"><span class="sl-cap r">Fast</span></div>
       </div>
-      <div class="cpk" id="cpk-color"><div class="cpk-box"><div class="cpk-box-hue"></div><div class="cpk-box-white"></div><div class="cpk-box-black"></div><div class="cpk-dot"></div></div><div class="cpk-hue"><div class="cpk-hue-thumb"></div></div><div class="cpk-bottom"><div class="cpk-preview"></div><input class="cpk-hex" maxlength="7" spellcheck="false"></div></div>
-    </div>
 
-    <div class="blk">
-      <div class="sl-hd"><span class="sl-lbl">Speed</span><span class="sl-val" id="speedLb"></span></div>
-      <div class="sl-row"><span class="sl-cap">Slow</span><input type="range" class="zs" id="speedSl" min="1" max="4" step="0.25"><span class="sl-cap r">Fast</span></div>
-    </div>
+      <div class="blk">
+        <div class="sl-hd"><span class="sl-lbl">Font Size</span><span class="sl-val" id="sizeLb"></span></div>
+        <div class="sl-row"><span class="sl-cap">−</span><input type="range" class="zs" id="sizeSl" min="8" max="20" step="1"><span class="sl-cap r">+</span></div>
+      </div>
 
-    <div class="blk">
-      <div class="sl-hd"><span class="sl-lbl">Font Size</span><span class="sl-val" id="sizeLb"></span></div>
-      <div class="sl-row"><span class="sl-cap">−</span><input type="range" class="zs" id="sizeSl" min="8" max="20" step="1"><span class="sl-cap r">+</span></div>
-    </div>
+      <div class="blk">
+        <div class="sl-hd"><span class="sl-lbl">Trail Length</span><span class="sl-val" id="trailLb"></span></div>
+        <div class="sl-row"><span class="sl-cap">Short</span><input type="range" class="zs" id="trailSl" min="2" max="14" step="1"><span class="sl-cap r">Long</span></div>
+      </div>
 
-    <div class="blk">
-      <div class="sl-hd"><span class="sl-lbl">Trail Length</span><span class="sl-val" id="trailLb"></span></div>
-      <div class="sl-row"><span class="sl-cap">Short</span><input type="range" class="zs" id="trailSl" min="2" max="14" step="1"><span class="sl-cap r">Long</span></div>
+      <button class="rst" id="rstBtn">Reset to defaults</button>
     </div>
-
-    <button class="rst" id="rstBtn">Reset to defaults</button>
   </div>
-</div>
 
-<script>
-const CHARSETS={
-  katakana:'ァアィイゥウェエォオカガキギクグケゲコゴサザシジスズセゼソゾタダチヂッツヅテデトドナニヌネノハバパヒビピフブプヘベペホボポマミムメモャヤュユョヨラリルレロワヲン',
-  latin:'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789',
-  binary:'01',
-  numbers:'0123456789',
-  symbols:'!@#$%^&*<>?|/\\[]{}~=+',
-  mixed:'アカサタ0123ABCdef!@#XYZ'
-};
+  <script>
+  /* ==========================================================================
+     1. CHARACTER SETS  (which glyphs the rain is drawn from)
+     ========================================================================== */
+  const CHARSETS={
+    katakana:'ァアィイゥウェエォオカガキギクグケゲコゴサザシジスズセゼソゾタダチヂッツヅテデトドナニヌネノハバパヒビピフブプヘベペホボポマミムメモャヤュユョヨラリルレロワヲン',
+    latin:'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789',
+    binary:'01',
+    numbers:'0123456789',
+    symbols:'!@#$%^&*<>?|/\\[]{}~=+',
+    mixed:'アカサタ0123ABCdef!@#XYZ'
+  };
 
-const P=new URLSearchParams(location.search);
-function parseColor(s){
-  if(!s)return null;
-  const m=s.match(/rgba?\(\s*(\d+)\s*,\s*(\d+)\s*,\s*(\d+)/);
-  if(m)return'#'+[+m[1],+m[2],+m[3]].map(x=>x.toString(16).padStart(2,'0')).join('');
-  if(/^#?[0-9a-f]{6}$/i.test(s))return s[0]==='#'?s:'#'+s;
-  return null;
-}
+  /* ==========================================================================
+     2. STATE  (defaults, persistence, URL overrides)
+     ========================================================================== */
+  const P=new URLSearchParams(location.search);
 
-const DEF={theme:'dark',charset:'latin',color:'#ffffff',speed:2.5,size:14,trail:8,bold:true};
-const PRESETS={
-  dark:['#00ff41','#ffffff','#00cfff','#ff3322','#cc44ff','#ffaa00'],
-  light:['#111111','#0a8a2e','#0066cc','#c41414','#7733bb','#cc6600']
-};
-const HGAP=6; // horizontal gap between columns
-const VGAP=2; // vertical gap between rows
-let S={...DEF};
-function load(){try{const d=localStorage.getItem('wmx3');if(d)S={...DEF,...JSON.parse(d)};}catch(e){}}
-function save(){try{localStorage.setItem('wmx3',JSON.stringify(S));}catch(e){}}
-function applyUrl(){
-  if(P.get('charset')&&CHARSETS[P.get('charset')])S.charset=P.get('charset');
-  if(P.get('theme')==='dark'||P.get('theme')==='light')S.theme=P.get('theme');
-  const c=parseColor(P.get('color'));if(c)S.color=c;
-  if(P.get('speed'))S.speed=Math.max(1,Math.min(4,+P.get('speed')));
-  if(P.get('size'))S.size=Math.max(8,Math.min(20,+P.get('size')));
-  if(P.get('trail'))S.trail=Math.max(2,Math.min(14,+P.get('trail')));
-}
-
-const canvas=document.getElementById('c');
-const ctx=canvas.getContext('2d');
-
-// Per-cell state
-let charGrid=[];   // char value
-let alphaGrid=[];  // current rendered alpha (0-1)
-let visitedGrid=[];// true once a stream has passed through this cell
-let phase=[];      // stream head position per column (float, wraps)
-let colSpeed=[];   // rows per tick, unique per column
-let colSLen=[];    // stream length per column
-let colCooldown=[]; // ticks to rest before next stream; 0 = streaming now
-
-let cols=0,rows=0,charW=1,colStride=1,rowStride=1;
-
-// AMBIENT floor — chars never drop below this
-const BASE=0.22;
-// Peak brightness at stream tip
-
-function rc(){const s=CHARSETS[S.charset]||CHARSETS.latin;return s[Math.random()*s.length|0];}
-function hexRgb(h){const m=(h||'').match(/^#?([0-9a-f]{6})/i);if(!m)return{r:255,g:255,b:255};const n=parseInt(m[1],16);return{r:(n>>16)&255,g:(n>>8)&255,b:n&255};}
-
-function fontStr(){return (S.bold===true||S.bold==='true'?'bold ':'')+S.size+'px monospace';}
-function measureCharW(){ctx.font=fontStr();return Math.ceil(ctx.measureText('W').width);}
-
-function resize(){canvas.width=window.innerWidth;canvas.height=window.innerHeight;initGrid();}
-
-function streamLen(){
-  // Short by default so gradient isn't visually obvious; trail slider extends it
-  return 3+Math.round(S.trail*1.4);
-}
-
-function initGrid(){
-  charW=measureCharW();
-  colStride=charW+HGAP;rowStride=S.size+VGAP;
-  cols=Math.max(1,Math.floor(canvas.width/colStride));
-  rows=Math.max(1,Math.floor(canvas.height/rowStride)+2);
-
-  charGrid=Array.from({length:cols},()=>Array.from({length:rows},rc));
-
-  alphaGrid=Array.from({length:cols},()=>Array(rows).fill(0));
-  visitedGrid=Array.from({length:cols},()=>Array(rows).fill(false));
-
-  phase=Array.from({length:cols},()=>Math.random()*rows);
-
-  // Pre-mark cells above each stream's starting position as already visited
-  for(let c=0;c<cols;c++){
-    const h=Math.floor(phase[c]);
-    for(let r=0;r<h;r++){visitedGrid[c][r]=true;alphaGrid[c][r]=BASE;}
+  /* Normalise a colour from a query param into a #rrggbb hex (or null). */
+  function parseColor(s){
+    if(!s) return null;
+    const m=s.match(/rgba?\(\s*(\d+)\s*,\s*(\d+)\s*,\s*(\d+)/);
+    if(m) return '#'+[+m[1],+m[2],+m[3]].map(x=>x.toString(16).padStart(2,'0')).join('');
+    if(/^#?[0-9a-f]{6}$/i.test(s)) return s[0]==='#'?s:'#'+s;
+    return null;
   }
 
-  // Each column advances at a different rate — cols never re-sync
-  colSpeed=Array.from({length:cols},()=>0.9+Math.random()*0.4);
+  const DEF={theme:'dark',charset:'latin',color:'#ffffff',speed:2.5,size:14,trail:8,bold:true};
+  /* Per-theme preset swatches; switching theme migrates the colour by index. */
+  const PRESETS={
+    dark:['#00ff41','#ffffff','#00cfff','#ff3322','#cc44ff','#ffaa00'],
+    light:['#111111','#0a8a2e','#0066cc','#c41414','#7733bb','#cc6600']
+  };
+  const HGAP=6; // horizontal gap between columns (px)
+  const VGAP=2; // vertical gap between rows (px)
 
-  const sl=streamLen();
-  colSLen=Array.from({length:cols},()=>sl+Math.floor(Math.random()*3)-1);
+  let S={...DEF};
+  function load(){ try{ const d=localStorage.getItem('wmx3'); if(d) S={...DEF,...JSON.parse(d)}; }catch(e){} }
+  function save(){ try{ localStorage.setItem('wmx3',JSON.stringify(S)); }catch(e){} }
 
-  // Stagger initial cooldowns so ~35% of columns start resting
-  colCooldown=Array.from({length:cols},()=>Math.random()*20);
-}
+  /* Optional URL overrides, e.g. ?theme=dark&charset=katakana&color=00ff41 */
+  function applyUrl(){
+    if(P.get('charset')&&CHARSETS[P.get('charset')]) S.charset=P.get('charset');
+    if(P.get('theme')==='dark'||P.get('theme')==='light') S.theme=P.get('theme');
+    const c=parseColor(P.get('color')); if(c) S.color=c;
+    if(P.get('speed')) S.speed=Math.max(1,Math.min(4,+P.get('speed')));
+    if(P.get('size'))  S.size =Math.max(8,Math.min(20,+P.get('size')));
+    if(P.get('trail')) S.trail=Math.max(2,Math.min(14,+P.get('trail')));
+  }
 
-const PEAK=1.0;
-const FLOOR=BASE-0.04;
+  /* ==========================================================================
+     3. CANVAS & GRID
+     ========================================================================== */
+  const canvas=document.getElementById('c');
+  const ctx=canvas.getContext('2d');
 
-function tick(dt){
-  const dtScale=dt/50;
-  const advPerTick=(S.speed/2)*0.55*dtScale;
-  const brightRate=1-Math.pow(0.35,dtScale);
-  const fadeRate=1-Math.pow(0.82,dtScale);
+  // Per-cell state (indexed [col][row]).
+  let charGrid=[];     // the glyph shown in each cell
+  let alphaGrid=[];    // current rendered alpha (0-1)
+  let visitedGrid=[];  // true once a stream has passed through this cell
+  let phase=[];        // stream-head row per column (float, wraps)
+  let colSpeed=[];     // fall rate per column (rows per tick)
+  let colSLen=[];      // stream length per column
+  let colCooldown=[];  // ticks resting before the next stream; 0 = streaming now
 
-  for(let col=0;col<cols;col++){
-    const aCol=alphaGrid[col];
-    const vCol=visitedGrid[col];
-    const cCol=charGrid[col];
+  let cols=0,rows=0,charW=1,colStride=1,rowStride=1;
 
-    if(colCooldown[col]>0){
-      colCooldown[col]-=dtScale;
+  const BASE=0.22;     // ambient brightness — visited cells never drop below this
+
+  /* Helpers. */
+  function rc(){ const s=CHARSETS[S.charset]||CHARSETS.latin; return s[Math.random()*s.length|0]; }  // random char
+  function hexRgb(h){
+    const m=(h||'').match(/^#?([0-9a-f]{6})/i);
+    if(!m) return {r:255,g:255,b:255};
+    const n=parseInt(m[1],16);
+    return {r:(n>>16)&255,g:(n>>8)&255,b:n&255};
+  }
+  function fontStr(){ return (S.bold===true||S.bold==='true'?'bold ':'')+S.size+'px monospace'; }
+  function measureCharW(){ ctx.font=fontStr(); return Math.ceil(ctx.measureText('W').width); }
+
+  function resize(){ canvas.width=window.innerWidth; canvas.height=window.innerHeight; initGrid(); }
+
+  /* Stream length: short by default (so the gradient isn't obvious); the trail
+     slider extends it. */
+  function streamLen(){ return 3+Math.round(S.trail*1.4); }
+
+  /* (Re)build the grid for the current canvas size and settings. */
+  function initGrid(){
+    charW=measureCharW();
+    colStride=charW+HGAP;
+    rowStride=S.size+VGAP;
+    cols=Math.max(1,Math.floor(canvas.width/colStride));
+    rows=Math.max(1,Math.floor(canvas.height/rowStride)+2);
+
+    charGrid=Array.from({length:cols},()=>Array.from({length:rows},rc));
+    alphaGrid=Array.from({length:cols},()=>Array(rows).fill(0));
+    visitedGrid=Array.from({length:cols},()=>Array(rows).fill(false));
+    phase=Array.from({length:cols},()=>Math.random()*rows);
+
+    // Mark cells above each stream's start as already visited (so they glow dim).
+    for(let c=0;c<cols;c++){
+      const h=Math.floor(phase[c]);
+      for(let r=0;r<h;r++){ visitedGrid[c][r]=true; alphaGrid[c][r]=BASE; }
+    }
+
+    // Each column advances at a slightly different rate so they never re-sync.
+    colSpeed=Array.from({length:cols},()=>0.9+Math.random()*0.4);
+
+    const sl=streamLen();
+    colSLen=Array.from({length:cols},()=>sl+Math.floor(Math.random()*3)-1);
+
+    // Stagger initial cooldowns so ~35% of columns start resting.
+    colCooldown=Array.from({length:cols},()=>Math.random()*20);
+  }
+
+  /* ==========================================================================
+     4. SIMULATION  (advance every cell's brightness toward its target)
+     ========================================================================== */
+  const PEAK=1.0;          // brightness at the stream tip
+  const FLOOR=BASE-0.04;   // lowest a visited cell may dip while flickering
+
+  function tick(dt){
+    const dtScale=dt/50;                              // frame-rate independence
+    const advPerTick=(S.speed/2)*0.55*dtScale;        // rows the head moves this frame
+    const brightRate=1-Math.pow(0.35,dtScale);        // easing toward a brighter target
+    const fadeRate=1-Math.pow(0.82,dtScale);          // easing toward a dimmer target
+
+    for(let col=0;col<cols;col++){
+      const aCol=alphaGrid[col];
+      const vCol=visitedGrid[col];
+      const cCol=charGrid[col];
+
+      // Resting column: just ease everything toward its ambient/0 level.
+      if(colCooldown[col]>0){
+        colCooldown[col]-=dtScale;
+        for(let row=0;row<rows;row++){
+          const cur=aCol[row];
+          const tgt=vCol[row]?BASE:0;
+          aCol[row]=cur+(tgt-cur)*fadeRate;
+        }
+        continue;
+      }
+
+      // Advance the stream head (wrapping). Occasionally rest after a full pass.
+      const next=phase[col]+colSpeed[col]*advPerTick;
+      if(next>=rows&&Math.random()<0.06) colCooldown[col]=80+(Math.random()*120|0);
+      phase[col]=next>=rows?next-rows:next;
+      const head=phase[col];
+      const sl=colSLen[col];
+      const slInv=1/(sl-1);
+
       for(let row=0;row<rows;row++){
+        // Distance behind the head (wrapped).
+        let dist=head-row;
+        if(dist<0) dist+=rows;
+
+        // The head cell picks a fresh glyph the first time it's reached.
+        if(dist<1&&!vCol[row]){ cCol[row]=rc(); vCol[row]=true; }
+        const visited=vCol[row];
+
+        // Target brightness: bright at the tip, cubic falloff along the trail,
+        // ambient (or 0 if never visited) beyond it.
+        let target;
+        if(dist<1){
+          target=PEAK;
+        } else if(dist<sl&&visited){
+          const t=1-(dist-1)*slInv;
+          target=BASE+(PEAK-BASE)*t*t*t;
+        } else {
+          target=visited?BASE:0;
+        }
+
+        // A little flicker, then clamp into the valid range.
+        target+=(Math.random()-0.5)*0.06;
+        const lo=visited?FLOOR:0;
+        target=target<lo?lo:target>PEAK?PEAK:target;
+
+        // Ease the displayed alpha toward the target.
         const cur=aCol[row];
-        const tgt=vCol[row]?BASE:0;
-        aCol[row]=cur+(tgt-cur)*fadeRate;
+        const rate=target>cur?brightRate:fadeRate;
+        aCol[row]=cur+(target-cur)*rate;
       }
-      continue;
-    }
-
-    const next=phase[col]+colSpeed[col]*advPerTick;
-    if(next>=rows&&Math.random()<0.06) colCooldown[col]=80+(Math.random()*120|0);
-    phase[col]=next>=rows?next-rows:next;
-    const head=phase[col];
-    const sl=colSLen[col];
-    const slInv=1/(sl-1);
-
-    for(let row=0;row<rows;row++){
-      let dist=head-row;
-      if(dist<0) dist+=rows;
-
-      if(dist<1&&!vCol[row]){cCol[row]=rc();vCol[row]=true;}
-      const visited=vCol[row];
-
-      let target;
-      if(dist<1){
-        target=PEAK;
-      } else if(dist<sl&&visited){
-        const t=1-(dist-1)*slInv;
-        target=BASE+(PEAK-BASE)*t*t*t;
-      } else {
-        target=visited?BASE:0;
-      }
-
-      target+=(Math.random()-0.5)*0.06;
-      const lo=visited?FLOOR:0;
-      target=target<lo?lo:target>PEAK?PEAK:target;
-
-      const cur=aCol[row];
-      const rate=target>cur?brightRate:fadeRate;
-      aCol[row]=cur+(target-cur)*rate;
     }
   }
-}
 
-function applyTheme(){document.body.style.background=S.theme==='light'?'#ffffff':'#191919';}
+  /* ==========================================================================
+     5. DRAW LOOP
+     ========================================================================== */
+  function applyTheme(){ document.body.style.background=S.theme==='light'?'#ffffff':'#191919'; }
 
-function draw(){
-  ctx.clearRect(0,0,canvas.width,canvas.height);
+  function draw(){
+    ctx.clearRect(0,0,canvas.width,canvas.height);
 
-  const rgb=hexRgb(S.color);
-  ctx.font=fontStr();
-  ctx.textBaseline='top';
-  ctx.fillStyle=`rgb(${rgb.r},${rgb.g},${rgb.b})`;
+    const rgb=hexRgb(S.color);
+    ctx.font=fontStr();
+    ctx.textBaseline='top';
+    ctx.fillStyle=`rgb(${rgb.r},${rgb.g},${rgb.b})`;
 
-  for(let col=0;col<cols;col++){
-    const aCol=alphaGrid[col];
-    const cCol=charGrid[col];
-    const x=col*colStride;
-    for(let row=0;row<rows;row++){
-      const a=aCol[row];
-      if(a<0.04)continue;
-      ctx.globalAlpha=a;
-      ctx.fillText(cCol[row],x,row*rowStride);
+    for(let col=0;col<cols;col++){
+      const aCol=alphaGrid[col];
+      const cCol=charGrid[col];
+      const x=col*colStride;
+      for(let row=0;row<rows;row++){
+        const a=aCol[row];
+        if(a<0.04) continue;                 // skip near-invisible cells
+        ctx.globalAlpha=a;
+        ctx.fillText(cCol[row],x,row*rowStride);
+      }
     }
+    ctx.globalAlpha=1;
   }
-  ctx.globalAlpha=1;
-}
 
-let raf,lastTime=0;
-function loop(ts){
-  raf=requestAnimationFrame(loop);
-  const dt=lastTime?Math.min(ts-lastTime,100):16;
-  lastTime=ts;
-  tick(dt);
-  draw();
-}
+  let raf,lastTime=0;
+  function loop(ts){
+    raf=requestAnimationFrame(loop);
+    const dt=lastTime?Math.min(ts-lastTime,100):16;   // clamp big gaps (tab was hidden)
+    lastTime=ts;
+    tick(dt);
+    draw();
+  }
+  function restart(){ if(raf) cancelAnimationFrame(raf); initGrid(); lastTime=0; raf=requestAnimationFrame(loop); }
 
-function restart(){if(raf)cancelAnimationFrame(raf);initGrid();lastTime=0;raf=requestAnimationFrame(loop);}
+  // Debounced resize.
+  let resizeT;
+  window.addEventListener('resize',()=>{ clearTimeout(resizeT); resizeT=setTimeout(resize,80); });
 
-let resizeT;
-window.addEventListener('resize',()=>{clearTimeout(resizeT);resizeT=setTimeout(resize,80);});
+  /* ==========================================================================
+     6. SETTINGS POPUP & CONTROLS
+     ========================================================================== */
+  const gearBtn=document.getElementById('gearBtn'), pop=document.getElementById('pop');
+  function openPop(){ pop.classList.add('open'); gearBtn.classList.add('hide'); }
+  function closePop(){ pop.classList.remove('open'); gearBtn.classList.remove('hide'); }
+  gearBtn.addEventListener('click',openPop);
+  document.getElementById('popX').addEventListener('click',closePop);
 
-// ── POPUP ────────────────────────────────────────────
-const gearBtn=document.getElementById('gearBtn'),pop=document.getElementById('pop');
-function openPop(){pop.classList.add('open');gearBtn.classList.add('hide');}
-function closePop(){pop.classList.remove('open');gearBtn.classList.remove('hide');}
-gearBtn.addEventListener('click',openPop);
-document.getElementById('popX').addEventListener('click',closePop);
-
-document.getElementById('gBold').addEventListener('click',e=>{
-  const b=e.target.closest('[data-v]');if(!b)return;
-  S.bold=b.dataset.v==='true';save();syncTg('gBold',String(S.bold));restart();
-});
-document.getElementById('gTheme').addEventListener('click',e=>{
-  const b=e.target.closest('[data-v]');if(!b)return;
-  if(S.theme===b.dataset.v)return;
-  const prev=S.theme;
-  S.theme=b.dataset.v;
-  const idx=PRESETS[prev].findIndex(p=>p.toLowerCase()===S.color.toLowerCase());
-  if(idx>=0) S.color=PRESETS[S.theme][idx];
-  save();syncTg('gTheme',S.theme);applyTheme();renderSwatches();
-});
-document.getElementById('gCharset').addEventListener('click',e=>{
-  const b=e.target.closest('[data-v]');if(!b)return;
-  S.charset=b.dataset.v;save();syncTg('gCharset',S.charset);
-  for(let c=0;c<cols;c++)for(let r=0;r<rows;r++)charGrid[c][r]=rc();
-});
-document.getElementById('gColor').addEventListener('click',e=>{
-  const sw=e.target.closest('.sw:not(.sw-cu)');if(!sw)return;
-  S.color=sw.dataset.c;save();
-  document.getElementById('cpk-color').classList.remove('open');
-  syncColor();
-});
-
-function renderSwatches(){
-  const sr=document.getElementById('gColor');
-  const cuSw=document.getElementById('cuSw');
-  sr.querySelectorAll('.sw:not(.sw-cu)').forEach(s=>s.remove());
-  PRESETS[S.theme].forEach(c=>{
-    const sw=document.createElement('div');
-    sw.className='sw';
-    sw.dataset.c=c;
-    sw.style.background=c;
-    sr.insertBefore(sw,cuSw);
+  // Style (Bold/Normal): rebuild so the font weight applies.
+  document.getElementById('gBold').addEventListener('click',e=>{
+    const b=e.target.closest('[data-v]'); if(!b) return;
+    S.bold=b.dataset.v==='true'; save(); syncTg('gBold',String(S.bold)); restart();
   });
-  syncColor();
-}
 
-function syncColor(){
-  const col=S.color.toLowerCase();
-  const presets=document.querySelectorAll('#gColor .sw:not(.sw-cu)');
-  const isCustom=![...presets].some(s=>s.dataset.c.toLowerCase()===col);
-  presets.forEach(s=>s.classList.toggle('on',s.dataset.c.toLowerCase()===col));
-  document.getElementById('cuSw').classList.toggle('on',isCustom);
-}
-
-function hexToHsv(hex){const r=parseInt(hex.slice(1,3),16)/255,g=parseInt(hex.slice(3,5),16)/255,b=parseInt(hex.slice(5,7),16)/255;const mx=Math.max(r,g,b),mn=Math.min(r,g,b),d=mx-mn;let h=0;if(d){if(mx===r)h=((g-b)/d+6)%6;else if(mx===g)h=(b-r)/d+2;else h=(r-g)/d+4;h/=6;}return{h,s:mx?d/mx:0,v:mx};}
-function hsvToHex(h,s,v){h*=6;const i=Math.floor(h),f=h-i,p=v*(1-s),q=v*(1-s*f),t=v*(1-s*(1-f));let r,g,b;switch(i%6){case 0:r=v;g=t;b=p;break;case 1:r=q;g=v;b=p;break;case 2:r=p;g=v;b=t;break;case 3:r=p;g=q;b=v;break;case 4:r=t;g=p;b=v;break;case 5:r=v;g=p;b=q;break;}return'#'+[r,g,b].map(x=>Math.round(x*255).toString(16).padStart(2,'0')).join('');}
-function isValidHex(h){return/^#[0-9a-fA-F]{6}$/.test(h);}
-
-function initColorPicker(){
-  const cpk=document.getElementById('cpk-color');
-  const box=cpk.querySelector('.cpk-box'),boxHue=cpk.querySelector('.cpk-box-hue'),dot=cpk.querySelector('.cpk-dot');
-  const hueBar=cpk.querySelector('.cpk-hue'),hueThumb=cpk.querySelector('.cpk-hue-thumb');
-  const preview=cpk.querySelector('.cpk-preview'),hexIn=cpk.querySelector('.cpk-hex');
-  let h=0,s=0,v=1;
-  function updUI(){const hex=hsvToHex(h,s,v);boxHue.style.background=`hsl(${(h*360).toFixed(1)},100%,50%)`;dot.style.left=s*100+'%';dot.style.top=(1-v)*100+'%';hueThumb.style.left=h*100+'%';preview.style.background=hex;hexIn.value=hex.toUpperCase();}
-  function setHex(hex){if(!isValidHex(hex))return;const hsv=hexToHsv(hex);h=hsv.h;s=hsv.s;v=hsv.v;updUI();}
-  function emit(){S.color=hsvToHex(h,s,v);save();syncColor();}
-  function bMove(e){const r=box.getBoundingClientRect();s=Math.max(0,Math.min(1,(e.clientX-r.left)/r.width));v=1-Math.max(0,Math.min(1,(e.clientY-r.top)/r.height));updUI();emit();}
-  function hMove(e){const r=hueBar.getBoundingClientRect();h=Math.max(0,Math.min(1,(e.clientX-r.left)/r.width));updUI();emit();}
-  box.addEventListener('pointerdown',e=>{e.preventDefault();box.setPointerCapture(e.pointerId);bMove(e);});
-  box.addEventListener('pointermove',e=>{if(e.buttons)bMove(e);});
-  hueBar.addEventListener('pointerdown',e=>{e.preventDefault();hueBar.setPointerCapture(e.pointerId);hMove(e);});
-  hueBar.addEventListener('pointermove',e=>{if(e.buttons)hMove(e);});
-  hexIn.addEventListener('input',()=>{let val=hexIn.value;if(val[0]!=='#')val='#'+val;if(isValidHex(val)){setHex(val);emit();}});
-  hexIn.addEventListener('blur',()=>{hexIn.value=hsvToHex(h,s,v).toUpperCase();});
-  document.getElementById('cuSw').addEventListener('click',()=>{
-    const wasOpen=cpk.classList.contains('open');
-    document.querySelectorAll('.cpk').forEach(p=>p.classList.remove('open'));
-    if(!wasOpen){cpk.classList.add('open');setHex(isValidHex(S.color)?S.color:'#00ff41');}
+  // Theme (Dark/Light): migrate the colour to the matching preset by index.
+  document.getElementById('gTheme').addEventListener('click',e=>{
+    const b=e.target.closest('[data-v]'); if(!b) return;
+    if(S.theme===b.dataset.v) return;
+    const prev=S.theme;
+    S.theme=b.dataset.v;
+    const idx=PRESETS[prev].findIndex(p=>p.toLowerCase()===S.color.toLowerCase());
+    if(idx>=0) S.color=PRESETS[S.theme][idx];
+    save(); syncTg('gTheme',S.theme); applyTheme(); renderSwatches();
   });
-}
 
-function mkSlider(id,lbId,key,parse,cb){
-  const el=document.getElementById(id),lb=document.getElementById(lbId);
-  el.addEventListener('input',()=>{S[key]=parse(el.value);lb.textContent=el.value;save();if(cb)cb();});
-}
-mkSlider('speedSl','speedLb','speed',parseFloat);
-mkSlider('sizeSl','sizeLb','size',parseInt,()=>{charW=measureCharW();initGrid();});
-mkSlider('trailSl','trailLb','trail',parseInt,()=>{
-  const sl=streamLen();
-  for(let c=0;c<cols;c++)colSLen[c]=sl+Math.floor(Math.random()*3)-1;
-});
-
-function syncTg(id,val){document.querySelectorAll('#'+id+' [data-v]').forEach(b=>b.classList.toggle('on',b.dataset.v===val));}
-function syncAll(){
-  syncTg('gTheme',S.theme);syncTg('gBold',String(S.bold));syncTg('gCharset',S.charset);renderSwatches();
-  [['speed','speedSl','speedLb'],['size','sizeSl','sizeLb'],['trail','trailSl','trailLb']].forEach(([k,si,li])=>{
-    document.getElementById(si).value=S[k];document.getElementById(li).textContent=S[k];
+  // Character set: swap every glyph immediately.
+  document.getElementById('gCharset').addEventListener('click',e=>{
+    const b=e.target.closest('[data-v]'); if(!b) return;
+    S.charset=b.dataset.v; save(); syncTg('gCharset',S.charset);
+    for(let c=0;c<cols;c++) for(let r=0;r<rows;r++) charGrid[c][r]=rc();
   });
-}
 
-document.getElementById('rstBtn').addEventListener('click',()=>{S={...DEF};save();syncAll();applyTheme();restart();});
+  // Preset swatch click (the custom wheel is handled in the colour picker).
+  document.getElementById('gColor').addEventListener('click',e=>{
+    const sw=e.target.closest('.sw:not(.sw-cu)'); if(!sw) return;
+    S.color=sw.dataset.c; save();
+    document.getElementById('cpk-color').classList.remove('open');
+    syncColor();
+  });
 
-load();applyUrl();syncAll();applyTheme();initColorPicker();resize();restart();
-</script>
+  // Rebuild the preset swatches for the active theme.
+  function renderSwatches(){
+    const sr=document.getElementById('gColor');
+    const cuSw=document.getElementById('cuSw');
+    sr.querySelectorAll('.sw:not(.sw-cu)').forEach(s=>s.remove());
+    PRESETS[S.theme].forEach(c=>{
+      const sw=document.createElement('div');
+      sw.className='sw';
+      sw.dataset.c=c;
+      sw.style.background=c;
+      sr.insertBefore(sw,cuSw);
+    });
+    syncColor();
+  }
+
+  // Highlight the active colour (a preset, or the custom wheel if no preset matches).
+  function syncColor(){
+    const col=S.color.toLowerCase();
+    const presets=document.querySelectorAll('#gColor .sw:not(.sw-cu)');
+    const isCustom=![...presets].some(s=>s.dataset.c.toLowerCase()===col);
+    presets.forEach(s=>s.classList.toggle('on',s.dataset.c.toLowerCase()===col));
+    document.getElementById('cuSw').classList.toggle('on',isCustom);
+  }
+
+  /* ==========================================================================
+     7. HSV COLOUR PICKER
+     ========================================================================== */
+  function hexToHsv(hex){
+    const r=parseInt(hex.slice(1,3),16)/255, g=parseInt(hex.slice(3,5),16)/255, b=parseInt(hex.slice(5,7),16)/255;
+    const mx=Math.max(r,g,b), mn=Math.min(r,g,b), d=mx-mn;
+    let h=0;
+    if(d){ if(mx===r) h=((g-b)/d+6)%6; else if(mx===g) h=(b-r)/d+2; else h=(r-g)/d+4; h/=6; }
+    return {h,s:mx?d/mx:0,v:mx};
+  }
+  function hsvToHex(h,s,v){
+    h*=6;
+    const i=Math.floor(h), f=h-i, p=v*(1-s), q=v*(1-s*f), t=v*(1-s*(1-f));
+    let r,g,b;
+    switch(i%6){
+      case 0: r=v; g=t; b=p; break;
+      case 1: r=q; g=v; b=p; break;
+      case 2: r=p; g=v; b=t; break;
+      case 3: r=p; g=q; b=v; break;
+      case 4: r=t; g=p; b=v; break;
+      case 5: r=v; g=p; b=q; break;
+    }
+    return '#'+[r,g,b].map(x=>Math.round(x*255).toString(16).padStart(2,'0')).join('');
+  }
+  function isValidHex(h){ return /^#[0-9a-fA-F]{6}$/.test(h); }
+
+  function initColorPicker(){
+    const cpk=document.getElementById('cpk-color');
+    const box=cpk.querySelector('.cpk-box'), boxHue=cpk.querySelector('.cpk-box-hue'), dot=cpk.querySelector('.cpk-dot');
+    const hueBar=cpk.querySelector('.cpk-hue'), hueThumb=cpk.querySelector('.cpk-hue-thumb');
+    const preview=cpk.querySelector('.cpk-preview'), hexIn=cpk.querySelector('.cpk-hex');
+    let h=0,s=0,v=1;
+
+    function updUI(){
+      const hex=hsvToHex(h,s,v);
+      boxHue.style.background=`hsl(${(h*360).toFixed(1)},100%,50%)`;
+      dot.style.left=s*100+'%';
+      dot.style.top=(1-v)*100+'%';
+      hueThumb.style.left=h*100+'%';
+      preview.style.background=hex;
+      hexIn.value=hex.toUpperCase();
+    }
+    function setHex(hex){ if(!isValidHex(hex)) return; const hsv=hexToHsv(hex); h=hsv.h; s=hsv.s; v=hsv.v; updUI(); }
+    function emit(){ S.color=hsvToHex(h,s,v); save(); syncColor(); }
+
+    // Drag in the saturation/value box.
+    function bMove(e){ const r=box.getBoundingClientRect(); s=Math.max(0,Math.min(1,(e.clientX-r.left)/r.width)); v=1-Math.max(0,Math.min(1,(e.clientY-r.top)/r.height)); updUI(); emit(); }
+    // Drag along the hue bar.
+    function hMove(e){ const r=hueBar.getBoundingClientRect(); h=Math.max(0,Math.min(1,(e.clientX-r.left)/r.width)); updUI(); emit(); }
+
+    box.addEventListener('pointerdown',e=>{ e.preventDefault(); box.setPointerCapture(e.pointerId); bMove(e); });
+    box.addEventListener('pointermove',e=>{ if(e.buttons) bMove(e); });
+    hueBar.addEventListener('pointerdown',e=>{ e.preventDefault(); hueBar.setPointerCapture(e.pointerId); hMove(e); });
+    hueBar.addEventListener('pointermove',e=>{ if(e.buttons) hMove(e); });
+    hexIn.addEventListener('input',()=>{ let val=hexIn.value; if(val[0]!=='#') val='#'+val; if(isValidHex(val)){ setHex(val); emit(); } });
+    hexIn.addEventListener('blur',()=>{ hexIn.value=hsvToHex(h,s,v).toUpperCase(); });
+
+    // The custom-colour wheel toggles the picker open/closed.
+    document.getElementById('cuSw').addEventListener('click',()=>{
+      const wasOpen=cpk.classList.contains('open');
+      document.querySelectorAll('.cpk').forEach(p=>p.classList.remove('open'));
+      if(!wasOpen){ cpk.classList.add('open'); setHex(isValidHex(S.color)?S.color:'#00ff41'); }
+    });
+  }
+
+  /* ==========================================================================
+     8. SLIDERS, SYNC & INIT
+     ========================================================================== */
+  // Wire one range input to a state key (+ optional side effect on change).
+  function mkSlider(id,lbId,key,parse,cb){
+    const el=document.getElementById(id), lb=document.getElementById(lbId);
+    el.addEventListener('input',()=>{ S[key]=parse(el.value); lb.textContent=el.value; save(); if(cb) cb(); });
+  }
+  mkSlider('speedSl','speedLb','speed',parseFloat);
+  mkSlider('sizeSl','sizeLb','size',parseInt,()=>{ charW=measureCharW(); initGrid(); });
+  mkSlider('trailSl','trailLb','trail',parseInt,()=>{
+    const sl=streamLen();
+    for(let c=0;c<cols;c++) colSLen[c]=sl+Math.floor(Math.random()*3)-1;
+  });
+
+  // Highlight the active option in a segmented toggle.
+  function syncTg(id,val){ document.querySelectorAll('#'+id+' [data-v]').forEach(b=>b.classList.toggle('on',b.dataset.v===val)); }
+
+  // Push all of state into the controls.
+  function syncAll(){
+    syncTg('gTheme',S.theme); syncTg('gBold',String(S.bold)); syncTg('gCharset',S.charset); renderSwatches();
+    [['speed','speedSl','speedLb'],['size','sizeSl','sizeLb'],['trail','trailSl','trailLb']].forEach(([k,si,li])=>{
+      document.getElementById(si).value=S[k];
+      document.getElementById(li).textContent=S[k];
+    });
+  }
+
+  document.getElementById('rstBtn').addEventListener('click',()=>{ S={...DEF}; save(); syncAll(); applyTheme(); restart(); });
+
+  // Boot: load settings, apply URL overrides, sync UI, then start animating.
+  load(); applyUrl(); syncAll(); applyTheme(); initColorPicker(); resize(); restart();
+  </script>
 </body>
 </html>
