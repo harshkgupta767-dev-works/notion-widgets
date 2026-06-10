@@ -31,7 +31,11 @@
     ============================================================================
   -->
 
-  <link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@400;500;600;700&family=Quicksand:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <!-- preconnect shaves a round-trip off the font fetch; Fredoka is only used at
+       600 (the timer) and Quicksand at 400/500/600/700, so we request just those. -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@600&family=Quicksand:wght@400;500;600;700&display=swap" rel="stylesheet">
 
   <style>
     /* ========================================================================
@@ -776,7 +780,7 @@
     panrl:    {label:'Pan ←',     motion:'panrl',    items:[{id:'forest',name:'Forest',svg:RAW.forest.svg},{id:'ocean-r',name:'Ocean',svg:RAW.ocean.svg}]},
     zoom:     {label:'Zoom',      motion:'zoom',     items:[{id:'night',name:'Night',svg:RAW.night.svg},{id:'sakura',name:'Sakura',svg:RAW.sakura.svg}]},
     kenburns: {label:'Ken Burns', motion:'kenburns', items:[{id:'sunset',name:'Sunset',svg:RAW.sunset.svg}]},
-    still:    {label:'Cinemagraph',motion:'static',  items:[{id:'noir',name:'Noir',svg:RAW.noir.svg}]},
+    still:    {label:'Cinemagraph',motion:'static',  items:[{id:'noir',name:'Noir',svg:RAW.noir.svg},{id:'pond',name:'Pond',video:'backgrounds/still/Pond_Cinemagraph.mp4'}]},
   };
   const CAT_ORDER=['panlr','panrl','zoom','kenburns','still'];
 
@@ -819,6 +823,11 @@
      ========================================================================== */
   const scene=document.getElementById('scene');
 
+  /* Strip stray quotes from a user-supplied URL before it goes into CSS/markup. */
+  const cleanUrl=s=>(s||'').replace(/"/g,'');
+  /* CSS shorthand for a cover-fit background image (with a dark fallback colour). */
+  const bgImage=url=>'#222 url("'+cleanUrl(url)+'") center/cover no-repeat';
+
   /* The background object currently selected within its category. */
   function getActiveItem(){
     const c=LIBRARY[S.category];
@@ -844,7 +853,7 @@
     if(S.useCustom&&S.custom){
       if(isVideoUrl(S.custom)){ renderVideo(S.custom,'',''); return; }
       scene.className=sceneClass(S.motion);
-      scene.style.background='#222 url("'+S.custom.replace(/"/g,'')+'") center/cover no-repeat';
+      scene.style.background=bgImage(S.custom);
       return;
     }
 
@@ -854,10 +863,17 @@
     if(item&&item.video){ renderVideo(item.video,item.webm||'',item.poster||''); return; }
 
     scene.className=sceneClass(cat.motion);
-    if(!item){ scene.style.background='#222'; return; }
-    if(item.svg)      scene.innerHTML=item.svg;
-    else if(item.css) scene.style.background=item.css;
-    else if(item.img) scene.style.background='#222 url("'+item.img.replace(/"/g,'')+'") center/cover no-repeat';
+    paintStill(item);
+  }
+
+  /* Paint a still background (svg / css / image) for an item onto .scene.
+     The caller resets .scene first; a missing item, or one with none of
+     svg/css/img, falls back to a flat colour. */
+  function paintStill(item){
+    if(item&&item.svg)      scene.innerHTML=item.svg;
+    else if(item&&item.css) scene.style.background=item.css;
+    else if(item&&item.img) scene.style.background=bgImage(item.img);
+    else                    scene.style.background='#222';
   }
 
   /* ----- Video backgrounds: muted, looping, full-bleed (video supplies motion) ----- */
@@ -865,15 +881,14 @@
     return /\.(mp4|webm|ogv|ogg|mov|m4v)(\?|#|$)/i.test(u||'');
   }
   function videoMarkup(mp4,webm,poster){
-    const clean=s=>(s||'').replace(/"/g,'');
     let src='';
-    if(webm) src+='<source src="'+clean(webm)+'" type="video/webm">';
+    if(webm) src+='<source src="'+cleanUrl(webm)+'" type="video/webm">';
     if(mp4){
       const ty=/\.webm(\?|#|$)/i.test(mp4)?'video/webm'
               :(/\.og[gv](\?|#|$)/i.test(mp4)?'video/ogg':'video/mp4');
-      src+='<source src="'+clean(mp4)+'" type="'+ty+'">';
+      src+='<source src="'+cleanUrl(mp4)+'" type="'+ty+'">';
     }
-    return '<video muted loop playsinline preload="auto"'+(poster?' poster="'+clean(poster)+'"':'')+'>'+src+'</video>';
+    return '<video muted loop playsinline preload="auto"'+(poster?' poster="'+cleanUrl(poster)+'"':'')+'>'+src+'</video>';
   }
   function renderVideo(mp4,webm,poster){
     scene.className='scene is-video';
@@ -892,10 +907,8 @@
     scene.className=sceneClass(cat.motion);
     scene.innerHTML='';
     scene.style.background='';
-    if(item&&item.svg)      scene.innerHTML=item.svg;
-    else if(item&&item.css) scene.style.background=item.css;
-    else if(item&&item.img) scene.style.background='#222 url("'+item.img.replace(/"/g,'')+'") center/cover no-repeat';
-    else                    scene.innerHTML=RAW.sunset.svg;
+    if(item) paintStill(item);
+    else     scene.innerHTML=RAW.sunset.svg;
   }
 
   function applyTint(){ document.documentElement.style.setProperty('--tint',S.tint/100); }
@@ -908,12 +921,19 @@
      ========================================================================== */
   const durOf=m=>({focus:S.focus,short:S.short,long:S.long}[m])*60;   // phase length in seconds
   const timeEl=document.getElementById('time');
+  const startBtn=document.getElementById('startBtn');
 
   function fmt(s){
     s=Math.max(0,Math.round(s));
     return String(Math.floor(s/60)).padStart(2,'0')+':'+String(s%60).padStart(2,'0');
   }
-  function renderTime(){ timeEl.textContent=fmt(remaining); }
+  // The interval ticks 4x/sec for prompt completion, but MM:SS only changes once
+  // a second — cache the last string so we don't rewrite identical text 3x/sec.
+  let lastTimeStr='';
+  function renderTime(){
+    const s=fmt(remaining);
+    if(s!==lastTimeStr){ timeEl.textContent=s; lastTimeStr=s; }
+  }
 
   /* Switch phase (and optionally auto-start it). */
   function setMode(m,autostart){
@@ -926,7 +946,7 @@
     updateStart();
     if(autostart) startTimer();
   }
-  function updateStart(){ document.getElementById('startBtn').textContent=running?'pause':'start'; }
+  function updateStart(){ startBtn.textContent=running?'pause':'start'; }
   function clearLoop(){ if(loopId){ clearInterval(loopId); loopId=null; } }
 
   function startTimer(){
@@ -965,7 +985,6 @@
     flash();
     if(mode==='focus'){
       sessionsDone++;
-      renderDots();
       const next=(sessionsDone>=S.sess)?'long':'short';
       if(sessionsDone>=S.sess) sessionsDone=0;   // long break resets the cycle
       setMode(next,S.auto);
@@ -977,10 +996,9 @@
 
   /* Brief fade on the timer when a phase completes. */
   function flash(){
-    const t=document.getElementById('time');
-    t.style.transition='none';
-    t.style.opacity='0.25';
-    requestAnimationFrame(()=>{ t.style.transition='opacity .5s'; t.style.opacity='1'; });
+    timeEl.style.transition='none';
+    timeEl.style.opacity='0.25';
+    requestAnimationFrame(()=>{ timeEl.style.transition='opacity .5s'; timeEl.style.opacity='1'; });
   }
 
   /* Session dots: one per pomodoro in the cycle, filled as they complete. */
@@ -1069,7 +1087,7 @@
     if(it.video){
       b.classList.add('hasvid');
       b.style.background='#2a2735';
-      if(it.poster) b.style.backgroundImage='url("'+it.poster.replace(/"/g,'')+'")';
+      if(it.poster) b.style.backgroundImage='url("'+cleanUrl(it.poster)+'")';
     }else if(it.svg){
       b.style.background='#3a3550';
       const u='data:image/svg+xml;utf8,'+encodeURIComponent(it.svg.replace(/preserveAspectRatio="[^"]*"/,'preserveAspectRatio="xMidYMid slice"'));
@@ -1078,7 +1096,7 @@
       b.style.background=it.css;
     }else if(it.img){
       b.style.background='#2a2735';
-      b.style.backgroundImage='url("'+it.img.replace(/"/g,'')+'")';
+      b.style.backgroundImage='url("'+cleanUrl(it.img)+'")';
     }
   }
 
@@ -1212,7 +1230,7 @@
      10. MAIN CONTROLS
      ========================================================================== */
   // ac() resumes the AudioContext on this user gesture (browsers require it).
-  document.getElementById('startBtn').addEventListener('click',()=>{ ac(); toggleTimer(); });
+  startBtn.addEventListener('click',()=>{ ac(); toggleTimer(); });
   document.getElementById('resetBtn').addEventListener('click',resetTimer);
   document.querySelectorAll('#tabs .pill').forEach(p=>p.addEventListener('click',()=>setMode(p.dataset.m,false)));
 
