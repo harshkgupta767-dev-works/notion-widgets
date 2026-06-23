@@ -40,7 +40,7 @@
       --tile-shadow: 0 2px 4px rgba(0,0,0,0.08), 0 4px 12px rgba(0,0,0,0.12);
       --tile-inner-shadow: inset 0 2px 4px rgba(0,0,0,0.15);
       --tile-highlight: rgba(255,255,255,0.6);
-      --tile-seam: rgba(0,0,0,0.2);     /* dark crevice line where the two halves meet */
+      --tile-seam: rgba(0,0,0,0.4);     /* dark crevice line where the two halves meet */
       --tile-gradient: linear-gradient(to bottom, rgba(255,255,255,0.08) 0%, transparent 50%);
       --popup-shadow: 0 8px 24px rgba(0,0,0,0.12), 0 2px 8px rgba(0,0,0,0.08);
       --digit-font: 'Anton','Roboto Condensed',sans-serif;
@@ -660,7 +660,7 @@
     // Seam (the crevice where the two halves meet) is drawn ON the tile, so its
     // darkness depends on the tile colour, not the theme: a light tile needs a
     // soft dark line; a dark tile needs a stronger one to read against it.
-    r.setProperty('--tile-seam', getTileTextColor(S.tile)==='#1a1a1a' ? 'rgba(0,0,0,0.22)' : 'rgba(0,0,0,0.5)');
+    r.setProperty('--tile-seam', getTileTextColor(S.tile)==='#1a1a1a' ? 'rgba(0,0,0,0.4)' : 'rgba(0,0,0,0.6)');
     if(S.theme==='dark'){
       r.setProperty('--tile-shadow','0 2px 8px rgba(0,0,0,0.3),0 4px 20px rgba(0,0,0,0.25)');
       r.setProperty('--tile-highlight','rgba(255,255,255,0.08)');
