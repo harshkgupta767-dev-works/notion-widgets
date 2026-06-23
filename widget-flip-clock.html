@@ -40,6 +40,7 @@
       --tile-shadow: 0 2px 4px rgba(0,0,0,0.08), 0 4px 12px rgba(0,0,0,0.12);
       --tile-inner-shadow: inset 0 2px 4px rgba(0,0,0,0.15);
       --tile-highlight: rgba(255,255,255,0.6);
+      --tile-seam: rgba(0,0,0,0.2);     /* dark crevice line where the two halves meet */
       --tile-gradient: linear-gradient(to bottom, rgba(255,255,255,0.08) 0%, transparent 50%);
       --popup-shadow: 0 8px 24px rgba(0,0,0,0.12), 0 2px 8px rgba(0,0,0,0.08);
       --digit-font: 'Anton','Roboto Condensed',sans-serif;
@@ -138,7 +139,7 @@
       top: 0;
       border-radius: 10px 10px 0 0;
       border-top: 1px solid var(--tile-highlight);
-      border-bottom: 1px solid rgba(128,128,128,0.15);
+      border-bottom: 1px solid var(--tile-seam);
       box-shadow: var(--tile-inner-shadow);
     }
     .half.top::before { content: ''; position: absolute; inset: 0; background: var(--tile-gradient); pointer-events: none; border-radius: 10px 10px 0 0; }
@@ -171,7 +172,7 @@
       top: 0;
       background: var(--tile-bg, #2a2a2a);
       border-radius: 10px 10px 0 0;
-      border-bottom: 1px solid rgba(128,128,128,0.15);
+      border-bottom: 1px solid var(--tile-seam);
       box-shadow: var(--flap-shadow-top);
       transform-origin: bottom center;
       animation: fd var(--flip-top-dur) var(--flip-top-ease) forwards,
@@ -200,9 +201,9 @@
        Note: fu/fds/fus are also rebuilt in JS per motion style (see applyMotion). */
     @keyframes fd  { 0% { transform: rotateX(0); }     100% { transform: rotateX(-90deg); } }
     @keyframes fu  { 0% { transform: rotateX(90deg); } 83%  { transform: rotateX(-3deg); } 100% { transform: rotateX(0); } }
-    @keyframes fds { 0% { background: rgba(0,0,0,0); } 50%  { background: rgba(0,0,0,0.35); } 100% { background: rgba(0,0,0,0); } }
-    @keyframes fus { 0% { background: rgba(0,0,0,0.12); } 40% { background: rgba(0,0,0,0.08); } 100% { background: rgba(0,0,0,0); } }
-    @keyframes fdg { 0% { opacity: 0; } 45% { opacity: 0.7; } 100% { opacity: 0; } }
+    @keyframes fds { 0% { background: rgba(0,0,0,0); } 55%  { background: rgba(0,0,0,0.05); } 90% { background: rgba(0,0,0,0.35); } 100% { background: rgba(0,0,0,0); } }
+    @keyframes fus { 0% { background: rgba(0,0,0,0.35); } 60% { background: rgba(0,0,0,0.12); } 85% { background: rgba(0,0,0,0); } 100% { background: rgba(0,0,0,0); } }
+    @keyframes fdg { 0% { opacity: 0; } 60% { opacity: 0.15; } 90% { opacity: 0.7; } 100% { opacity: 0; } }
     @keyframes fug { 0% { opacity: 0; } 25% { opacity: 0.6; } 100% { opacity: 0; } }
     @keyframes fbsOut { 0% { box-shadow: var(--flap-shadow-bot); } 100% { box-shadow: 0 -2px 4px rgba(0,0,0,0); } }
     @keyframes ftsOut { 0% { box-shadow: var(--flap-shadow-top); } 100% { box-shadow: 0 2px 4px rgba(0,0,0,0); } }
@@ -549,10 +550,13 @@
     const fuKf=m.bounce===0
       ?'@keyframes fu{0%{transform:rotateX(90deg)}100%{transform:rotateX(0)}}'
       :'@keyframes fu{0%{transform:rotateX(90deg)}'+m.bounceAt+'%{transform:rotateX('+m.bounce+'deg)}100%{transform:rotateX(0)}}';
-    const fdsKf='@keyframes fds{0%{background:rgba(0,0,0,0)}50%{background:rgba(0,0,0,'+m.shadowMax+')}100%{background:rgba(0,0,0,0)}}';
-    const fusStart=(m.shadowMax*0.34).toFixed(3);
-    const fusMid=(m.shadowMax*0.23).toFixed(3);
-    const fusKf='@keyframes fus{0%{background:rgba(0,0,0,'+fusStart+')}40%{background:rgba(0,0,0,'+fusMid+')}100%{background:rgba(0,0,0,0)}}';
+    // Top hinge shadow: stay near-zero while the flap is front-facing, then
+    // darken late (peak at 90%) as it angles edge-on — not while still flat.
+    const fdsKf='@keyframes fds{0%{background:rgba(0,0,0,0)}55%{background:rgba(0,0,0,'+(m.shadowMax*0.14).toFixed(3)+')}90%{background:rgba(0,0,0,'+m.shadowMax+')}100%{background:rgba(0,0,0,0)}}';
+    // Bottom hinge shadow: start at the mode's full shadow, then ease to fully
+    // transparent by 85% so it is gone before the flap settles (no abrupt pop).
+    const fus60=(m.shadowMax*0.34).toFixed(3);
+    const fusKf='@keyframes fus{0%{background:rgba(0,0,0,'+m.shadowMax+')}60%{background:rgba(0,0,0,'+fus60+')}85%{background:rgba(0,0,0,0)}100%{background:rgba(0,0,0,0)}}';
     kf.textContent=fuKf+fdsKf+fusKf;
   }
 
@@ -598,7 +602,7 @@
       const tb=document.getElementById(id);
       if(tb) tb.querySelector('.half.bot .num').textContent=nv;
       ft.remove(); fb.remove();
-    },580);
+    },560);   // just past the 550ms flip end — keeps the bounce, drops the linger window
   }
 
   /* Read the clock into padded HH / MM strings (+ AM/PM in 12h mode). */
@@ -653,6 +657,10 @@
     r.setProperty('--time-text',S.timeText);
     r.setProperty('--date-color',S.dateText);
     r.setProperty('--gear-color',getTileTextColor(S.tile));
+    // Seam (the crevice where the two halves meet) is drawn ON the tile, so its
+    // darkness depends on the tile colour, not the theme: a light tile needs a
+    // soft dark line; a dark tile needs a stronger one to read against it.
+    r.setProperty('--tile-seam', getTileTextColor(S.tile)==='#1a1a1a' ? 'rgba(0,0,0,0.22)' : 'rgba(0,0,0,0.5)');
     if(S.theme==='dark'){
       r.setProperty('--tile-shadow','0 2px 8px rgba(0,0,0,0.3),0 4px 20px rgba(0,0,0,0.25)');
       r.setProperty('--tile-highlight','rgba(255,255,255,0.08)');
